@@ -16,20 +16,22 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
                 if (isTerraformValueRaw.HasValue) {
                     isTerraformValue = isTerraformValueRaw.Value;
                 } else {
-                    isTerraformValue = Generics.IsTypeImplementingGenericTypeDefinition(
-                        Type,
-                        typeof(ITerraformValue<>),
-                        out var implementerType,
-                        out var _);
+                    //isTerraformValue = Generics.IsTypeImplementingGenericTypeDefinition(
+                    //    Type,
+                    //    typeof(ITerraformValue<>),
+                    //    out var implementerType,
+                    //    out var _);
 
-                    if (isTerraformValue) {
-                        var implementerGenericTypeDefinition = implementerType!.GetGenericTypeDefinition();
+                    isTerraformValue = false; // ISSUE
 
-                        if (implementerGenericTypeDefinition != typeof(TerraformValue<>)
-                            && implementerGenericTypeDefinition != typeof(ITerraformValue<>)) {
-                            throw new NotSupportedException($"Only {typeof(TerraformValue<>).Name} or {typeof(ITerraformValue<>).Name} is allowed but not {implementerType.Name}");
-                        }
-                    }
+                    //if (isTerraformValue) {
+                    //    var implementerGenericTypeDefinition = implementerType!.GetGenericTypeDefinition();
+
+                    //    if (implementerGenericTypeDefinition != typeof(TerraformValue<>)
+                    //        && implementerGenericTypeDefinition != typeof(ITerraformValue<>)) {
+                    //        throw new NotSupportedException($"Only {typeof(TerraformValue<>).Name} or {typeof(ITerraformValue<>).Name} is allowed but not {implementerType.Name}");
+                    //    }
+                    //}
 
                     _isTerraformValue = isTerraformValue;
                 }

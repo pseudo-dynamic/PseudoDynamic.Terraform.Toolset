@@ -22,7 +22,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         [InlineData(new object[] { "set_of_string", TerraformType.Set })]
         [InlineData(new object[] { "map_of_string", TerraformType.Map })]
         [InlineData(new object[] { "object", TerraformType.Object })]
-        [InlineData(new object[] { "nested_block", TerraformType.NestedBlock })]
+        [InlineData(new object[] { "nested_block", TerraformType.Block })]
         public void Attribute_type_should_match_terraform_type(string attributeName, TerraformType expectedTerraformType)
         {
             Assert.Equal(expectedTerraformType, NullableBlock.DefaultSchema.Attributes[attributeName].TerraformType);

@@ -11,6 +11,6 @@
         Map,
         Object,
         Tuple,
-        NestedBlock
+        Block
     }
 }

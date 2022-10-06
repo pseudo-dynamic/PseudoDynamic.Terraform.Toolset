@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using PseudoDynamic.Terraform.Plugin.Schema.AttributeNaming;
+using PseudoDynamic.Terraform.Plugin.Schema.Conventions;
 using PseudoDynamic.Terraform.Plugin.Types;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema

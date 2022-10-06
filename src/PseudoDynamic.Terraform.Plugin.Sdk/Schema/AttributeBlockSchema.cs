@@ -11,7 +11,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         /// </summary>
         /// <param name="attributeName"></param>
         /// <param name="attributeTypeInfo"></param>
-        /// <param name="terraformType">Accepts <see cref="TerraformType.Object"/> or <see cref="TerraformType.NestedBlock"/>.</param>
+        /// <param name="terraformType">Accepts <see cref="TerraformType.Object"/> or <see cref="TerraformType.Block"/>.</param>
         /// <exception cref="InvalidOperationException">Incompatible Terraform type</exception>
         internal AttributeBlockSchema(
             string attributeName,

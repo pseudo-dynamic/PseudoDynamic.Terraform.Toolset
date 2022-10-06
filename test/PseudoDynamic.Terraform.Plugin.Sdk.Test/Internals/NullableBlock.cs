@@ -53,31 +53,31 @@ namespace PseudoDynamic.Terraform.Plugin.Internals
         /// <summary>
         /// Represents Terraform's "block".
         /// </summary>
-        [NestedBlock]
+        [Block]
         public ObjectAttributes SingleNestedBlock { get; set; }
 
         /// <summary>
         /// Represents Terraform's "block".
         /// </summary>
-        [NestedBlock]
+        [Block]
         public IList<ObjectAttributes> ListOfNestedBlock { get; set; }
 
         /// <summary>
         /// Represents Terraform's "block".
         /// </summary>
-        [NestedBlock]
+        [Block]
         public ISet<ObjectAttributes> SetOfNestedBlock { get; set; }
 
         /// <summary>
         /// Represents Terraform's "block".
         /// </summary>
-        [NestedBlock]
+        [Block]
         public IDictionary<string, ObjectAttributes> MapOfNestedBlock { get; set; }
 
         /// <summary>
         /// Represents Terraform's "block".
         /// </summary>
-        [NestedBlock]
+        [Block]
         public ObjectAttributes NullableSingleNestedBlock { get; set; }
 
         public class ObjectAttributes : NullablePrimitivesBlock

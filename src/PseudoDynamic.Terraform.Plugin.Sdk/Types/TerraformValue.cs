@@ -6,7 +6,7 @@ namespace PseudoDynamic.Terraform.Plugin.Types
     /// Represents the value in the view of Terraform where it can be null or unknown.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public record TerraformValue<T> : ITerraformValue<T>
+    public record TerraformValue<[TerraformValue] T> : ITerraformValue<T>
     {
         /// <summary>
         /// The value.

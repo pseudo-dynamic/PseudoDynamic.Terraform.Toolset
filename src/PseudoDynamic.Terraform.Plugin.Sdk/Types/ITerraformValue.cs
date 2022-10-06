@@ -14,7 +14,7 @@ namespace PseudoDynamic.Terraform.Plugin.Types
     /// as property type and not any other possible derivation of
     /// <see cref="ITerraformValue{T}"/>.
     /// </remarks>
-    public interface ITerraformValue<out T>
+    public interface ITerraformValue<[TerraformValue] out T>
     {
         /// <summary>
         /// The deserialized Terraform value.

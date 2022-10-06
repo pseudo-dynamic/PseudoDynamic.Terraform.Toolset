@@ -2,10 +2,9 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Schema
 {
-    public class TupleAttribute : BlockAttribute
+    public class ObjectAttribute : BlockAttribute
     {
-        public TupleAttribute()
-            : base(TerraformType.Tuple)
+        public ObjectAttribute() : base(TerraformType.Object)
         {
         }
     }

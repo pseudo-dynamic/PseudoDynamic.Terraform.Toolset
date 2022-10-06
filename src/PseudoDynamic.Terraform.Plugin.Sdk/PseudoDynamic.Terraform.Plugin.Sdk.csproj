@@ -27,8 +27,4 @@
         <Protobuf Include="**/*.proto" GrpcServices="Server" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Schema\SchemaTypeVisitor\" />
-    </ItemGroup>
-
 </Project>
