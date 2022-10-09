@@ -8,12 +8,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal class BlockSchemaBuilder
     {
-        public static readonly BlockSchemaBuilder Default = new BlockSchemaBuilder(SnakeCaseConvention.Default);
+        public static readonly BlockSchemaBuilder Default = new BlockSchemaBuilder(new AttributeNameConvention(SnakeCaseConvention.Default));
 
         private BlockNodeBuilder _blockTypeNodeProducer = new BlockNodeBuilder();
-        private INameConvention _attributeNameConvention;
+        private IAttributeNameConvention _attributeNameConvention;
 
-        public BlockSchemaBuilder(INameConvention attributeNameConvention) =>
+        public BlockSchemaBuilder(IAttributeNameConvention attributeNameConvention) =>
             _attributeNameConvention = attributeNameConvention ?? throw new ArgumentNullException(nameof(attributeNameConvention));
 
         protected ValueDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node) =>
@@ -41,7 +41,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected ObjectAttributeDefinition BuildObjectAttribute(BlockNode<IVisitPropertySegmentContext> node)
         {
-            var attributeName = _attributeNameConvention.Format(node.Context.Property.Name);
+            var attributeName = _attributeNameConvention.Format(node.Context.Property);
             var value = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
             var attribute = new ObjectAttributeDefinition(attributeName, value);
             return ExtendAttribute(node, attribute);
@@ -55,7 +55,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         {
             var propertyContext = node.Context;
             var propertyType = propertyContext.VisitedType;
-            var attributeName = _attributeNameConvention.Format(propertyContext.Property.Name);
+            var attributeName = _attributeNameConvention.Format(propertyContext.Property);
 
             var isComputed = propertyType.GetCustomAttribute<ComputedAttribute>(inherit: true) is not null;
             var isSensitive = propertyType.GetCustomAttribute<SensitiveAttribute>(inherit: true) is not null;

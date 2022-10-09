@@ -1,7 +1,9 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
+﻿using System.Reflection;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
 {
-    public interface INameConvention
+    internal interface IAttributeNameConvention
     {
-        public string Format(string attributeName);
+        string Format(PropertyInfo attribute);
     }
 }

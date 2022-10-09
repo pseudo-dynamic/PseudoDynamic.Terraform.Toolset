@@ -6,7 +6,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
     internal class BlockNodeBuilder
     {
-        private BlockTypeVisitor _visistor = new BlockTypeVisitor();
+        private SameDepthCapturingVisitor _visistor = new SameDepthCapturingVisitor();
 
         /// <summary>
         /// Represents the entry point of visiting a complex type.
@@ -16,10 +16,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         /// <exception cref="ArgumentException"></exception>
         public virtual BlockNode BuildNode(Type blockType, Context? context = null)
         {
-            if (!blockType.IsComplexType()) {
-                throw new ArgumentException("The specified type must be either class or struct");
-            }
-
             _visistor.VisitComplex(blockType);
             return _visistor.RootNode;
         }
@@ -27,7 +23,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         public BlockNode BuildNode<T>(Context? context = null) =>
             BuildNode(typeof(T), context);
 
-        private class BlockTypeVisitor : ComplexTypeVisitor
+        private class SameDepthCapturingVisitor : ComplexTypeVisitor
         {
             public BlockNode RootNode => _rootNode ?? throw new InvalidOperationException("You need to visit a type at least once to have access to root node");
 

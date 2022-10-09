@@ -3,8 +3,8 @@
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class ValueAttribute : Attribute
     {
-        public TerraformTypeConstraint Type { get; }
+        public TerraformTypeConstraint TypeConstraint { get; }
 
-        public ValueAttribute(TerraformTypeConstraint type) => Type = type;
+        public ValueAttribute(TerraformTypeConstraint typeConstraint) => TypeConstraint = typeConstraint;
     }
 }

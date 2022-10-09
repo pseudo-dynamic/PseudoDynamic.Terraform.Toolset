@@ -5,12 +5,12 @@
         public static IEnumerable<object[]> GetBlockSchemas()
         {
             yield return new object[] {
-                typeof(ZeroDepthBlock),
+                typeof(Blocks.ZeroDepth),
                 new BlockDefinition()
             };
 
             yield return new object[] {
-                typeof(PropertyBlock),
+                typeof(Blocks.HavingString),
                 new BlockDefinition() {
                     Attributes = new []{
                         new BlockAttributeDefinition("string", PrimitiveDefinition.String) { IsRequired = true }
@@ -19,7 +19,7 @@
             };
 
             yield return new object[] {
-                typeof(NestedBlock),
+                typeof(Blocks.NestedBlock),
                 new BlockDefinition() {
                     Attributes = new []{
                         new BlockAttributeDefinition("block", new BlockDefinition() {
@@ -34,7 +34,7 @@
             };
 
             yield return new object[] {
-                typeof(TerraformValueNestedBlock),
+                typeof(Blocks.TerraformValueNestedBlock),
                 new BlockDefinition() {
                     Attributes = new []{
                         new BlockAttributeDefinition("block", new BlockDefinition() {
@@ -50,7 +50,7 @@
             };
 
             yield return new object[] {
-                typeof(PropertyArgumentBlock),
+                typeof(Blocks.ListOfStrings),
                 new BlockDefinition() {
                     Attributes = new []{
                         new BlockAttributeDefinition("list", new MonoRangeDefinition(TerraformTypeConstraint.List, PrimitiveDefinition.String)) {
@@ -61,7 +61,7 @@
             };
 
             yield return new object[] {
-                typeof(PropertyArgumentNestedBlock),
+                typeof(Blocks.MapOfObjects),
                 new BlockDefinition() {
                     Attributes = new []{
                         new BlockAttributeDefinition("dictionary", new MapDefinition(new ObjectDefinition() {
@@ -84,39 +84,42 @@
             Assert.Equal(expectedDefinition, actualDefinition, TerraformDefinitionEqualityComparer.Default);
         }
 
-        [Block]
-        public class ZeroDepthBlock { }
-
-        [Block]
-        public class PropertyBlock
-        {
-            public string String { get; set; }
-        }
-
-        [Block]
-        public class NestedBlock
+        public class Blocks
         {
             [Block]
-            public PropertyBlock Block { get; set; }
-        }
+            public class ZeroDepth { }
 
-        [Block]
-        public class TerraformValueNestedBlock
-        {
             [Block]
-            public ITerraformValue<PropertyBlock> Block { get; set; }
-        }
+            public class HavingString
+            {
+                public string String { get; set; }
+            }
 
-        [Block]
-        public class PropertyArgumentBlock
-        {
-            public IList<string> List { get; set; }
-        }
+            [Block]
+            public class NestedBlock
+            {
+                [Block]
+                public HavingString Block { get; set; }
+            }
 
-        [Block]
-        public class PropertyArgumentNestedBlock
-        {
-            public IDictionary<string, PropertyBlock> Dictionary { get; set; }
+            [Block]
+            public class TerraformValueNestedBlock
+            {
+                [Block]
+                public ITerraformValue<HavingString> Block { get; set; }
+            }
+
+            [Block]
+            public class ListOfStrings
+            {
+                public IList<string> List { get; set; }
+            }
+
+            [Block]
+            public class MapOfObjects
+            {
+                public IDictionary<string, HavingString> Dictionary { get; set; }
+            }
         }
     }
 }

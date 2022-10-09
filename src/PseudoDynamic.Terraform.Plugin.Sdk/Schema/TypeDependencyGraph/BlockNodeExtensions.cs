@@ -56,7 +56,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             TerraformTypeConstraint terraformValueType;
 
             if (hasTerraformTypeAttribute) {
-                var explicitTerraformType = terraformTypeAttribute!.Type;
+                var explicitTerraformType = terraformTypeAttribute!.TypeConstraint;
                 var isExplicitTerraformBlockType = explicitTerraformType.IsBlockType();
 
                 if (isExplicitTerraformBlockType && guessedTerraformTypes.Contains(TerraformTypeConstraint.Object)

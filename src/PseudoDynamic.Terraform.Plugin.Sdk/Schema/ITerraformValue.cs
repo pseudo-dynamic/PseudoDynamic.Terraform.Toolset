@@ -9,10 +9,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
     /// <typeparam name="T"></typeparam>
     /// <remarks>
     /// If you model a schema, and you want to have access to <see cref="IsNull"/>
-    /// or <see cref="IsUnknown"/> of a value, then you can only use
+    /// or <see cref="IsUnknown"/> of a value, then you can use
     /// <see cref="ITerraformValue{T}"/> or <see cref="TerraformValue{T}"/>
-    /// as property type and not any other possible derivation of
-    /// <see cref="ITerraformValue{T}"/>.
+    /// as property type or a other possible derivation of
+    /// <see cref="ITerraformValue{T}"/>. Keep in mind to use
+    /// <see cref="TerraformValueTypeAttribute"/>.
     /// </remarks>
     public interface ITerraformValue<[TerraformValueType] out T>
     {
