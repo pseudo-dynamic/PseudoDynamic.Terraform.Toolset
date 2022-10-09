@@ -1,6 +1,7 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Schema
 {
-    //public sealed class OptionalAttribute : Attribute
-    //{
-    //}
+    [AttributeUsage(AttributeTargets.Property)]
+    public sealed class OptionalAttribute : Attribute
+    {
+    }
 }

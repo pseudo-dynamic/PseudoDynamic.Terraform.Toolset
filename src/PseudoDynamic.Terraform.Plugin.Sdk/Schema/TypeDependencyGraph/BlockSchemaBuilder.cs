@@ -16,35 +16,43 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         public BlockSchemaBuilder(IAttributeNameConvention attributeNameConvention) =>
             _attributeNameConvention = attributeNameConvention ?? throw new ArgumentNullException(nameof(attributeNameConvention));
 
-        protected ValueDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node) =>
-            new MonoRangeDefinition(TerraformTypeConstraint.List, BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value);
-
-        protected ValueDefinition BuildSet(BlockNode<IVisitPropertySegmentContext> node) =>
-            new MonoRangeDefinition(TerraformTypeConstraint.Set, BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value);
-
-        protected ValueDefinition BuildMap(BlockNode<IVisitPropertySegmentContext> node) =>
-            new MapDefinition(BuildValue(node.ElementAt(1).AsContext<IVisitPropertySegmentContext>()).Value);
-
-        private TAttribute ExtendAttribute<TAttribute>(TAttribute attribute, BlockNode<IVisitPropertySegmentContext> node)
-        where TAttribute : AttributeDefinition
+        protected ValueDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node)
         {
-            var nullability = node.Context.NullabilityInfo.ReadState;
-            var isNullable = nullability == NullabilityState.Nullable;
-            var isRequired = !isNullable;
-            var IsOptional = isNullable;
+            var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
+            return new MonoRangeDefinition(TerraformTypeConstraint.List, item);
+        }
 
-            return attribute with {
-                IsRequired = isRequired,
-                IsOptional = IsOptional,
-            };
+        protected ValueDefinition BuildSet(BlockNode<IVisitPropertySegmentContext> node)
+        {
+            var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
+            return new MonoRangeDefinition(TerraformTypeConstraint.Set, item);
+        }
+
+        protected ValueDefinition BuildMap(BlockNode<IVisitPropertySegmentContext> node)
+        {
+            var value = BuildValue(node.ElementAt(1).AsContext<IVisitPropertySegmentContext>()).Value;
+            return new MapDefinition(value);
+        }
+
+        private bool IsAttributeOptional(BlockNode<IVisitPropertySegmentContext> node)
+        {
+            if (node.Context.Property.GetCustomAttribute<OptionalAttribute>() is not null) {
+                return true;
+            }
+
+            var nullability = node.Context.NullabilityInfo.ReadState;
+            return nullability == NullabilityState.Nullable;
         }
 
         protected ObjectAttributeDefinition BuildObjectAttribute(BlockNode<IVisitPropertySegmentContext> node)
         {
             var attributeName = _attributeNameConvention.Format(node.Context.Property);
             var valueResult = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
-            var attribute = new ObjectAttributeDefinition(attributeName, valueResult.Value);
-            return ExtendAttribute(attribute, valueResult.UnwrappedNode);
+            var isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
+
+            return new ObjectAttributeDefinition(attributeName, valueResult.Value) {
+                IsOptional = isOptional
+            };
         }
 
         protected ObjectDefinition BuildObject(BlockNode node) => new ObjectDefinition() {
@@ -73,25 +81,21 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             });
 
             var valueResult = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
+            var isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
 
-            var attribute = new BlockAttributeDefinition(attributeName, valueResult.Value) {
+            return new BlockAttributeDefinition(attributeName, valueResult.Value) {
                 IsComputed = isComputed,
                 IsSensitive = isSensitive,
                 IsDeprecated = isDeprecated,
                 Description = description,
-                DescriptionKind = descriptionKind
+                DescriptionKind = descriptionKind,
+                IsOptional = isOptional
             };
-
-            if (isComputed) {
-                return attribute;
-            } else {
-                return ExtendAttribute(attribute, valueResult.UnwrappedNode);
-            }
         }
 
         protected BlockDefinition BuildBlock(BlockNode node)
         {
-            var schemaVersion = node.Context.VisitedType.GetCustomAttribute<SchemaVersionAttribute>()?.SchemaVersion ?? 1;
+            var schemaVersion = node.Context.VisitedType.GetCustomAttribute<SchemaVersionAttribute>()?.SchemaVersion ?? BlockDefinition.DefaultSchemaVersion;
 
             return new BlockDefinition() {
                 SchemaVersion = schemaVersion,
@@ -126,13 +130,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 unwrappedNode);
         }
 
-        public TerraformDefinition BuildSchema(Type blockType)
+        public BlockDefinition BuildSchema(Type blockType)
         {
             var node = _blockTypeNodeProducer.BuildNode(blockType);
             return BuildBlock(node);
         }
 
-        public TerraformDefinition BuildSchema<T>() =>
+        public BlockDefinition BuildSchema<T>() =>
             BuildSchema(typeof(T));
 
         protected class ValueResult
