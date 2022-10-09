@@ -4,14 +4,14 @@ namespace PseudoDynamic.Terraform.Plugin.Internals
 {
     internal class NullableBlock : NullablePrimitivesBlock
     {
-        public static readonly BlockSchema DefaultSchema;
+        //public static readonly BlockSchema DefaultSchema;
 
-        static NullableBlock()
-        {
-            var builder = BlockSchemaBuilder.CreateDefault();
-            builder.ConcatSchema(typeof(NullableBlock));
-            DefaultSchema = builder.BuildSchema();
-        }
+        //static NullableBlock()
+        //{
+        //    var builder = BlockSchemaBuilder.CreateDefault();
+        //    builder.ConcatSchema(typeof(NullableBlock));
+        //    DefaultSchema = builder.BuildSchema();
+        //}
 
         /// <summary>
         /// Represents Terraform's "object".

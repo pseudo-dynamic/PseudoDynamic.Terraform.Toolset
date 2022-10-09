@@ -1,18 +1,16 @@
-﻿using PseudoDynamic.Terraform.Plugin.Types;
-
-namespace PseudoDynamic.Terraform.Plugin.Schema
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     /// <summary>
-    /// By annotating a class with this attribute the class can be used as Terraform schema or nested block.
+    /// Annotates a class for being used as Terraform (nested) block.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class BlockAttribute : TerraformTypeAttribute
+    public class BlockAttribute : ValueAttribute
     {
-        internal BlockAttribute(TerraformType type) : base(type)
+        internal BlockAttribute(TerraformTypeConstraint type) : base(type)
         {
         }
 
-        public BlockAttribute() : base(TerraformType.Block)
+        public BlockAttribute() : base(TerraformTypeConstraint.Block)
         {
         }
     }

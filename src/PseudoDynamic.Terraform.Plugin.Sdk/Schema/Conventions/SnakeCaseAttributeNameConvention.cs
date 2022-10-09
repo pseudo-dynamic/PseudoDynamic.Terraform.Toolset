@@ -2,9 +2,9 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
 {
-    public class SnakeCaseAttributeNameConvention : IAttributeNameConvention
+    public class SnakeCaseConvention : INameConvention
     {
-        public static readonly SnakeCaseAttributeNameConvention Default = new SnakeCaseAttributeNameConvention();
+        public static readonly SnakeCaseConvention Default = new SnakeCaseConvention();
 
         public string Format(string attributeName) => attributeName.ToSnakeCase();
     }

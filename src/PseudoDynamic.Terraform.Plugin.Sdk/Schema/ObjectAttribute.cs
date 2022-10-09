@@ -1,10 +1,8 @@
-﻿using PseudoDynamic.Terraform.Plugin.Types;
-
-namespace PseudoDynamic.Terraform.Plugin.Schema
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     public class ObjectAttribute : BlockAttribute
     {
-        public ObjectAttribute() : base(TerraformType.Object)
+        public ObjectAttribute() : base(TerraformTypeConstraint.Object)
         {
         }
     }
