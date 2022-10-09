@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal class VisitContextType
     {

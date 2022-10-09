@@ -1,27 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal abstract record class AttributeDefinition : TerraformDefinition
     {
+        protected internal const bool DefaultIsRequired = true;
+
         /// <summary>
         /// The attribute name.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// The value this attribute describes is required.
+        /// The value this attribute describes is required. (default true)
         /// </summary>
-        public bool IsRequired { get; init; }
+        public virtual bool IsRequired {
+            get => _isRequired;
+            init {
+                _isRequired = value;
+                _isOptional = !value;
+            }
+        }
 
         /// <summary>
         /// The value this attribute describes is optional.
         /// </summary>
-        public bool IsOptional { get; init; }
+        public virtual bool IsOptional {
+            get => _isOptional;
+
+            init {
+                _isOptional = value;
+                _isRequired = !value;
+            }
+        }
 
         public ValueDefinition Value {
             get => _value ?? throw new InvalidOperationException("Value has been not set");
@@ -29,6 +38,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         }
 
         private ValueDefinition? _value;
+        private bool _isOptional;
+        private bool _isRequired = DefaultIsRequired;
 
         protected AttributeDefinition(string name, ValueDefinition value)
         {

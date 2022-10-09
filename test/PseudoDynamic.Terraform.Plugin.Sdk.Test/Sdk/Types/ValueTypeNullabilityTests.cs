@@ -1,6 +1,4 @@
-﻿using PseudoDynamic.Terraform.Plugin.Internals;
-
-namespace PseudoDynamic.Terraform.Plugin.Sdk.Types
+﻿namespace PseudoDynamic.Terraform.Plugin.Sdk.Types
 {
     public class ValueTypeNullabilityTests
     {

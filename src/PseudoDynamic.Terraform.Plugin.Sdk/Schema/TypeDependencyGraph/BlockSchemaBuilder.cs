@@ -89,9 +89,15 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
         }
 
-        protected BlockDefinition BuildBlock(BlockNode node) => new BlockDefinition() {
-            Attributes = node.Select(node => BuildBlockAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList()
-        };
+        protected BlockDefinition BuildBlock(BlockNode node)
+        {
+            var schemaVersion = node.Context.VisitedType.GetCustomAttribute<SchemaVersionAttribute>()?.SchemaVersion ?? 1;
+
+            return new BlockDefinition() {
+                SchemaVersion = schemaVersion,
+                Attributes = node.Select(node => BuildBlockAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList()
+            };
+        }
 
         protected ValueDefinition BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {

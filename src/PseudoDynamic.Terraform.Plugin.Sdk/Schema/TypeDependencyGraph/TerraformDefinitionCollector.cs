@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal class TerraformDefinitionCollector
     {

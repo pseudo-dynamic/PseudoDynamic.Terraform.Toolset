@@ -15,10 +15,43 @@
             init => _description = value ?? throw new ArgumentNullException(nameof(value));
         }
 
+        /// <inheritdoc/>
+        public override bool IsRequired {
+            get => _isRequired;
+            init {
+                _isRequired = value;
+                _isOptional = !value;
+
+                if (value) {
+                    _isComputed = false;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override bool IsOptional {
+            get => _isOptional;
+
+            init {
+                _isOptional = value;
+                _isRequired = !value;
+            }
+        }
+
         /// <summary>
         /// The value this attribute describes will be computed.
         /// </summary>
-        public bool IsComputed { get; init; }
+        public bool IsComputed {
+            get => _isComputed;
+
+            init {
+                _isComputed = value;
+
+                if (value) {
+                    _isRequired = false;
+                }
+            }
+        }
 
         /// <summary>
         /// Marks this attribute as sensitive.
@@ -36,11 +69,9 @@
         public bool IsDeprecated { get; init; }
 
         private string _description = string.Empty;
-
-        //internal BlockAttributeDefinition(string name)
-        //    : base(name)
-        //{
-        //}
+        private bool _isOptional;
+        private bool _isRequired = DefaultIsRequired;
+        private bool _isComputed;
 
         /// <summary>
         /// Creates an instance of this type.

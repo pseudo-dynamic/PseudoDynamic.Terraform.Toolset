@@ -13,7 +13,7 @@
                 typeof(Blocks.HavingString),
                 new BlockDefinition() {
                     Attributes = new []{
-                        new BlockAttributeDefinition("string", PrimitiveDefinition.String) { IsRequired = true }
+                        new BlockAttributeDefinition("string", PrimitiveDefinition.String)
                     }
                 }
             };
@@ -24,11 +24,9 @@
                     Attributes = new []{
                         new BlockAttributeDefinition("block", new BlockDefinition() {
                                 Attributes = new []{
-                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String) { IsRequired = true }
+                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String)
                                 }
-                            }) {
-                            IsRequired = true,
-                        }
+                            })
                     }
                 }
             };
@@ -39,12 +37,10 @@
                     Attributes = new []{
                         new BlockAttributeDefinition("block", new BlockDefinition() {
                                 Attributes = new []{
-                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String) { IsRequired = true }
+                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String)
                                 },
                                 IsWrappedByTerraformValue = true
-                            }) {
-                            IsRequired = true,
-                        }
+                            })
                     }
                 }
             };
@@ -53,9 +49,7 @@
                 typeof(Blocks.ListOfStrings),
                 new BlockDefinition() {
                     Attributes = new []{
-                        new BlockAttributeDefinition("list", new MonoRangeDefinition(TerraformTypeConstraint.List, PrimitiveDefinition.String)) {
-                            IsRequired = true,
-                        }
+                        new BlockAttributeDefinition("list", new MonoRangeDefinition(TerraformTypeConstraint.List, PrimitiveDefinition.String))
                     }
                 }
             };
@@ -66,11 +60,9 @@
                     Attributes = new []{
                         new BlockAttributeDefinition("dictionary", new MapDefinition(new ObjectDefinition() {
                             Attributes = new []{
-                                new ObjectAttributeDefinition("string", PrimitiveDefinition.String) { IsRequired = true }
+                                new ObjectAttributeDefinition("string", PrimitiveDefinition.String)
                             }
-                        })) {
-                            IsRequired = true,
-                        }
+                        }))
                     }
                 }
             };
