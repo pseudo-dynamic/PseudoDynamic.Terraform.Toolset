@@ -6,7 +6,7 @@
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class BlockAttribute : ValueAttribute
     {
-        internal BlockAttribute(TerraformTypeConstraint typeConstraint) : base(typeConstraint)
+        protected BlockAttribute(TerraformTypeConstraint typeConstraint) : base(typeConstraint)
         {
         }
 

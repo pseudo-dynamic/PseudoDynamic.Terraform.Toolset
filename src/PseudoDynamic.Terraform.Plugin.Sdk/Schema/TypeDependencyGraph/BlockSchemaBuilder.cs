@@ -17,15 +17,15 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             _attributeNameConvention = attributeNameConvention ?? throw new ArgumentNullException(nameof(attributeNameConvention));
 
         protected ValueDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node) =>
-            new MonoRangeDefinition(TerraformTypeConstraint.List, BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()));
+            new MonoRangeDefinition(TerraformTypeConstraint.List, BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value);
 
         protected ValueDefinition BuildSet(BlockNode<IVisitPropertySegmentContext> node) =>
-            new MonoRangeDefinition(TerraformTypeConstraint.Set, BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()));
+            new MonoRangeDefinition(TerraformTypeConstraint.Set, BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value);
 
         protected ValueDefinition BuildMap(BlockNode<IVisitPropertySegmentContext> node) =>
-            new MapDefinition(BuildValue(node.ElementAt(1).AsContext<IVisitPropertySegmentContext>()));
+            new MapDefinition(BuildValue(node.ElementAt(1).AsContext<IVisitPropertySegmentContext>()).Value);
 
-        private TAttribute ExtendAttribute<TAttribute>(BlockNode<IVisitPropertySegmentContext> node, TAttribute attribute)
+        private TAttribute ExtendAttribute<TAttribute>(TAttribute attribute, BlockNode<IVisitPropertySegmentContext> node)
         where TAttribute : AttributeDefinition
         {
             var nullability = node.Context.NullabilityInfo.ReadState;
@@ -42,9 +42,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected ObjectAttributeDefinition BuildObjectAttribute(BlockNode<IVisitPropertySegmentContext> node)
         {
             var attributeName = _attributeNameConvention.Format(node.Context.Property);
-            var value = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
-            var attribute = new ObjectAttributeDefinition(attributeName, value);
-            return ExtendAttribute(node, attribute);
+            var valueResult = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
+            var attribute = new ObjectAttributeDefinition(attributeName, valueResult.Value);
+            return ExtendAttribute(attribute, valueResult.UnwrappedNode);
         }
 
         protected ObjectDefinition BuildObject(BlockNode node) => new ObjectDefinition() {
@@ -72,9 +72,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                     : XmlDocsFormattingMode.None
             });
 
-            var value = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
+            var valueResult = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
 
-            var attribute = new BlockAttributeDefinition(attributeName, value) {
+            var attribute = new BlockAttributeDefinition(attributeName, valueResult.Value) {
                 IsComputed = isComputed,
                 IsSensitive = isSensitive,
                 IsDeprecated = isDeprecated,
@@ -85,7 +85,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             if (isComputed) {
                 return attribute;
             } else {
-                return ExtendAttribute(node, attribute);
+                return ExtendAttribute(attribute, valueResult.UnwrappedNode);
             }
         }
 
@@ -99,7 +99,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             };
         }
 
-        protected ValueDefinition BuildValue(BlockNode<IVisitPropertySegmentContext> node)
+        protected ValueResult BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {
             var isTerraformValue = node.TryUnwrapTerraformValue(out var unwrappedNode);
             var valueTypeConstraint = unwrappedNode.DetermineTypeConstraint();
@@ -121,7 +121,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 value = new PrimitiveDefinition(valueTypeConstraint);
             }
 
-            return value with { IsWrappedByTerraformValue = isTerraformValue };
+            return new ValueResult(
+                value with { IsWrappedByTerraformValue = isTerraformValue },
+                unwrappedNode);
         }
 
         public TerraformDefinition BuildSchema(Type blockType)
@@ -132,5 +134,17 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         public TerraformDefinition BuildSchema<T>() =>
             BuildSchema(typeof(T));
+
+        protected class ValueResult
+        {
+            public ValueDefinition Value { get; }
+            public BlockNode<IVisitPropertySegmentContext> UnwrappedNode { get; }
+
+            public ValueResult(ValueDefinition value, BlockNode<IVisitPropertySegmentContext> unwrappedNode)
+            {
+                Value = value;
+                UnwrappedNode = unwrappedNode;
+            }
+        }
     }
 }

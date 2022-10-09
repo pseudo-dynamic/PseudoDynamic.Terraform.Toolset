@@ -1,6 +1,6 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
-    public class BlockSchemaEqualityTests
+    public class BlockEqualityTests
     {
         public static IEnumerable<object[]> GetBlockSchemas()
         {

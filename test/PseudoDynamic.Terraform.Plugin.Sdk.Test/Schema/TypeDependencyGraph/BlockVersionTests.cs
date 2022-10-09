@@ -1,6 +1,6 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
-    public class BlockSchemaVersionTests
+    public class BlockVersionTests
     {
         [Fact]
         public void Block_schema_should_have_default_schema_Version()
