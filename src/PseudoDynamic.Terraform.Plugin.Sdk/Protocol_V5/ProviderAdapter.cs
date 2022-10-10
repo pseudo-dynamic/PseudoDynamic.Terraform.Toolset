@@ -1,27 +1,27 @@
 ﻿using Grpc.Core;
 
-namespace PseudoDynamic.Terraform.Plugin.Protocol_V6
+namespace PseudoDynamic.Terraform.Plugin.Protocol_V5
 {
     public class ProviderAdapter : Provider.ProviderBase
     {
-        public override Task<GetProviderSchema.Types.Response> GetProviderSchema(GetProviderSchema.Types.Request request, ServerCallContext context)
+        public override Task<GetProviderSchema.Types.Response> GetSchema(GetProviderSchema.Types.Request request, ServerCallContext context)
         {
-            return base.GetProviderSchema(request, context);
+            return base.GetSchema(request, context);
         }
 
-        public override Task<ValidateProviderConfig.Types.Response> ValidateProviderConfig(ValidateProviderConfig.Types.Request request, ServerCallContext context)
+        public override Task<Configure.Types.Response> Configure(Configure.Types.Request request, ServerCallContext context)
         {
-            return base.ValidateProviderConfig(request, context);
+            return base.Configure(request, context);
         }
 
-        public override Task<ConfigureProvider.Types.Response> ConfigureProvider(ConfigureProvider.Types.Request request, ServerCallContext context)
+        public override Task<PrepareProviderConfig.Types.Response> PrepareProviderConfig(PrepareProviderConfig.Types.Request request, ServerCallContext context)
         {
-            return base.ConfigureProvider(request, context);
+            return base.PrepareProviderConfig(request, context);
         }
 
-        public override Task<ValidateDataResourceConfig.Types.Response> ValidateDataResourceConfig(ValidateDataResourceConfig.Types.Request request, ServerCallContext context)
+        public override Task<ValidateDataSourceConfig.Types.Response> ValidateDataSourceConfig(ValidateDataSourceConfig.Types.Request request, ServerCallContext context)
         {
-            return base.ValidateDataResourceConfig(request, context);
+            return base.ValidateDataSourceConfig(request, context);
         }
 
         public override Task<ReadDataSource.Types.Response> ReadDataSource(ReadDataSource.Types.Request request, ServerCallContext context)
@@ -29,9 +29,9 @@ namespace PseudoDynamic.Terraform.Plugin.Protocol_V6
             return base.ReadDataSource(request, context);
         }
 
-        public override Task<ValidateResourceConfig.Types.Response> ValidateResourceConfig(ValidateResourceConfig.Types.Request request, ServerCallContext context)
+        public override Task<ValidateResourceTypeConfig.Types.Response> ValidateResourceTypeConfig(ValidateResourceTypeConfig.Types.Request request, ServerCallContext context)
         {
-            return base.ValidateResourceConfig(request, context);
+            return base.ValidateResourceTypeConfig(request, context);
         }
 
         public override Task<ReadResource.Types.Response> ReadResource(ReadResource.Types.Request request, ServerCallContext context)
@@ -59,9 +59,9 @@ namespace PseudoDynamic.Terraform.Plugin.Protocol_V6
             return base.ImportResourceState(request, context);
         }
 
-        public override Task<StopProvider.Types.Response> StopProvider(StopProvider.Types.Request request, ServerCallContext context)
+        public override Task<Stop.Types.Response> Stop(Stop.Types.Request request, ServerCallContext context)
         {
-            return base.StopProvider(request, context);
+            return base.Stop(request, context);
         }
     }
 }

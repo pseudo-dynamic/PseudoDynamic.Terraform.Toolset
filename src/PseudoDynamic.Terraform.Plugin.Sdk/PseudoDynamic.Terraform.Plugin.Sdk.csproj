@@ -11,11 +11,7 @@
     <ItemGroup>
         <PackageReference Include="CaseExtensions" Version="1.1.0" />
         <PackageReference Include="Google.Protobuf" Version="3.21.7" />
-        <PackageReference Include="Grpc.Core" Version="2.46.5" />
-        <PackageReference Include="Grpc.Tools" Version="2.49.1">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
         <PackageReference Include="Namotion.Reflection" Version="2.1.1" />
         <PackageReference Include="Teronis.DotNet.EditorConfig.Base" Version="0.3.0-alpha.1">
             <PrivateAssets>all</PrivateAssets>
@@ -25,6 +21,10 @@
 
     <ItemGroup>
         <Protobuf Include="**/*.proto" GrpcServices="Server" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Protocol_V5\tfplugin5.3.proto" />
     </ItemGroup>
 
 </Project>

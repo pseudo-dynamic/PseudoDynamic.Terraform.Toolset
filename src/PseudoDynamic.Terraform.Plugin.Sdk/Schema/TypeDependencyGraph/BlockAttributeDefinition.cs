@@ -23,6 +23,7 @@
                 _isOptional = !value;
 
                 if (value) {
+                    // Disable the attribute being computed when it is required
                     _isComputed = false;
                 }
             }
@@ -34,7 +35,11 @@
 
             init {
                 _isOptional = value;
-                _isRequired = !value;
+
+                if (!_isComputed) {
+                    // Prevents the change of being required or not when it is computed
+                    _isRequired = !value;
+                }
             }
         }
 
@@ -48,6 +53,7 @@
                 _isComputed = value;
 
                 if (value) {
+                    // Disable the attribute being required when it is computed
                     _isRequired = false;
                 }
             }
