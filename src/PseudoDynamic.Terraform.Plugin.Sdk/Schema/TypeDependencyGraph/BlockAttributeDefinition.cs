@@ -12,7 +12,7 @@
         /// </summary>
         public string Description {
             get => _description;
-            init => _description = value ?? throw new ArgumentNullException(nameof(value));
+            init => _description = value ?? string.Empty;
         }
 
         /// <inheritdoc/>

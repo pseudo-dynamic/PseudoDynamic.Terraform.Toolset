@@ -14,7 +14,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var serverAddresses = server.Features.Get<IServerAddressesFeature>();
 
             if (serverAddresses is null) {
-                throw new InvalidOperationException("The plugin server need at least one available server address");
+                throw new InvalidOperationException("The plugin server needs at least one available server address");
             }
 
             var serverAddressString = serverAddresses.Addresses.First();

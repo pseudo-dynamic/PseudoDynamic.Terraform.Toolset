@@ -1,10 +1,21 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Internals
+﻿using System.Text.Json.Serialization;
+
+namespace PseudoDynamic.Terraform.Plugin.Internals
 {
     internal class TerraformReattachProvider
     {
         public string Protocol { get; init; } = "grpc";
-        public int Pid { get; init; } = Environment.ProcessId;
-        public bool Test { get; init; } = true;
-        public TerraformReattachProviderAddress Addr { get; init; }
+
+        [JsonPropertyName("Pid")]
+        public int ProcessId { get; init; } = Environment.ProcessId;
+
+        [JsonPropertyName("Test")]
+        public bool IsTest { get; init; } = true;
+
+        [JsonPropertyName("Addr")]
+        public TerraformReattachProviderAddress Address { get; }
+
+        public TerraformReattachProvider(TerraformReattachProviderAddress address) =>
+            Address = address ?? throw new ArgumentNullException(nameof(address));
     }
 }

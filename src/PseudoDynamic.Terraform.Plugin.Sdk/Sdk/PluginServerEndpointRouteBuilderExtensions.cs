@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
-using PseudoDynamic.Terraform.Plugin.Protocol_V5;
+using PseudoDynamic.Terraform.Plugin.Protocols.v6;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {

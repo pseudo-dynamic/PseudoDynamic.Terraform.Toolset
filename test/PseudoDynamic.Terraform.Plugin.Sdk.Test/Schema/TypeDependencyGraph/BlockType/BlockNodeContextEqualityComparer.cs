@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.Block;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {

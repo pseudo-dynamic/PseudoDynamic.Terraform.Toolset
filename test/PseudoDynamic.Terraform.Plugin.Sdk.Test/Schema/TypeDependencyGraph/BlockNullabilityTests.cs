@@ -5,7 +5,7 @@
         [Fact]
         public void String_block_has_optional_string()
         {
-            var actualBlock = BlockSchemaBuilder.Default.BuildSchema(typeof(StringBlocks.Optional));
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(StringBlocks.Optional));
 
             var expectedBlock = new BlockDefinition()
             {
@@ -22,7 +22,7 @@
         [Fact]
         public void String_block_has_required_string()
         {
-            var actualBlock = BlockSchemaBuilder.Default.BuildSchema(typeof(StringBlocks.Required));
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(StringBlocks.Required));
 
             var expectedBlock = new BlockDefinition()
             {
@@ -40,7 +40,7 @@
         [Fact]
         public void Terraform_value_block_has_optional_string()
         {
-            var actualBlock = BlockSchemaBuilder.Default.BuildSchema(typeof(TeraformValueBlocks.Optional));
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(TeraformValueBlocks.Optional));
 
             var expectedBlock = new BlockDefinition()
             {
@@ -57,7 +57,7 @@
         [Fact]
         public void Terraform_value_block_has_required_string()
         {
-            var actualBlock = BlockSchemaBuilder.Default.BuildSchema(typeof(TeraformValueBlocks.Required));
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(TeraformValueBlocks.Required));
 
             var expectedBlock = new BlockDefinition()
             {

@@ -2,6 +2,12 @@
 {
     internal record class MonoRangeDefinition : RangeDefinition
     {
+        internal static MonoRangeDefinition List(TerraformDefinition item) =>
+            new MonoRangeDefinition(TerraformTypeConstraint.List, item);
+
+        internal static MonoRangeDefinition Set(TerraformDefinition item) =>
+            new MonoRangeDefinition(TerraformTypeConstraint.Set, item);
+
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.MonoRange;
 
         public override TerraformTypeConstraint TypeConstraint { get; }

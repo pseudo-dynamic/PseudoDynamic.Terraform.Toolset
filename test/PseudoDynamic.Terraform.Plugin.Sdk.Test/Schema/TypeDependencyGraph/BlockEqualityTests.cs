@@ -49,7 +49,7 @@
                 typeof(Blocks.ListOfStrings),
                 new BlockDefinition() {
                     Attributes = new []{
-                        new BlockAttributeDefinition("list", new MonoRangeDefinition(TerraformTypeConstraint.List, PrimitiveDefinition.String))
+                        new BlockAttributeDefinition("list", MonoRangeDefinition.List(PrimitiveDefinition.String))
                     }
                 }
             };
@@ -72,7 +72,7 @@
         [MemberData(nameof(GetBlockSchemas))]
         internal void Block_schema_matches_expected_block_schema(Type schemaType, TerraformDefinition expectedDefinition)
         {
-            var actualDefinition = BlockSchemaBuilder.Default.BuildSchema(schemaType);
+            var actualDefinition = BlockBuilder.Default.BuildBlock(schemaType);
             Assert.Equal(expectedDefinition, actualDefinition, TerraformDefinitionEqualityComparer.Default);
         }
 

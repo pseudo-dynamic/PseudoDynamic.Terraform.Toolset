@@ -12,6 +12,8 @@ namespace PseudoDynamic.Terraform.Plugin.Internals
 
         public IReadOnlyDictionary<string, string> EnvironmentVariables { get; init; } = EmptyEnvironmentVariables;
 
+        public TerraformReattachProviders TerraformReattachProviders { get; } = new TerraformReattachProviders();
+
         private TerraformProcessStartInfo CreateStartInfo(string? args)
         {
             var startInfo = new TerraformProcessStartInfo(
@@ -22,6 +24,11 @@ namespace PseudoDynamic.Terraform.Plugin.Internals
             foreach (var environmentVariable in EnvironmentVariables)
             {
                 startInfo.EnvironmentVariables.Add(environmentVariable.Key, environmentVariable.Value);
+            }
+
+            if (TerraformReattachProviders.Count > 0)
+            {
+                startInfo.EnvironmentVariables.Add(TerraformReattachProviders.VariableName, TerraformReattachProviders.ToJson());
             }
 
             return startInfo;
