@@ -5,13 +5,13 @@
     /// </summary>
     internal record class BlockDefinition : ComplexDefinition
     {
-        internal const int DefaultSchemaVersion = 1;
+        internal const int DefaultVersion = 1;
 
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.Block;
 
         public override TerraformTypeConstraint TypeConstraint => TerraformTypeConstraint.Block;
 
-        public int SchemaVersion { get; init; } = DefaultSchemaVersion;
+        public int Version { get; init; } = DefaultVersion;
 
         public IReadOnlyList<BlockAttributeDefinition> Attributes { get; init; } = Array.Empty<BlockAttributeDefinition>();
 
@@ -42,13 +42,13 @@
 
         public virtual bool Equals(BlockDefinition? other) =>
             other is not null
-            && SchemaVersion == other.SchemaVersion
+            && Version == other.Version
             && Description == other.Description
             && DescriptionKind == other.DescriptionKind
             && IsDeprecated == other.IsDeprecated;
 
         public override int GetHashCode() => HashCode.Combine(
-            SchemaVersion,
+            Version,
             Description,
             DescriptionKind,
             IsDeprecated);

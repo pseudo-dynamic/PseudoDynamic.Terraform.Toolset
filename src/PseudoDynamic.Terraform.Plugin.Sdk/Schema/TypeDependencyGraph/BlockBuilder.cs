@@ -103,7 +103,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected BlockDefinition BuildBlock(BlockNode node)
         {
             var visitedType = node.Context.VisitedType;
-            var schemaVersion = visitedType.GetCustomAttribute<SchemaVersionAttribute>()?.SchemaVersion ?? BlockDefinition.DefaultSchemaVersion;
+            var version = visitedType.GetCustomAttribute<BlockAttribute>()?.GetVersion() ?? BlockDefinition.DefaultVersion;
             var isDeprecated = visitedType.GetCustomAttribute<DeprecatedAttribute>(inherit: true) is not null;
             var descriptionKind = visitedType.GetCustomAttribute<DescriptionKindAttribute>(inherit: true)?.DescriptionKind ?? default;
 
@@ -132,7 +132,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 .ToList();
 
             return new BlockDefinition() {
-                SchemaVersion = schemaVersion,
+                Version = version,
                 Attributes = attributes,
                 Blocks = blocks,
                 Description = description,

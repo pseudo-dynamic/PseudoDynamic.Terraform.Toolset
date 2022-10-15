@@ -1,4 +1,4 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
+﻿namespace PseudoDynamic.Terraform.Plugin
 {
     internal interface INameConvention
     {

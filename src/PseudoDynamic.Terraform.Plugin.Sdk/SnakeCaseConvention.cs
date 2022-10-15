@@ -1,6 +1,6 @@
 ﻿using CaseExtensions;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
+namespace PseudoDynamic.Terraform.Plugin
 {
     internal class SnakeCaseConvention : INameConvention
     {

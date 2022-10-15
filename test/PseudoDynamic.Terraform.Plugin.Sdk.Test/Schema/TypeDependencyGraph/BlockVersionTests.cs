@@ -6,7 +6,7 @@
         public void Block_schema_should_have_default_schema_Version()
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.Default));
-            var expectedBlock = new BlockDefinition() { SchemaVersion = BlockDefinition.DefaultSchemaVersion };
+            var expectedBlock = new BlockDefinition() { Version = BlockDefinition.DefaultVersion };
             Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
         }
 
@@ -14,7 +14,7 @@
         public void Block_schema_should_have_custom_schema_Version()
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.SchemaVersion));
-            var expectedBlock = new BlockDefinition() { SchemaVersion = 2 };
+            var expectedBlock = new BlockDefinition() { Version = 2 };
             Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
         }
 
@@ -26,7 +26,7 @@
             var expectedBlock = new BlockDefinition()
             {
                 Blocks = new[] {
-                    new NestedBlockAttributeDefinition("block", new BlockDefinition() { SchemaVersion = 2 })
+                    new NestedBlockAttributeDefinition("block", new BlockDefinition() { Version = 2 })
                 }
             };
 
@@ -40,8 +40,7 @@
             {
             }
 
-            [Block]
-            [SchemaVersion(2)]
+            [Block(2)]
             public class SchemaVersion
             {
             }

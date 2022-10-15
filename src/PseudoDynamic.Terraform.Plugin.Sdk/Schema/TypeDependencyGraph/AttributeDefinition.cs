@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal abstract record class AttributeDefinition : TerraformDefinition
     {
@@ -34,8 +36,14 @@
 
         public virtual ValueDefinition Value {
             get => _value ?? throw new InvalidOperationException("Value has been not set");
-            internal init => _value = value;
+
+            internal init {
+                _value = value;
+                ParseValue(value);
+            }
         }
+
+        public ValueWrapping? ValueWrapping { get; private set; }
 
         private ValueDefinition? _value;
         private bool _isOptional;
@@ -45,6 +53,14 @@
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Value = value ?? throw new ArgumentNullException(nameof(value));
+            ParseValue(value);
+        }
+
+        private void ParseValue(ValueDefinition value)
+        {
+            if (value is INestedValueAccessor nestedValueAccessor) {
+                ValueWrapping = nestedValueAccessor.NestedValue.TypeConstraint.ToValueWrapping();
+            }
         }
 
         public virtual bool Equals(AttributeDefinition? other) =>
@@ -52,12 +68,14 @@
             && base.Equals(other)
             && Name == other.Name
             && IsRequired == other.IsRequired
-            && IsOptional == other.IsOptional;
+            && IsOptional == other.IsOptional
+            && ValueWrapping == other.ValueWrapping;
 
         public override int GetHashCode() => HashCode.Combine(
             base.GetHashCode(),
             Name,
             IsRequired,
-            IsOptional);
+            IsOptional,
+            ValueWrapping);
     }
 }

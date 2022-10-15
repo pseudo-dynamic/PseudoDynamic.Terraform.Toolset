@@ -9,6 +9,10 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
     {
         private static IMapper Mapper = new MapperConfiguration(config => config.AddProfile<SchemaMapper>()).CreateMapper();
 
+        [Fact]
+        internal void Mapper_configuration_is_valid() =>
+            Mapper.ConfigurationProvider.AssertConfigurationIsValid();
+
         [Theory]
         [ClassData(typeof(SchemaBlockData))]
         internal void Block_definition_maps_to_schema_block(Schema.Types.Block expectedSchemaBlock, BlockDefinition blockDefinition)
@@ -32,7 +36,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                     Description = "goofy",
                     DescriptionKind = DescriptionKind.Markdown,
                     IsDeprecated = true,
-                    SchemaVersion = 2
+                    Version = 2
                 });
 
                 var stringList = MonoRangeDefinition.List(PrimitiveDefinition.String);

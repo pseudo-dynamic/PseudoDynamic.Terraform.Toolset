@@ -18,17 +18,15 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
         }
 
-        public ValueWrapping? ValueWrapping { get; private set; }
-
         public BlockDefinition Block { get; private set; }
 
         public int MinimumItems { get; init; } = DefaultMinimumItems;
 
         public int MaximumItems { get; init; } = DefaultMaximumItems;
 
-        internal NestedBlockAttributeDefinition(BlockAttributeDefinition original)
-            : base(original) =>
-            ParseValue(original.Value);
+        internal NestedBlockAttributeDefinition(BlockAttributeDefinition blockAttribute)
+            : base(blockAttribute) =>
+            ParseValue(blockAttribute.Value);
 
         private NestedBlockAttributeDefinition(string name, ValueDefinition value)
             : base(name, value) =>
@@ -50,7 +48,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             ValueDefinition block;
 
             if (value is INestedValueAccessor nestedValueAccessor) {
-                ValueWrapping = nestedValueAccessor.NestedValue.TypeConstraint.ToValueWrapping();
                 block = nestedValueAccessor.NestedValue;
             } else {
                 block = value;
