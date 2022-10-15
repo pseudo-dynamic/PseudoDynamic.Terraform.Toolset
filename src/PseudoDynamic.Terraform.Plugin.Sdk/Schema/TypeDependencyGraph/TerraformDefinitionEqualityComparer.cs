@@ -17,32 +17,45 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
 
             var definitions = TerraformDefinitionCollector.Default.Queue(x);
-            var definitionsCount = definitions.Count;
             var definitionVisitor = new EqualityComparingVisitor(definitions);
             definitionVisitor.Visit(y);
-            return definitionVisitor.AreEqual && definitionsCount == definitionVisitor.VisitCounter;
+            return definitionVisitor.AreEqual;
         }
 
         public override int GetHashCode([DisallowNull] TerraformDefinition obj) => throw new NotImplementedException();
 
         private class EqualityComparingVisitor : TerraformDefinitionVisitor
         {
-            public bool AreEqual => _areEqual;
-            public int VisitCounter;
+            public bool AreEqual => _areEqual && _queueCount == _visitCounter;
 
+            private int _visitCounter;
             private bool _areEqual = true;
+            private bool _onceVisited;
 
             private readonly Queue<TerraformDefinition> _queue;
+            private readonly int _queueCount;
 
-            public EqualityComparingVisitor(Queue<TerraformDefinition> queue) =>
-                _queue = queue;
+            public EqualityComparingVisitor(Queue<TerraformDefinition> queue)
+            {
+                _queue = queue ?? throw new ArgumentNullException(nameof(queue));
+                _queueCount = queue.Count;
+            }
 
             public override void Visit(TerraformDefinition y)
             {
-                VisitCounter++;
+                if (_onceVisited) {
+                    throw new InvalidOperationException("This instance is stateful and cannot be used to re-compare another definition");
+                }
 
-                if (!_queue.TryDequeue(out var x) || !x.Equals(y)) {
-                    _areEqual = false;
+                bool dequeueSucceeded = _queue.TryDequeue(out var x);
+
+                if (dequeueSucceeded) {
+                    _visitCounter++;
+                    _areEqual = x!.Equals(y);
+                }
+
+                if (!dequeueSucceeded || !_areEqual) {
+                    _onceVisited = true;
                     return;
                 }
 

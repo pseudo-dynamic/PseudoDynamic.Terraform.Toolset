@@ -50,7 +50,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
 
             if (block is not BlockDefinition typedBlock) {
-                throw new NestedBlockException($"The (nested) value was expected to be a (nested) block but it was {block.TypeConstraint}");
+                throw new NestedBlockException($"The nested value was expected to be a nested block but it was {block.TypeConstraint}");
             }
 
             Block = typedBlock;

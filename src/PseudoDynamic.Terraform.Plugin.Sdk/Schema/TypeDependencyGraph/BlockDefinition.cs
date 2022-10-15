@@ -13,6 +13,8 @@
 
         public int SchemaVersion { get; init; } = DefaultSchemaVersion;
 
+        public IReadOnlyList<BlockAttributeDefinition> Attributes { get; init; } = Array.Empty<BlockAttributeDefinition>();
+
         public IReadOnlyList<NestedBlockAttributeDefinition> Blocks { get; init; } = Array.Empty<NestedBlockAttributeDefinition>();
 
         /// <summary>
