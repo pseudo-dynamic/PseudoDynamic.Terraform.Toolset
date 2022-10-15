@@ -2,18 +2,21 @@
 {
     internal static class TerraformTypeConstraintExtensions
     {
-        public static bool IsBlockType(this TerraformTypeConstraint terraformType) =>
+        public static bool IsBlockLike(this TerraformTypeConstraint terraformType) =>
             terraformType is TerraformTypeConstraint.Object or TerraformTypeConstraint.Tuple or TerraformTypeConstraint.Block;
 
-        public static bool IsMonoRangeType(this TerraformTypeConstraint terraformType) =>
+        public static bool IsMonoRange(this TerraformTypeConstraint terraformType) =>
             terraformType is TerraformTypeConstraint.List or TerraformTypeConstraint.Set;
 
-        public static bool IsRangeType(this TerraformTypeConstraint terraformType) =>
-            terraformType.IsMonoRangeType() || terraformType == TerraformTypeConstraint.Map;
+        public static bool IsRange(this TerraformTypeConstraint terraformType) =>
+            terraformType.IsMonoRange() || terraformType == TerraformTypeConstraint.Map;
 
-        //public static bool IsReferenceType(this TerraformTypeConstraint terraformType) =>
-        //    terraformType.IsBlockType() || terraformType is TerraformTypeConstraint.Any
-        //    or TerraformTypeConstraint.List or TerraformTypeConstraint.Set or TerraformTypeConstraint.Map
-        //    or TerraformTypeConstraint.Object or TerraformTypeConstraint.Block;
+        public static ValueWrapping? ToValueWrapping(this TerraformTypeConstraint typeConstraint) => typeConstraint switch {
+            TerraformTypeConstraint.Block => default,
+            TerraformTypeConstraint.List => ValueWrapping.List,
+            TerraformTypeConstraint.Set => ValueWrapping.Set,
+            TerraformTypeConstraint.Map => ValueWrapping.Map,
+            _ => throw new InvalidOperationException($"Type constraint \"{typeConstraint}\" cannot be translated to a value of {typeof(ValueWrapping).FullName}")
+        };
     }
 }

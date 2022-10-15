@@ -12,7 +12,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
 
         public string BuildJsonType(TerraformDefinition definition)
         {
-            var visitor = new BlockTypeStackingVisitor();
+            var visitor = new TypeStackingVisitor();
             var stack = TerraformDefinitionCollector.Default.Stack(definition);
 
             while (stack.TryPop(out var poppedDefinition)) {
@@ -22,7 +22,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
             return visitor.Last;
         }
 
-        private class BlockTypeStackingVisitor : TerraformDefinitionVisitor
+        private class TypeStackingVisitor : TerraformDefinitionVisitor
         {
             private static List<T> PopRangeReversed<T>(Stack<T> stack, int count)
             {
@@ -72,12 +72,15 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
             }
 
             protected internal override void VisitTuple(TupleDefinition definition) =>
-                throw new NotSupportedException();
+                throw new NotImplementedException();
 
             protected internal override void VisitBlock(BlockDefinition definition) =>
                 throw new NotSupportedException();
 
             protected internal override void VisitBlockAttribute(BlockAttributeDefinition definition) =>
+                throw new NotSupportedException();
+
+            protected internal override void VisitNestedBlock(NestedBlockAttributeDefinition definition) =>
                 throw new NotSupportedException();
         }
     }

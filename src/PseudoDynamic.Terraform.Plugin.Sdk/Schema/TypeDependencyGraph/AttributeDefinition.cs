@@ -32,7 +32,7 @@
             }
         }
 
-        public ValueDefinition Value {
+        public virtual ValueDefinition Value {
             get => _value ?? throw new InvalidOperationException("Value has been not set");
             internal init => _value = value;
         }

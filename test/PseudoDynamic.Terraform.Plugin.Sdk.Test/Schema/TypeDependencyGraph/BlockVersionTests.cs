@@ -25,8 +25,8 @@
 
             var expectedBlock = new BlockDefinition()
             {
-                Attributes = new[] {
-                    new BlockAttributeDefinition("block", new BlockDefinition() { SchemaVersion = 2 })
+                Blocks = new[] {
+                    new NestedBlockAttributeDefinition("block", new BlockDefinition() { SchemaVersion = 2 })
                 }
             };
 
@@ -49,7 +49,7 @@
             [Block]
             public class NestedSchemaVersion
             {
-                [Block]
+                [NestedBlock]
                 public SchemaVersion Block { get; set; }
             }
         }

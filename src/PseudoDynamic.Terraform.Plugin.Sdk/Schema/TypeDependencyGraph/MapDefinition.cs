@@ -1,6 +1,6 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
-    internal record class MapDefinition : RangeDefinition
+    internal record class MapDefinition : RangeDefinition, INestedValueAccessor
     {
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.Map;
 
@@ -9,6 +9,7 @@
         public ValueDefinition Key { get; } = PrimitiveDefinition.String;
 
         public ValueDefinition Value { get; }
+        ValueDefinition INestedValueAccessor.NestedValue => Value;
 
         public MapDefinition(ValueDefinition value) =>
             Value = value ?? throw new ArgumentNullException(nameof(value));

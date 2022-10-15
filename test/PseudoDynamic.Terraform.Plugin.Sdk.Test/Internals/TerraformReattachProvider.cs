@@ -5,6 +5,7 @@ namespace PseudoDynamic.Terraform.Plugin.Internals
     internal class TerraformReattachProvider
     {
         public string Protocol { get; init; } = "grpc";
+        public int ProtocolVersion { get; init; } = 6;
 
         [JsonPropertyName("Pid")]
         public int ProcessId { get; init; } = Environment.ProcessId;

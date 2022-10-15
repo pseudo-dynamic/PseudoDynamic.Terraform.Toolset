@@ -21,8 +21,8 @@
             yield return new object[] {
                 typeof(Blocks.NestedBlock),
                 new BlockDefinition() {
-                    Attributes = new []{
-                        new BlockAttributeDefinition("block", new BlockDefinition() {
+                    Blocks = new []{
+                        new NestedBlockAttributeDefinition("block", new BlockDefinition() {
                                 Attributes = new []{
                                     new BlockAttributeDefinition("string", PrimitiveDefinition.String)
                                 }
@@ -34,13 +34,40 @@
             yield return new object[] {
                 typeof(Blocks.TerraformValueNestedBlock),
                 new BlockDefinition() {
-                    Attributes = new []{
-                        new BlockAttributeDefinition("block", new BlockDefinition() {
+                    Blocks = new []{
+                        new NestedBlockAttributeDefinition("block", new BlockDefinition() {
                                 Attributes = new []{
                                     new BlockAttributeDefinition("string", PrimitiveDefinition.String)
                                 },
                                 IsWrappedByTerraformValue = true
                             })
+                    }
+                }
+            };
+
+            yield return new object[] {
+                typeof(Blocks.ListTerraformValueNestedBlock),
+                new BlockDefinition() {
+                    Blocks = new []{
+                        new NestedBlockAttributeDefinition("block", MonoRangeDefinition.List(new BlockDefinition() {
+                                Attributes = new []{
+                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String)
+                                },
+                                IsWrappedByTerraformValue = true
+                            }))
+                    }
+                }
+            };
+
+            yield return new object[] {
+                typeof(Blocks.HavingBlockList),
+                new BlockDefinition() {
+                    Blocks = new []{
+                        new NestedBlockAttributeDefinition("list_of_blocks", MonoRangeDefinition.List(new BlockDefinition() {
+                                Attributes = new []{
+                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String)
+                                }
+                            }))
                     }
                 }
             };
@@ -90,15 +117,29 @@
             [Block]
             public class NestedBlock
             {
-                [Block]
+                [NestedBlock]
                 public HavingString Block { get; set; }
             }
 
             [Block]
             public class TerraformValueNestedBlock
             {
-                [Block]
+                [NestedBlock]
                 public ITerraformValue<HavingString> Block { get; set; }
+            }
+
+            [Block]
+            public class ListTerraformValueNestedBlock
+            {
+                [NestedBlock]
+                public IList<ITerraformValue<HavingString>> Block { get; set; }
+            }
+
+            [Block]
+            public class HavingBlockList
+            {
+                [NestedBlock]
+                public IList<HavingString> ListOfBlocks { get; set; }
             }
 
             [Block]

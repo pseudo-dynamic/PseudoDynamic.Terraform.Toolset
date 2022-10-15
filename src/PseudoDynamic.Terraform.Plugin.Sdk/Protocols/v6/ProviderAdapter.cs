@@ -1,6 +1,6 @@
 ﻿using Grpc.Core;
 
-namespace PseudoDynamic.Terraform.Plugin.Protocols.v6
+namespace PseudoDynamic.Terraform.Plugin.Protocols.V6
 {
     public class ProviderAdapter : Provider.ProviderBase
     {

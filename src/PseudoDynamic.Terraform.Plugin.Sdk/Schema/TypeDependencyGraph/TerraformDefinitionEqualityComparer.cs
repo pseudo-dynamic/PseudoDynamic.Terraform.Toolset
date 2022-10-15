@@ -17,9 +17,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
 
             var definitions = TerraformDefinitionCollector.Default.Queue(x);
+            var definitionsCount = definitions.Count;
             var definitionVisitor = new EqualityComparingVisitor(definitions);
             definitionVisitor.Visit(y);
-            return definitionVisitor.AreEqual;
+            return definitionVisitor.AreEqual && definitionsCount == definitionVisitor.VisitCounter;
         }
 
         public override int GetHashCode([DisallowNull] TerraformDefinition obj) => throw new NotImplementedException();
@@ -27,6 +28,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         private class EqualityComparingVisitor : TerraformDefinitionVisitor
         {
             public bool AreEqual => _areEqual;
+            public int VisitCounter;
 
             private bool _areEqual = true;
 
@@ -37,6 +39,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
             public override void Visit(TerraformDefinition y)
             {
+                VisitCounter++;
+
                 if (!_queue.TryDequeue(out var x) || !x.Equals(y)) {
                     _areEqual = false;
                     return;

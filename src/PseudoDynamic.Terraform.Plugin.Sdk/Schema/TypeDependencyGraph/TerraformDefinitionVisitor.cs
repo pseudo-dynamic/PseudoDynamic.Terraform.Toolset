@@ -37,9 +37,16 @@
             foreach (var attribute in definition.Attributes) {
                 Visit(attribute);
             }
+
+            foreach (var block in definition.Blocks) {
+                Visit(block);
+            }
         }
 
         protected internal virtual void VisitBlockAttribute(BlockAttributeDefinition definition) =>
+            Visit(definition.Value);
+
+        protected internal virtual void VisitNestedBlock(NestedBlockAttributeDefinition definition) =>
             Visit(definition.Value);
     }
 }

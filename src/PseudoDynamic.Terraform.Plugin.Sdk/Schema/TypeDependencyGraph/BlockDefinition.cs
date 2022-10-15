@@ -13,6 +13,8 @@
 
         public int SchemaVersion { get; init; } = DefaultSchemaVersion;
 
+        public IReadOnlyList<NestedBlockAttributeDefinition> Blocks { get; init; } = Array.Empty<NestedBlockAttributeDefinition>();
+
         /// <summary>
         /// The description of this attribute.
         /// </summary>
@@ -35,5 +37,18 @@
 
         protected internal override void Visit(TerraformDefinitionVisitor visitor) =>
             visitor.VisitBlock(this);
+
+        public virtual bool Equals(BlockDefinition? other) =>
+            other is not null
+            && SchemaVersion == other.SchemaVersion
+            && Description == other.Description
+            && DescriptionKind == other.DescriptionKind
+            && IsDeprecated == other.IsDeprecated;
+
+        public override int GetHashCode() => HashCode.Combine(
+            SchemaVersion,
+            Description,
+            DescriptionKind,
+            IsDeprecated);
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using Namotion.Reflection;
 using PseudoDynamic.Terraform.Plugin.Schema.Conventions;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.Block;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.Complex;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
@@ -16,19 +16,19 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         public BlockBuilder(IAttributeNameConvention attributeNameConvention) =>
             _attributeNameConvention = attributeNameConvention ?? throw new ArgumentNullException(nameof(attributeNameConvention));
 
-        protected ValueDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node)
+        protected MonoRangeDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node)
         {
             var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
             return new MonoRangeDefinition(TerraformTypeConstraint.List, item);
         }
 
-        protected ValueDefinition BuildSet(BlockNode<IVisitPropertySegmentContext> node)
+        protected MonoRangeDefinition BuildSet(BlockNode<IVisitPropertySegmentContext> node)
         {
             var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
             return new MonoRangeDefinition(TerraformTypeConstraint.Set, item);
         }
 
-        protected ValueDefinition BuildMap(BlockNode<IVisitPropertySegmentContext> node)
+        protected MapDefinition BuildMap(BlockNode<IVisitPropertySegmentContext> node)
         {
             var value = BuildValue(node.ElementAt(1).AsContext<IVisitPropertySegmentContext>()).Value;
             return new MapDefinition(value);
@@ -59,24 +59,22 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             Attributes = node.Select(node => BuildObjectAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList()
         };
 
-        protected BlockAttributeDefinition BuildBlockAttribute(BlockNode<IVisitPropertySegmentContext> node)
+        protected BlockAttributeDefinition BuildBlockAttribute(ValueResult valueResult)
         {
-            var propertyContext = node.Context;
-            var property = propertyContext.Property;
-            var attributeName = _attributeNameConvention.Format(propertyContext.Property);
+            var property = valueResult.UnwrappedNode.Context.Property;
+            var attributeName = _attributeNameConvention.Format(property);
 
             var isComputed = property.GetCustomAttribute<ComputedAttribute>(inherit: true) is not null;
             var isSensitive = property.GetCustomAttribute<SensitiveAttribute>(inherit: true) is not null;
             var isDeprecated = property.GetCustomAttribute<DeprecatedAttribute>(inherit: true) is not null;
             var descriptionKind = property.GetCustomAttribute<DescriptionKindAttribute>(inherit: true)?.DescriptionKind ?? default;
 
-            var description = propertyContext.Property.GetXmlDocsSummary(new XmlDocsOptions() {
+            var description = property.GetXmlDocsSummary(new XmlDocsOptions() {
                 FormattingMode = descriptionKind == DescriptionKind.Markdown
                     ? XmlDocsFormattingMode.Markdown
                     : XmlDocsFormattingMode.None
             });
 
-            var valueResult = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
             var isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
 
             return new BlockAttributeDefinition(attributeName, valueResult.Value) {
@@ -102,40 +100,86 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                     : XmlDocsFormattingMode.None
             });
 
+            var childNodes = node
+                .Select(x => x.AsContext<IVisitPropertySegmentContext>())
+                .ToList();
+
+            var childNodeValueResults = childNodes
+                .Select(BuildValue)
+                .ToList();
+
+            var attributes = childNodeValueResults
+                .Where(x => !x.IsNestedBlock)
+                .Select(x => BuildBlockAttribute(x))
+                .ToList();
+
+            var blocks = childNodeValueResults
+                .Where(x => x.IsNestedBlock)
+                .Select(x => new NestedBlockAttributeDefinition(BuildBlockAttribute(x)))
+                .ToList();
+
             return new BlockDefinition() {
                 SchemaVersion = schemaVersion,
-                Attributes = node.Select(node => BuildBlockAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList(),
+                Attributes = attributes,
+                Blocks = blocks,
                 Description = description,
                 DescriptionKind = descriptionKind,
                 IsDeprecated = isDeprecated
             };
         }
 
+        protected ValueDefinition BuildValue(BlockNode<IVisitPropertySegmentContext> node, TerraformTypeConstraint valueTypeConstraint) => valueTypeConstraint switch {
+            TerraformTypeConstraint.Block => BuildBlock(node),
+            TerraformTypeConstraint.Object => BuildObject(node),
+            TerraformTypeConstraint.List => BuildList(node),
+            TerraformTypeConstraint.Set => BuildSet(node),
+            TerraformTypeConstraint.Map => BuildMap(node),
+            TerraformTypeConstraint.Tuple => throw new NotImplementedException("A tuple schema API has not been implemented yet"),
+            _ => new PrimitiveDefinition(valueTypeConstraint)
+        };
+
         protected ValueResult BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {
             var isTerraformValue = node.TryUnwrapTerraformValue(out var unwrappedNode);
-            var valueTypeConstraint = unwrappedNode.DetermineTypeConstraint();
-            ValueDefinition value;
+            var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint(out var implicitValueTypeConstraints);
+            bool isNestedBlock;
+            ValueDefinition builtValue;
 
-            if (valueTypeConstraint == TerraformTypeConstraint.Block) {
-                value = BuildBlock(unwrappedNode);
-            } else if (valueTypeConstraint == TerraformTypeConstraint.Object) {
-                value = BuildObject(unwrappedNode);
-            } else if (valueTypeConstraint == TerraformTypeConstraint.List) {
-                value = BuildList(unwrappedNode);
-            } else if (valueTypeConstraint == TerraformTypeConstraint.Set) {
-                value = BuildSet(unwrappedNode);
-            } else if (valueTypeConstraint == TerraformTypeConstraint.Map) {
-                value = BuildMap(unwrappedNode);
-            } else if (valueTypeConstraint == TerraformTypeConstraint.Tuple) {
-                throw new NotImplementedException("A tuple schema API has not been implemented yet");
+            if (explicitTypeConstraint == TerraformTypeConstraint.Block) {
+                var property = node.Context.Property;
+
+                TerraformTypeConstraint? singleImplicitValueTypeConstraints = property.GetCustomAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
+                    ?? (implicitValueTypeConstraints.Count == 1
+                        ? implicitValueTypeConstraints.Single()
+                        : default);
+
+                if (!singleImplicitValueTypeConstraints.HasValue) {
+                    throw new NestedBlockException();
+                }
+
+                if (singleImplicitValueTypeConstraints.Value.IsBlockLike()) {
+                    builtValue = BuildBlock(unwrappedNode);
+                } else if (isTerraformValue) {
+                    throw new NestedBlockException($"The {property.DeclaringType!.FullName}.{property.Name} property wants to be a nested block but can only be wrapped by " +
+                        $"{typeof(ITerraformValue<>).FullName} if the implicit type constraint is object, tuple or block");
+                } else if (singleImplicitValueTypeConstraints.Value.IsRange()) {
+                    builtValue = BuildValue(unwrappedNode, singleImplicitValueTypeConstraints.Value);
+                } else {
+                    throw new NestedBlockException($"The {property.DeclaringType!.FullName}.{property.Name} property wants to be a nested block but the property type " +
+                        $"can be implictly object, tuple, block, or list, set or map, that contains implictly object, tuple or block");
+                }
+
+                isNestedBlock = true;
             } else {
-                value = new PrimitiveDefinition(valueTypeConstraint);
+                builtValue = BuildValue(unwrappedNode, explicitTypeConstraint);
+                isNestedBlock = false;
             }
 
-            return new ValueResult(
-                value with { IsWrappedByTerraformValue = isTerraformValue },
-                unwrappedNode);
+            var updatedValue = builtValue with { IsWrappedByTerraformValue = isTerraformValue };
+
+            return new ValueResult(updatedValue, unwrappedNode) {
+                IsNestedBlock = isNestedBlock
+            };
         }
 
         public BlockDefinition BuildBlock(Type blockType)
@@ -151,6 +195,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         {
             public ValueDefinition Value { get; }
             public BlockNode<IVisitPropertySegmentContext> UnwrappedNode { get; }
+            public bool IsNestedBlock { get; init; }
 
             public ValueResult(ValueDefinition value, BlockNode<IVisitPropertySegmentContext> unwrappedNode)
             {

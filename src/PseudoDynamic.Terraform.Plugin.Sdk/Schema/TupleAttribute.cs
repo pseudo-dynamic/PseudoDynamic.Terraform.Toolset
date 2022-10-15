@@ -1,6 +1,6 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Schema
 {
-    public class TupleAttribute : BlockAttribute
+    public sealed class TupleAttribute : BlockLikeAttribute
     {
         public TupleAttribute()
             : base(TerraformTypeConstraint.Tuple)

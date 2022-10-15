@@ -40,6 +40,10 @@ namespace PseudoDynamic.Terraform.Plugin.Internals
 
         public string Init() => RunCommandThenReadOutput("init");
 
+        public string Validate() => RunCommandThenReadOutput("validate");
+
+        public string Plan() => RunCommandThenReadOutput("plan -input=false");
+
         public string Apply() => RunCommandThenReadOutput("apply -input=false -auto-approve");
 
         private class TerraformProcessStartInfo : SimpleProcessStartInfo

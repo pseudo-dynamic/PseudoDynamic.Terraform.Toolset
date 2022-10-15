@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Protocols\v5\tfplugin5.3.proto" />
+      <None Remove="Protocols\V5\tfplugin5.3.proto" />
     </ItemGroup>
 
 </Project>

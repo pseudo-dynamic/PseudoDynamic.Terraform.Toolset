@@ -18,7 +18,7 @@
 //
 syntax = "proto3";
 option go_package = "github.com/hashicorp/terraform/internal/tfplugin5";
-option csharp_namespace = "PseudoDynamic.Terraform.Plugin.Protocols.v5";
+option csharp_namespace = "PseudoDynamic.Terraform.Plugin.Protocols.V5";
 
 package tfplugin5;
 

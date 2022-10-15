@@ -9,6 +9,7 @@
         ObjectAttribute,
         Tuple,
         Block,
-        BlockAttribute
+        BlockAttribute,
+        NestedBlockAttribute
     }
 }

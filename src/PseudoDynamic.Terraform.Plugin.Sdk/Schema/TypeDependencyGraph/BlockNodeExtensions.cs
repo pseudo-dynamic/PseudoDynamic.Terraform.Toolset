@@ -1,6 +1,5 @@
-﻿using System.Reflection;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.Block;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.Complex;
+﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
@@ -40,41 +39,54 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
         }
 
-        internal static TerraformTypeConstraint DetermineTypeConstraint(this BlockNode<IVisitPropertySegmentContext> node)
-        {
-            var property = node.Context.Property;
-            var valueType = node.Context.VisitedType;
-            var terraformTypeAttribute = property.GetCustomAttribute<ValueAttribute>(inherit: true);
-            var hasTerraformTypeAttribute = terraformTypeAttribute is not null;
+        //// TODO: ......................
+        //internal static TerraformTypeConstraint DetermineTypeConstraintForBlock(this BlockNode<IVisitPropertySegmentContext> node, IReadOnlySet<TerraformTypeConstraint> implicitTypeConstraints)
+        //{
+        //    var property = node.Context.Property;
+        //    var valueType = node.Context.VisitedType;
+        //    var valueAttribute = property.GetCustomAttribute<ValueAttribute>(inherit: true);
 
-            var guessedTerraformTypes = TerraformTypeConstraintEvaluator.Default.Evaluate(valueType);
-            TerraformTypeConstraint terraformValueType;
+        //    var implicitTypeConstraints = TerraformTypeConstraintEvaluator.Default.Evaluate(valueType);
+        //    TerraformTypeConstraint typeConstraintResult;
+        //    TerraformTypeConstraint? singleImplicitTypeConstraint = null;
 
-            if (hasTerraformTypeAttribute) {
-                var explicitTerraformType = terraformTypeAttribute!.TypeConstraint;
-                var isExplicitTerraformBlockType = explicitTerraformType.IsBlockType();
+        //    if (valueAttribute is not null) {
+        //        var explicitTerraformType = valueAttribute.TypeConstraint;
+        //        var isExplicitTerraformBlockType = explicitTerraformType.IsBlockType();
 
-                if (isExplicitTerraformBlockType && guessedTerraformTypes.Contains(TerraformTypeConstraint.Object)
-                    || guessedTerraformTypes.Contains(explicitTerraformType)) {
-                    terraformValueType = explicitTerraformType;
-                } else if (isExplicitTerraformBlockType && guessedTerraformTypes.Count == 1
-                      && guessedTerraformTypes.Single().IsRangeType()) {
-                    terraformValueType = explicitTerraformType;
-                } else {
-                    throw new InvalidOperationException($"The \"{typeof(ValueAttribute).FullName}\" attribute on \"{property.DeclaringType?.FullName}.{property.Name}\" property wants to be "
-                        + $"a \"{explicitTerraformType}\" Terraform value type but the \"{property.PropertyType.Name}\" property type does not support it");
-                }
-            } else if (guessedTerraformTypes.Count == 0) {
-                throw new InvalidOperationException($"The \"{property.Name}\" property does implement at least Terraform value type");
-            } else if (guessedTerraformTypes.Count > 1) {
-                throw new InvalidOperationException($"The \"{property.Name}\" property cannot implement more than one Terraform value type. " +
-                    "The following Terraform value types have been found: "
-                    + string.Join(", ", guessedTerraformTypes.Select(x => x.ToString())));
-            } else {
-                terraformValueType = guessedTerraformTypes.Single();
-            }
+        //        if (isExplicitTerraformBlockType && implicitTypeConstraints.Contains(TerraformTypeConstraint.Object)
+        //            || implicitTypeConstraints.Contains(explicitTerraformType)) {
+        //            typeConstraintResult = explicitTerraformType;
+        //        } else if (isExplicitTerraformBlockType && implicitTypeConstraints.Count == 1
+        //              && GetSingleImplicitTypeConstraint().IsRangeType()) {
+        //            typeConstraintResult = explicitTerraformType;
+        //        } else {
+        //            throw new InvalidOperationException($"The \"{typeof(ValueAttribute).FullName}\" attribute on \"{property.DeclaringType?.FullName}.{property.Name}\" property wants to be "
+        //                + $"a \"{explicitTerraformType}\" Terraform type constraint but the \"{property.PropertyType.Name}\" property type does not support it");
+        //        }
+        //    } else {
+        //        typeConstraintResult = GetSingleImplicitTypeConstraint();
+        //    }
 
-            return terraformValueType;
-        }
+        //    return typeConstraintResult;
+
+        //    TerraformTypeConstraint GetSingleImplicitTypeConstraint()
+        //    {
+        //        if (singleImplicitTypeConstraint.HasValue) {
+        //            return singleImplicitTypeConstraint.Value;
+        //        }
+
+        //        if (implicitTypeConstraints.Count == 0) {
+        //            throw new InvalidOperationException($"The \"{property.Name}\" property does not implement at least one Terraform type constraint");
+        //        } else if (implicitTypeConstraints.Count > 1) {
+        //            throw new InvalidOperationException($"The \"{property.Name}\" property cannot implement more than one Terraform type constraints. " +
+        //                "The following Terraform type constraints have been evaluated: "
+        //                + string.Join(", ", implicitTypeConstraints.Select(x => x.ToString())));
+        //        }
+
+        //        singleImplicitTypeConstraint = implicitTypeConstraints.Single();
+        //        return singleImplicitTypeConstraint.Value;
+        //    }
+        //}
     }
 }
