@@ -2,7 +2,7 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
-    internal record class NestedBlockAttributeDefinition : BlockAttributeDefinition
+    internal record class NestedBlockAttributeDefinition : BlockAttributeDefinitionBase
     {
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.NestedBlockAttribute;
 
