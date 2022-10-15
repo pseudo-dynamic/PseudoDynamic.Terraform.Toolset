@@ -87,6 +87,19 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             };
         }
 
+        protected NestedBlockAttributeDefinition BuildNestedBlockAttribute(ValueResult valueResult)
+        {
+            var blockAttribute = BuildBlockAttribute(valueResult);
+            var nestedBlockAttribute = valueResult.UnwrappedNode.Context.Property.GetCustomAttribute<NestedBlockAttribute>();
+            var minimumItems = nestedBlockAttribute?.MinimumItems ?? NestedBlockAttributeDefinition.DefaultMinimumItems;
+            var maximumItems = nestedBlockAttribute?.MaximumItems ?? NestedBlockAttributeDefinition.DefaultMaximumItems;
+
+            return new NestedBlockAttributeDefinition(blockAttribute) {
+                MinimumItems = minimumItems,
+                MaximumItems = maximumItems
+            };
+        }
+
         protected BlockDefinition BuildBlock(BlockNode node)
         {
             var visitedType = node.Context.VisitedType;
@@ -115,7 +128,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
             var blocks = childNodeValueResults
                 .Where(x => x.IsNestedBlock)
-                .Select(x => new NestedBlockAttributeDefinition(BuildBlockAttribute(x)))
+                .Select(x => BuildNestedBlockAttribute(x))
                 .ToList();
 
             return new BlockDefinition() {

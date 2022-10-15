@@ -34,9 +34,11 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                 ByteString.CopyFromUtf8(BlockAttributeTypeBuilder.Default.BuildJsonType(destination.Value))));
 
             var nestedBlockAttribute = CreateMap<NestedBlockAttributeDefinition, Schema.Types.NestedBlock>(MemberList.None)
-                .ForMember(x => x.TypeName, o => o.MapFrom(x => x.Name))
+                .ForMember(x => x.Block, o => o.MapFrom(x => x.Block))
+                .ForMember(x => x.MaxItems, o => o.MapFrom(x => x.MaximumItems))
+                .ForMember(x => x.MinItems, o => o.MapFrom(x => x.MinimumItems))
                 .ForMember(x => x.Nesting, o => o.MapFrom(x => x.ValueWrapping))
-                .ForMember(x => x.Block, o => o.MapFrom(x => x.Block));
+                .ForMember(x => x.TypeName, o => o.MapFrom(x => x.Name));
         }
     }
 }

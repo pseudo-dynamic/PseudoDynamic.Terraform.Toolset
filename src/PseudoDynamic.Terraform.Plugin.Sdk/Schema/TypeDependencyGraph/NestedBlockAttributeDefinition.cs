@@ -4,6 +4,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal record class NestedBlockAttributeDefinition : BlockAttributeDefinitionBase
     {
+        public const int DefaultMinimumItems = 0;
+        public const int DefaultMaximumItems = 0;
+
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.NestedBlockAttribute;
 
         public override ValueDefinition Value {
@@ -18,6 +21,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         public ValueWrapping? ValueWrapping { get; private set; }
 
         public BlockDefinition Block { get; private set; }
+
+        public int MinimumItems { get; init; } = DefaultMinimumItems;
+
+        public int MaximumItems { get; init; } = DefaultMaximumItems;
 
         internal NestedBlockAttributeDefinition(BlockAttributeDefinition original)
             : base(original) =>
@@ -58,5 +65,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected internal override void Visit(TerraformDefinitionVisitor visitor) =>
             visitor.VisitNestedBlock(this);
+
+        public virtual bool Equals(NestedBlockAttributeDefinition? definition) =>
+            definition is not null
+            && ValueWrapping == definition.ValueWrapping
+            && MinimumItems == definition.MinimumItems
+            && MaximumItems == definition.MaximumItems;
     }
 }
