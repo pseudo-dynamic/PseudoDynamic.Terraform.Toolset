@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Data;
+using Microsoft.Extensions.Options;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -6,25 +7,36 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     {
         public IReadOnlyDictionary<string, ResourceDefinition> ResourceDefinitions => _resourceDefinitions;
         public string FullyQualifiedProviderName { get; }
+        public string ProviderName { get; }
 
         private Dictionary<string, ResourceDefinition> _resourceDefinitions;
-        private INameConvention _nameConvention;
 
-        public Provider(IOptions<ProviderOptions> providerOptions)
+        public Provider(IOptionsSnapshot<ProviderOptions> providerOptions)
         {
             var unwrappedProviderOptions = providerOptions.Value ?? throw new ArgumentNullException(nameof(providerOptions));
             _resourceDefinitions = new Dictionary<string, ResourceDefinition>();
-            _nameConvention = unwrappedProviderOptions.NameConvention;
-            FullyQualifiedProviderName = unwrappedProviderOptions.FullyQualifiedProviderName;
 
-            foreach (var resourceDescriptor in unwrappedProviderOptions.ResourceDescriptors) {
-                //_resourceDefinitions.Add(_nameConvention.Format(
-            }
+            var fullyQualifiedProviderName = unwrappedProviderOptions.FullyQualifiedProviderName;
+            FullyQualifiedProviderName = fullyQualifiedProviderName;
+            var providerName = fullyQualifiedProviderName.Split("/").Last();
+            ProviderName = providerName;
+
+            AddResourceDefinitions(unwrappedProviderOptions.ResourceDefinitions, providerName);
         }
 
-        public void AddResource(ResourceDescriptor resource)
+        private void AddResourceDefinitions(IEnumerable<ResourceDefinition> resourceDescriptors, string providerName)
         {
+            foreach (var resourceDefinition in resourceDescriptors) {
+                var resourceTypeName = resourceDefinition.ResourceTypeName;
+                var fullResourceTypeName = $"{ProviderName}_{resourceTypeName}";
 
+                if (_resourceDefinitions.ContainsKey(fullResourceTypeName)) {
+                    throw new DuplicateNameException($"The resource type name \"{resourceTypeName}\" is already taken");
+                }
+
+                var updatedResourceDefinition = resourceDefinition with { ResourceTypeName = fullResourceTypeName };
+                _resourceDefinitions.Add(fullResourceTypeName, updatedResourceDefinition);
+            }
         }
     }
 }

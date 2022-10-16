@@ -3,5 +3,6 @@
     public interface IProvider
     {
         string FullyQualifiedProviderName { get; }
+        string ProviderName { get; }
     }
 }

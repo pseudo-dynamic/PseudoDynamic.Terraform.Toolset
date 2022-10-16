@@ -1,6 +1,4 @@
-﻿using Grpc.Core;
-
-namespace PseudoDynamic.Terraform.Plugin.Protocols.V6
+﻿namespace PseudoDynamic.Terraform.Plugin.Protocols
 {
     internal interface IProviderAdapter
     {

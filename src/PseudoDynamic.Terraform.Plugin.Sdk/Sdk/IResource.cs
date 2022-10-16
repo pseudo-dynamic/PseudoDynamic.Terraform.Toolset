@@ -3,7 +3,7 @@
     /// <summary>
     /// <para>
     /// Represents a resource that has multiple routes. Some routes are separated in
-    /// two stages that belong together.
+    /// two stages that belong together. The next paragraph explains it more detailed.
     /// </para>
     /// <para>
     /// The routes to be named are Plan, Create, Update, Delete and Import. The two
@@ -47,7 +47,7 @@
     /// <br/>- <see cref="ReviseState"/>
     /// </summary>
     /// <typeparam name="Schema"></typeparam>
-    public interface IResource<Schema>
+    public interface IResource<Schema> : IResourceInfo
     {
         // ISSUE: should be constructor
         //Task Configure();

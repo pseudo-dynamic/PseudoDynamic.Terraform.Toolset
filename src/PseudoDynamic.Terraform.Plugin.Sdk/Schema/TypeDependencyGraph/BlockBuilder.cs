@@ -61,13 +61,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected BlockAttributeDefinition BuildBlockAttribute(ValueResult valueResult)
         {
-            var property = valueResult.UnwrappedNode.Context.Property;
+            var context = valueResult.UnwrappedNode.Context;
+            var property = context.Property;
             var attributeName = _attributeNameConvention.Format(property);
 
-            var isComputed = property.GetCustomAttribute<ComputedAttribute>(inherit: true) is not null;
-            var isSensitive = property.GetCustomAttribute<SensitiveAttribute>(inherit: true) is not null;
-            var isDeprecated = property.GetCustomAttribute<DeprecatedAttribute>(inherit: true) is not null;
-            var descriptionKind = property.GetCustomAttribute<DescriptionKindAttribute>(inherit: true)?.DescriptionKind ?? default;
+            var isComputed = context.GetContextualAttribute<ComputedAttribute>() is not null;
+            var isSensitive = context.GetContextualAttribute<SensitiveAttribute>() is not null;
+            var isDeprecated = context.GetContextualAttribute<DeprecatedAttribute>() is not null;
+            var descriptionKind = context.GetContextualAttribute<DescriptionKindAttribute>()?.DescriptionKind ?? default;
 
             var description = property.GetXmlDocsSummary(new XmlDocsOptions() {
                 FormattingMode = descriptionKind == DescriptionKind.Markdown
@@ -90,7 +91,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected NestedBlockAttributeDefinition BuildNestedBlockAttribute(ValueResult valueResult)
         {
             var blockAttribute = BuildBlockAttribute(valueResult);
-            var nestedBlockAttribute = valueResult.UnwrappedNode.Context.Property.GetCustomAttribute<NestedBlockAttribute>();
+            var nestedBlockAttribute = valueResult.UnwrappedNode.Context.GetContextualAttribute<NestedBlockAttribute>();
             var minimumItems = nestedBlockAttribute?.MinimumItems ?? NestedBlockAttributeDefinition.DefaultMinimumItems;
             var maximumItems = nestedBlockAttribute?.MaximumItems ?? NestedBlockAttributeDefinition.DefaultMaximumItems;
 
@@ -102,10 +103,18 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected BlockDefinition BuildBlock(BlockNode node)
         {
+            var context = node.Context;
             var visitedType = node.Context.VisitedType;
-            var version = visitedType.GetCustomAttribute<BlockAttribute>()?.GetVersion() ?? BlockDefinition.DefaultVersion;
-            var isDeprecated = visitedType.GetCustomAttribute<DeprecatedAttribute>(inherit: true) is not null;
-            var descriptionKind = visitedType.GetCustomAttribute<DescriptionKindAttribute>(inherit: true)?.DescriptionKind ?? default;
+
+            var blockAttributeVersion = context.GetContextualAttribute<BlockAttribute>()?.GetVersion();
+
+            if (blockAttributeVersion == null && context.ContextType == VisitContextType.PropertySegment) {
+                blockAttributeVersion = context.GetVisitedTypeAttribute<BlockAttribute>()?.GetVersion();
+            }
+
+            var version = blockAttributeVersion ?? BlockDefinition.DefaultVersion;
+            var isDeprecated = context.GetContextualAttribute<DeprecatedAttribute>() is not null;
+            var descriptionKind = context.GetContextualAttribute<DescriptionKindAttribute>()?.DescriptionKind ?? default;
 
             var description = visitedType.GetXmlDocsSummary(new XmlDocsOptions() {
                 FormattingMode = descriptionKind == DescriptionKind.Markdown
@@ -154,14 +163,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected ValueResult BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {
             var isTerraformValue = node.TryUnwrapTerraformValue(out var unwrappedNode);
+            var unwrappedContext = unwrappedNode.Context;
             var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint(out var implicitValueTypeConstraints);
             bool isNestedBlock;
             ValueDefinition builtValue;
 
             if (explicitTypeConstraint == TerraformTypeConstraint.Block) {
-                var property = node.Context.Property;
-
-                TerraformTypeConstraint? singleImplicitValueTypeConstraints = property.GetCustomAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
+                TerraformTypeConstraint? singleImplicitValueTypeConstraints = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
                     ?? (implicitValueTypeConstraints.Count == 1
                         ? implicitValueTypeConstraints.Single()
                         : default);
@@ -173,12 +181,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 if (singleImplicitValueTypeConstraints.Value.IsBlockLike()) {
                     builtValue = BuildBlock(unwrappedNode);
                 } else if (isTerraformValue) {
-                    throw new NestedBlockException($"The {property.DeclaringType!.FullName}.{property.Name} property wants to be a nested block but can only be wrapped by " +
+                    throw new NestedBlockException($"The {unwrappedContext.PropertyPath} property wants to be a nested block but can only be wrapped by " +
                         $"{typeof(ITerraformValue<>).FullName} if the implicit type constraint is object, tuple or block");
                 } else if (singleImplicitValueTypeConstraints.Value.IsRange()) {
                     builtValue = BuildValue(unwrappedNode, singleImplicitValueTypeConstraints.Value);
                 } else {
-                    throw new NestedBlockException($"The {property.DeclaringType!.FullName}.{property.Name} property wants to be a nested block but the property type " +
+                    throw new NestedBlockException($"The {unwrappedContext.PropertyPath} property wants to be a nested block but the property type " +
                         $"can be implictly object, tuple, block, or list, set or map, that contains implictly object, tuple or block");
                 }
 

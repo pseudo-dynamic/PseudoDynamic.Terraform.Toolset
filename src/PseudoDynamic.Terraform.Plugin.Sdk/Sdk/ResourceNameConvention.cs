@@ -2,17 +2,9 @@
 {
     internal class ResourceNameConvention : IResourceNameConvention
     {
-        public string Format(string resourceName, ResourceNameConventionContext context)
+        public string Format(string resourceName, ResourceNameContext context)
         {
             return resourceName;
         }
-    }
-
-    public class ResourceNameConventionContext
-    {
-        public IProvider provider { get; }
-
-        public ResourceNameConventionContext(IProvider provider) =>
-            this.provider = provider ?? throw new ArgumentNullException(nameof(provider));
     }
 }

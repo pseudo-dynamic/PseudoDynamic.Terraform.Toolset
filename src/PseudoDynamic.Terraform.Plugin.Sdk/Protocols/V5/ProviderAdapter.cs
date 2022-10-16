@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Grpc.Core;
-using PseudoDynamic.Terraform.Plugin.Protocols.V6;
 
 namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {

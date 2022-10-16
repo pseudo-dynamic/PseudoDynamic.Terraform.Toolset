@@ -19,7 +19,7 @@
         }
 
         [Fact]
-        public void Nested_block_schema_should_have_custom_schema_Version()
+        public void Nested_block_schema_should_have_schema_version()
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaVersion));
 
@@ -27,6 +27,21 @@
             {
                 Blocks = new[] {
                     new NestedBlockAttributeDefinition("block", new BlockDefinition() { Version = 2 })
+                }
+            };
+
+            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+        }
+
+        [Fact]
+        public void Nested_block_schema_should_have_overriden_schema_Version()
+        {
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaOverridenVersion));
+
+            var expectedBlock = new BlockDefinition()
+            {
+                Blocks = new[] {
+                    new NestedBlockAttributeDefinition("block", new BlockDefinition() { Version = 3 })
                 }
             };
 
@@ -49,6 +64,13 @@
             public class NestedSchemaVersion
             {
                 [NestedBlock]
+                public SchemaVersion Block { get; set; }
+            }
+
+            [Block]
+            public class NestedSchemaOverridenVersion
+            {
+                [NestedBlock(3)]
                 public SchemaVersion Block { get; set; }
             }
         }

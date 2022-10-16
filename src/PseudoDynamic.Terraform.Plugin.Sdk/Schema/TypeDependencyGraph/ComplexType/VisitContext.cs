@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Namotion.Reflection;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
@@ -27,8 +28,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 
         Type IVisitContext.VisitedType => VisitedType;
 
-        private Type? _visitType;
         private VisitContextType? _contextType;
+        private Type? _visitType;
+        private ContextualType? _visitedContextualType;
 
         internal VisitContext(IContext context, Type visitedType)
             : base(context) =>
@@ -74,6 +76,25 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 
         internal void RememberTypeBeingVisited() =>
             AddVisitedComplexType(VisitedType);
+
+        private ContextualType GetVisitedContextualType() =>
+            _visitedContextualType ??= VisitedType.ToContextualType();
+
+        /// <summary>
+        /// Gets the contextual attribute from maybe the visited type or property.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public T? GetVisitedTypeAttribute<T>()
+            where T : Attribute =>
+            GetVisitedContextualType().GetInheritedAttribute<T>();
+
+        /// <summary>
+        /// Gets the contextual attribute from maybe the visited type or property.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public virtual T? GetContextualAttribute<T>()
+            where T : Attribute =>
+            GetVisitedTypeAttribute<T>();
 
         private string GetDebuggerDisplay() =>
             $"[{ContextType}, {VisitedType.Name}]";

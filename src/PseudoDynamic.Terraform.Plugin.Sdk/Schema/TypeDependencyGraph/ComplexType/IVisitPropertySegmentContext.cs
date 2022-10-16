@@ -6,6 +6,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
     {
         PropertyInfo Property { get; }
 
+        /// <summary>
+        /// Consists of the full name of <see cref="MemberInfo.DeclaringType"/> and the property name of <see cref="Property"/>.
+        /// </summary>
+        string PropertyPath => $"{Property.DeclaringType!.FullName}.{Property.Name}";
+
         NullabilityInfo NullabilityInfo { get; }
 
         /// <summary>

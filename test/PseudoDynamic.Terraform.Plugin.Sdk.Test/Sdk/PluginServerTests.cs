@@ -1,13 +1,10 @@
-﻿using Grpc.Core;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PseudoDynamic.Terraform.Plugin.Internals;
 using PseudoDynamic.Terraform.Plugin.Protocols;
-using PseudoDynamic.Terraform.Plugin.Protocols.Models;
-using PseudoDynamic.Terraform.Plugin.Protocols.V5;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {

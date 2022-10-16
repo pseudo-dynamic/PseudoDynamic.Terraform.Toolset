@@ -2,6 +2,6 @@
 {
     public interface IResourceNameConvention
     {
-        string Format(string resourceName, ResourceNameConventionContext context);
+        string Format(string resourceName, ResourceNameContext context);
     }
 }

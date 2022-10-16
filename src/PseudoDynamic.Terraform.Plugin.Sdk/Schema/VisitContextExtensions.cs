@@ -22,13 +22,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
                 if (isExplicitBlockLike || implicitTypeConstraints.Contains(explicitTypeConstraint)) {
                     typeConstraintResult = explicitTypeConstraint;
                 } else {
-                    throw new InvalidOperationException($"The \"{typeof(ValueAttribute).FullName}\" attribute on \"{property.DeclaringType?.FullName}.{property.Name}\" property wants to be "
+                    throw new InvalidOperationException($"The \"{typeof(ValueAttribute).FullName}\" attribute on \"{context.PropertyPath}\" property wants to be "
                         + $"a \"{explicitTypeConstraint}\" Terraform type constraint but the \"{property.PropertyType.Name}\" property type does not support it");
                 }
             } else if (implicitTypeConstraints.Count == 0) {
-                throw new InvalidOperationException($"The \"{property.Name}\" property does not implement at least one Terraform type constraint");
+                throw new InvalidOperationException($"The \"{context.PropertyPath}\" property does not implement at least one Terraform type constraint");
             } else if (implicitTypeConstraints.Count > 1) {
-                throw new InvalidOperationException($"The \"{property.Name}\" property cannot implement more than one Terraform type constraints. " +
+                throw new InvalidOperationException($"The \"{context.PropertyPath}\" property cannot implement more than one Terraform type constraints. " +
                     "The following Terraform type constraints have been evaluated: "
                     + string.Join(", ", implicitTypeConstraints.Select(x => x.ToString())));
             } else {

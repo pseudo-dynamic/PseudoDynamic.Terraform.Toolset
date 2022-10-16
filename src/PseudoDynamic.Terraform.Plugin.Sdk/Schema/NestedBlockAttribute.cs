@@ -39,5 +39,14 @@
         /// must remain set to 0.
         /// </summary>
         public int MaximumItems { get; init; }
+
+
+        public NestedBlockAttribute()
+        {
+        }
+
+        public NestedBlockAttribute(int version) : base(version)
+        {
+        }
     }
 }

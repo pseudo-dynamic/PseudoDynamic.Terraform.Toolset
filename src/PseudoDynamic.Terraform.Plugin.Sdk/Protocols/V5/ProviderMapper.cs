@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-
-namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
+﻿namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {
     internal class ProviderMapper : SchemaMapper
     {

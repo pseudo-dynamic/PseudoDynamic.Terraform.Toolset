@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Namotion.Reflection;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
@@ -15,6 +16,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         public NullabilityInfo NullabilityInfo { get; }
 
         public int SegmentDepth { get; }
+
+        private ContextualPropertyInfo? _contextualProperty;
 
         internal VisitPropertyContext(IContext context, PropertyInfo property)
             : base(context, property.PropertyType)
@@ -33,5 +36,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             Property = underlyingSegment.Property;
             NullabilityInfo = underlyingSegment.NullabilityInfo;
         }
+
+        private ContextualPropertyInfo GetContextualProperty() =>
+            _contextualProperty ??= Property.ToContextualProperty();
+
+        public override T? GetContextualAttribute<T>()
+            where T : class =>
+            GetContextualProperty().GetContextAttribute<T>();
     }
 }
