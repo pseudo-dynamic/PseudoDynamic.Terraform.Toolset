@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace PseudoDynamic.Terraform.Plugin.Internals
+namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 {
     internal class TerraformReattachProviders : Dictionary<string, TerraformReattachProvider>
     {

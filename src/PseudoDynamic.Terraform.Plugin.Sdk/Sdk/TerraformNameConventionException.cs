@@ -6,10 +6,18 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     {
         public static void EnsureProviderNameConvention(string providerName)
         {
-            foreach (var namePart in providerName.Split("/")) {
-                if (namePart != SnakeCaseConvention.Default.Format(namePart)) {
-                    throw new TerraformNameConventionException($"A provider name part \"{namePart}\" must be snake_case");
-                }
+            var lastNamePart = providerName.Split("/").Last();
+
+            if (!string.Equals(lastNamePart, SnakeCaseConvention.Default.Format(lastNamePart), StringComparison.InvariantCulture)
+                && !string.Equals(lastNamePart, KebabCaseConvention.Default.Format(lastNamePart), StringComparison.InvariantCulture)) {
+                throw new TerraformNameConventionException($"A provider name part \"{lastNamePart}\" must be snake_case or kebab-case");
+            }
+        }
+
+        public static void EnsureResourceTypeNameConvention(string resourceName)
+        {
+            if (!string.Equals(resourceName, SnakeCaseConvention.Default.Format(resourceName), StringComparison.InvariantCulture)) {
+                throw new TerraformNameConventionException($"A provider name part \"{resourceName}\" must be snake_case");
             }
         }
 

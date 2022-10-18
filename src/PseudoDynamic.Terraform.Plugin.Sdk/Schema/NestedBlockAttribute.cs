@@ -40,11 +40,20 @@
         /// </summary>
         public int MaximumItems { get; init; }
 
-
+        /// <summary>
+        /// Creates an instance of this type.
+        /// </summary>
         public NestedBlockAttribute()
         {
         }
 
+        /// <summary>
+        /// Creates an instance of this type.
+        /// </summary>
+        /// <param name="version">
+        /// The schema version. The schema type this nested block describes may also be decorated with <see cref="BlockAttribute"/>, but its version is now overriden by <paramref name="version"/>.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public NestedBlockAttribute(int version) : base(version)
         {
         }

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace PseudoDynamic.Terraform.Plugin.Internals.Diagnostics
+namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
     [Serializable]
     internal class ProcessNotSpawnedException : Exception

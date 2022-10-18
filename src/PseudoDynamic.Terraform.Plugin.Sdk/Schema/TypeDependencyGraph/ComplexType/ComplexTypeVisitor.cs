@@ -1,7 +1,4 @@
-﻿using System.Data;
-using System.Reflection;
-
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal class ComplexTypeVisitor
     {
@@ -10,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 
         private void VisitPropertySegment(IVisitPropertySegmentContext context)
         {
-            if (context.VisitedType.TryGetGenericArguments(out var genericArguments)) {
+            if (context.VisitType.TryGetGenericArguments(out var genericArguments)) {
                 for (int i = 0; i < genericArguments.Length; i++) {
                     var genericArgument = genericArguments[i];
                     VisitAfterRewrite(new VisitPropertyGenericSegmentContext(context, genericArgument, i));
@@ -26,13 +23,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 
         protected virtual void VisitComplex(VisitContext context)
         {
-            context.RememberTypeBeingVisited();
+            context.RememberVisitTypeBeingVisited();
+            var complexMetadata = context.ComplexMetadata!;
 
-            // Get properties with public getters and setters
-            var properties = context.VisitedType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-               .Where(x => x.GetGetMethod(nonPublic: false) != null && x.GetSetMethod(nonPublic: false) != null);
-
-            foreach (var property in properties) {
+            foreach (var property in complexMetadata.AllProperties) {
                 VisitAfterRewrite(new VisitPropertyContext(context, property));
             }
         }

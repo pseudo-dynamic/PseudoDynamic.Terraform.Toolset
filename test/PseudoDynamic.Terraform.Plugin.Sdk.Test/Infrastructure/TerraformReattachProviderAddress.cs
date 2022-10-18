@@ -1,4 +1,4 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Internals
+﻿namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 {
     internal class TerraformReattachProviderAddress
     {

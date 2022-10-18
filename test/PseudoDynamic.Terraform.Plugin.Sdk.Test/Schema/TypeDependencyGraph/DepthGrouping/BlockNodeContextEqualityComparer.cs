@@ -19,7 +19,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
             }
 
             return x.Context.ContextType == y.Context.ContextType
-                && x.Context.VisitedType == y.Context.VisitedType
+                && x.Context.VisitType == y.Context.VisitType
                 && x.Nodes.SequenceEqual(y.Nodes, Default);
         }
 
@@ -27,7 +27,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
         {
             var hashCode = new HashCode();
             hashCode.Add(obj.Context.ContextType);
-            hashCode.Add(obj.Context.VisitedType);
+            hashCode.Add(obj.Context.VisitType);
             return hashCode.ToHashCode();
         }
     }

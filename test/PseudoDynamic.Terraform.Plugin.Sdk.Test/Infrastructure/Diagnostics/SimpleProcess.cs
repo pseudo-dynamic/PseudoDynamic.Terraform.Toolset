@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace PseudoDynamic.Terraform.Plugin.Internals.Diagnostics
+namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
     /// <summary>
     /// Represents the aquivalent of <see cref="Process"/>

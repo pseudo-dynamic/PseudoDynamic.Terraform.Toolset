@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Namotion.Reflection;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     /// <summary>
-    /// The current walking context.
+    /// The context originated from a visitation.
     /// </summary>
     [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
     internal record VisitContext : Context, IVisitContext
@@ -18,26 +19,41 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         }
 
         /// <summary>
-        /// The type the walker is currently processing during walk.
+        /// The type the visitor has been processed.
         /// </summary>
-        public virtual Type VisitedType {
+        public virtual Type VisitType {
             get {
                 return _visitType ?? throw new InvalidOperationException("There is no type because you are not visiting");
             }
         }
 
-        Type IVisitContext.VisitedType => VisitedType;
+        public ComplexTypeMetadata? ComplexMetadata {
+            get {
+                if (ContextType != VisitContextType.Complex) {
+                    throw new NotSupportedException($"Other contexts of type {VisitContextType.Complex.Id} cannot possess complex metadata");
+                }
+
+                return _complexMetadata ??= ComplexTypeMetadata.FromVisitContext(this);
+            }
+        }
+
+        [MemberNotNullWhen(true, nameof(ComplexMetadata))]
+        public bool HasComplexMetadata => ContextType == VisitContextType.Complex;
+
+        Type IVisitContext.VisitType => VisitType;
 
         private VisitContextType? _contextType;
         private Type? _visitType;
         private ContextualType? _visitedContextualType;
+        private ComplexTypeMetadata? _complexMetadata;
+        private bool _computedComplexMetadata;
 
         internal VisitContext(IContext context, Type visitedType)
             : base(context) =>
-            SetVisitedType(visitedType);
+            SetVisitType(visitedType);
 
         internal VisitContext(Type walkingType) =>
-            SetVisitedType(walkingType);
+            SetVisitType(walkingType);
 
         public VisitContext(VisitContext context)
             : base(context) =>
@@ -47,7 +63,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             : base(context) =>
             ApplyContext(context);
 
-        private void SetVisitedType(Type visitType)
+        private void SetVisitType(Type visitType)
         {
             if (visitType is null) {
                 throw new ArgumentNullException(nameof(visitType));
@@ -60,7 +76,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         private void ApplyContext(IVisitContext context)
         {
             _contextType = context.ContextType;
-            _visitType = context.VisitedType;
+            _visitType = context.VisitType;
         }
 
         private void CheckNonDependencyCycle(Type type)
@@ -69,16 +85,16 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
                 return;
             }
 
-            if (VisitedComplexTypes.Contains(type)) {
+            if (RememberedComplexVisitTypes.Contains(type)) {
                 throw new TypeDependencyCycleException($"A type dependency cycle has been detected: {type.FullName}");
             }
         }
 
-        internal void RememberTypeBeingVisited() =>
-            AddVisitedComplexType(VisitedType);
+        internal void RememberVisitTypeBeingVisited() =>
+            RememberComplexTypeBeingVisited(VisitType);
 
         private ContextualType GetVisitedContextualType() =>
-            _visitedContextualType ??= VisitedType.ToContextualType();
+            _visitedContextualType ??= VisitType.ToContextualType();
 
         /// <summary>
         /// Gets the contextual attribute from maybe the visited type or property.
@@ -96,7 +112,16 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             where T : Attribute =>
             GetVisitedTypeAttribute<T>();
 
+        public virtual bool Equals(VisitContext? context) =>
+            context is not null
+            && ContextType == context.ContextType
+            && VisitType == context.VisitType;
+
+        public override int GetHashCode() => HashCode.Combine(
+            ContextType,
+            VisitType);
+
         private string GetDebuggerDisplay() =>
-            $"[{ContextType}, {VisitedType.Name}]";
+            $"[{ContextType}, {VisitType.Name}]";
     }
 }

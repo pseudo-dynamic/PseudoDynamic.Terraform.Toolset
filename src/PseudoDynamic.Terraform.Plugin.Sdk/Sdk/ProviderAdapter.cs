@@ -10,9 +10,16 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public ProviderAdapter(IProvider provider) =>
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
 
-        public Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request) => throw new NotImplementedException();
+        public async Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request)
+        {
+            return new GetProviderSchema.Response() {
+                Provider = new Schema.TypeDependencyGraph.BlockDefinition(),
+                ProviderMeta = new Schema.TypeDependencyGraph.BlockDefinition(),
+                ResourceSchemas = _provider.ResourceDefinitions.ToDictionary(x => x.Key, x => x.Value.Schema)
+            };
+        }
 
-        public Task<ValidateProviderConfig.Response> ValidateProviderConfig(ValidateProviderConfig.Request request) => throw new NotImplementedException();
+        public async Task<ValidateProviderConfig.Response> ValidateProviderConfig(ValidateProviderConfig.Request request) => throw new NotImplementedException();
 
         public Task<ConfigureProvider.Response> ConfigureProvider(ConfigureProvider.Request request) => throw new NotImplementedException();
 
@@ -20,13 +27,16 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public Task<ReadDataSource.Response> ReadDataSource(ReadDataSource.Request request) => throw new NotImplementedException();
 
-        public Task<ValidateDataResourceConfig.Response> ValidateDataResourceConfig(ValidateDataResourceConfig.Request request) => throw new NotImplementedException();
+        public async Task<ValidateDataResourceConfig.Response> ValidateDataResourceConfig(ValidateDataResourceConfig.Request request) => throw new NotImplementedException();
 
         #endregion
 
         #region resources
 
-        public Task<ValidateResourceConfig.Response> ValidateResourceConfig(ValidateResourceConfig.Request request) => throw new NotImplementedException();
+        public async Task<ValidateResourceConfig.Response> ValidateResourceConfig(ValidateResourceConfig.Request request)
+        {
+            return new ValidateResourceConfig.Response();
+        }
 
         public Task<ReadResource.Response> ReadResource(ReadResource.Request request) => throw new NotImplementedException();
 

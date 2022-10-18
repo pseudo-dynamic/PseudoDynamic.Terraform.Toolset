@@ -6,12 +6,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
     /// <summary>
     /// Represents the initial context of a visitation.
     /// </summary>
-    public record Context : IContext, IVisitedComplexTypes
+    internal record Context : IContext
     {
-        public IReadOnlySet<Type> VisitedComplexTypes => _visitedComplexTypes;
+        public IReadOnlySet<Type> RememberedComplexVisitTypes => _rememberedComplexVisitTypes;
         public NullabilityInfoContext NullabilityInfoContext => _nullabilityInfoContext;
 
-        private HashSet<Type> _visitedComplexTypes;
+        private HashSet<Type> _rememberedComplexVisitTypes;
         private NullabilityInfoContext _nullabilityInfoContext;
 
         internal Context(IContext context) =>
@@ -22,24 +22,24 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 
         public Context()
         {
-            _visitedComplexTypes = new HashSet<Type>();
+            _rememberedComplexVisitTypes = new HashSet<Type>();
             _nullabilityInfoContext = new NullabilityInfoContext();
         }
 
-        [MemberNotNull(nameof(_visitedComplexTypes), nameof(_nullabilityInfoContext))]
+        [MemberNotNull(nameof(_rememberedComplexVisitTypes), nameof(_nullabilityInfoContext))]
         private void ApplyContext(IContext context)
         {
-            _visitedComplexTypes = new HashSet<Type>(context.VisitedComplexTypes);
+            _rememberedComplexVisitTypes = new HashSet<Type>(context.RememberedComplexVisitTypes);
             _nullabilityInfoContext = context.NullabilityInfoContext;
         }
 
-        public void AddVisitedComplexType(Type type)
+        protected void RememberComplexTypeBeingVisited(Type type)
         {
             if (!type.IsComplexType()) {
                 return;
             }
 
-            _visitedComplexTypes.Add(type);
+            _rememberedComplexVisitTypes.Add(type);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 
-namespace PseudoDynamic.Terraform.Plugin.Internals.Diagnostics
+namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
     internal static class ProcessStartInfoUtils
     {

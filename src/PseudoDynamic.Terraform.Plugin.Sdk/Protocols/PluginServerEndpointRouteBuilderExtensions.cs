@@ -12,6 +12,8 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
                 builder.MapTerraformPluginProtocolV5();
             } else if (protocol == PluginProtocol.V6) {
                 builder.MapTerraformPluginProtocolV6();
+            } else {
+                throw new NotSupportedException("Bad protocol");
             }
 
             return builder;

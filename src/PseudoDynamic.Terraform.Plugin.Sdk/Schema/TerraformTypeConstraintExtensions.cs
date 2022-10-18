@@ -2,7 +2,7 @@
 {
     internal static class TerraformTypeConstraintExtensions
     {
-        public static bool IsBlockLike(this TerraformTypeConstraint terraformType) =>
+        public static bool IsComplex(this TerraformTypeConstraint terraformType) =>
             terraformType is TerraformTypeConstraint.Object or TerraformTypeConstraint.Tuple or TerraformTypeConstraint.Block;
 
         public static bool IsMonoRange(this TerraformTypeConstraint terraformType) =>

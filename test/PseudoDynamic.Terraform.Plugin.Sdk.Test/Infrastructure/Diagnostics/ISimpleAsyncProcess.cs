@@ -1,9 +1,9 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Internals.Diagnostics
+﻿namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
     /// <summary>
-    /// A process.
+    /// An async process.
     /// </summary>
-    public interface ISimpleProcess : IDisposable
+    public interface ISimpleAsyncProcess : IDisposable
     {
         /// <summary>
         /// Indicates whether the process has been started.
@@ -16,10 +16,10 @@
         void Start();
 
         /// <summary>
-        /// Waits for exit.
+        /// Waits for exit asynchronously.
         /// </summary>
         /// <returns>The exit code.</returns>
-        int WaitForExit();
+        Task<int> WaitForExitAsync();
 
         /// <summary>
         /// Kills the process.

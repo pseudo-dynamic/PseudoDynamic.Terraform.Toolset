@@ -1,7 +1,7 @@
 ﻿using System.Collections.Specialized;
 using System.Diagnostics;
 
-namespace PseudoDynamic.Terraform.Plugin.Internals.Diagnostics
+namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
     /// <summary>
     /// The start info of a process.

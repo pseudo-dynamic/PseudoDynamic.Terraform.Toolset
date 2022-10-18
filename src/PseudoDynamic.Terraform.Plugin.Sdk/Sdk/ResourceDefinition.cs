@@ -14,7 +14,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             Resource = resource ?? throw new ArgumentNullException(nameof(resource));
-            ResourceTypeName = Resource.TypeName;
+
+            var resourceTypeName = Resource.TypeName;
+            TerraformNameConventionException.EnsureResourceTypeNameConvention(resourceTypeName);
+            ResourceTypeName = resourceTypeName;
         }
     }
 }

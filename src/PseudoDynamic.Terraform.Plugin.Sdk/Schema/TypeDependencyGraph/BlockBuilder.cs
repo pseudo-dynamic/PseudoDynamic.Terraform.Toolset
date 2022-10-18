@@ -104,7 +104,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected BlockDefinition BuildBlock(BlockNode node)
         {
             var context = node.Context;
-            var visitedType = node.Context.VisitedType;
+            var visitedType = node.Context.VisitType;
 
             var blockAttributeVersion = context.GetContextualAttribute<BlockAttribute>()?.GetVersion();
 
@@ -178,15 +178,15 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                     throw new NestedBlockException();
                 }
 
-                if (singleImplicitValueTypeConstraints.Value.IsBlockLike()) {
+                if (singleImplicitValueTypeConstraints.Value.IsComplex()) {
                     builtValue = BuildBlock(unwrappedNode);
                 } else if (isTerraformValue) {
-                    throw new NestedBlockException($"The {unwrappedContext.PropertyPath} property wants to be a nested block but can only be wrapped by " +
+                    throw new NestedBlockException($"The {unwrappedContext.Property.GetPath()} property wants to be a nested block but can only be wrapped by " +
                         $"{typeof(ITerraformValue<>).FullName} if the implicit type constraint is object, tuple or block");
                 } else if (singleImplicitValueTypeConstraints.Value.IsRange()) {
                     builtValue = BuildValue(unwrappedNode, singleImplicitValueTypeConstraints.Value);
                 } else {
-                    throw new NestedBlockException($"The {unwrappedContext.PropertyPath} property wants to be a nested block but the property type " +
+                    throw new NestedBlockException($"The {unwrappedContext.Property.GetPath()} property wants to be a nested block but the property type " +
                         $"can be implictly object, tuple, block, or list, set or map, that contains implictly object, tuple or block");
                 }
 

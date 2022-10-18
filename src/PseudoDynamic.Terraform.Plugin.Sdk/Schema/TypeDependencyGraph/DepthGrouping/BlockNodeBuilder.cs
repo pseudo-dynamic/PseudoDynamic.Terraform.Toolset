@@ -31,7 +31,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
 
             private bool TryVisitPropertySegment(IVisitPropertySegmentContext context)
             {
-                var visitedType = context.VisitedType;
+                var visitedType = context.VisitType;
 
                 if (visitedType.IsImplementingGenericTypeDefinition(typeof(ITerraformValue<>), out _, out var genericTypeArguments)) {
                     var genericTypeArgument = genericTypeArguments.Single();
@@ -86,7 +86,7 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
 
             protected override void VisitComplex(VisitContext context)
             {
-                if (!context.VisitedType.IsBlockLikeAnnotated(out _)) {
+                if (!context.VisitType.IsComplexAnnotated(out _)) {
                     return;
                 }
 
@@ -116,10 +116,10 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
 
             private bool TryRewritePropertySegment(IVisitPropertySegmentContext context, [NotNullWhen(true)] out VisitContext? rewrittenContext)
             {
-                var visitedType = context.VisitedType;
+                var visitedType = context.VisitType;
 
-                if (visitedType.IsBlockLikeAnnotated(out _)) {
-                    rewrittenContext = new VisitPropertyContext(context, context.VisitedType) { ContextType = VisitContextType.Complex.Inherits(context.ContextType) };
+                if (visitedType.IsComplexAnnotated(out _)) {
+                    rewrittenContext = new VisitPropertyContext(context, context.VisitType) { ContextType = VisitContextType.Complex.Inherits(context.ContextType) };
                     return true;
                 }
 
@@ -138,8 +138,8 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
 
             public override void VisitComplex(Type complexType, Context? context = null)
             {
-                if (!complexType.IsBlockLikeAnnotated(out _)) {
-                    throw new ArgumentException($"Schema type must be annotated with [{typeof(BlockAttribute).FullName}]");
+                if (!complexType.IsComplexAnnotated(out _)) {
+                    throw new ArgumentException($"Schema type {complexType.FullName} must be annotated with [{typeof(BlockAttribute).FullName}]");
                 }
 
                 base.VisitComplex(complexType, context);

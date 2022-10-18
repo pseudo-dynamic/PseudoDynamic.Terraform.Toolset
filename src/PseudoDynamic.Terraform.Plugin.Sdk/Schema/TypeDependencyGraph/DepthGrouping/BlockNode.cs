@@ -35,6 +35,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         private string GetDebuggerDisplay() =>
-            $"[{Context.ContextType}, {Context.VisitedType.Name}, Nodes = {Nodes.Count}]";
+            $"[{Context.ContextType}, {Context.VisitType.Name}, Nodes = {Nodes.Count}]";
     }
 }

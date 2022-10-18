@@ -3,9 +3,9 @@
     /// <summary>
     /// Derived classes annotates classes or structs being treated as Terraform object, tuple or block.
     /// </summary>
-    public abstract class BlockLikeAttribute : ValueAttribute
+    public abstract class ComplexAttribute : ValueAttribute
     {
-        internal BlockLikeAttribute(TerraformTypeConstraint typeConstraint) : base(typeConstraint)
+        internal ComplexAttribute(TerraformTypeConstraint typeConstraint) : base(typeConstraint)
         {
         }
     }

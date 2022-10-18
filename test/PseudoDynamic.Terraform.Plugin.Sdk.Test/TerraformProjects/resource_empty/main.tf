@@ -7,4 +7,4 @@ terraform {
   }
 }
 
-resource "debug_empty" "default" {}
+resource "debug_validate" "default" {}

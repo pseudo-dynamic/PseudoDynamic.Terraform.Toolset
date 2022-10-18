@@ -32,8 +32,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         {
             if (node.Any(x => x.Context.ContextType == TerraformVisitContextType.TerraformValue)) {
                 var errorMessage = node.Context.ContextType == TerraformVisitContextType.TerraformValue
-                    ? $"In the dependency graph of {node.Context.VisitedType.FullName}, another nested terraform value is not allowed"
-                    : $"In the dependency graph of {node.Context.VisitedType.FullName}, a nested terraform value is not allowed";
+                    ? $"In the dependency graph of {node.Context.VisitType.FullName}, another nested terraform value is not allowed"
+                    : $"In the dependency graph of {node.Context.VisitType.FullName}, a nested terraform value is not allowed";
 
                 throw new NestedTerraformValueException(errorMessage);
             }

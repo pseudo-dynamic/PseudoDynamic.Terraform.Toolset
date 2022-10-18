@@ -36,7 +36,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         private string? _fullyQualifiedProviderName;
         private readonly List<ResourceDefinition> _resourceDefinitions = new List<ResourceDefinition>();
 
-        public class RequestResources : IConfigureOptions<ProviderOptions>
+        public class RequestResources : IPostConfigureOptions<ProviderOptions>
         {
             private readonly IServiceProvider _serviceProvider;
 
@@ -46,11 +46,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             private ResourceDefinition BuildResourceDefinition(ResourceDescriptor resourceDescriptor)
             {
                 var schema = BlockBuilder.Default.BuildBlock(resourceDescriptor.SchemaType);
-                var resource = (IResourceInfo)ActivatorUtilities.CreateInstance(_serviceProvider, resourceDescriptor.ResourceType);
-                return new ResourceDefinition(schema, resource);
+                var resource = resourceDescriptor.Resource ?? ActivatorUtilities.CreateInstance(_serviceProvider, resourceDescriptor.ResourceType);
+                var resourceInfo = (IResourceInfo)resource;
+                return new ResourceDefinition(schema, resourceInfo);
             }
 
-            public void Configure(ProviderOptions options)
+            public void PostConfigure(string name, ProviderOptions options)
             {
                 foreach (var resourceDescriptor in options.ResourceDescriptors) {
                     var resourceDefinition = BuildResourceDefinition(resourceDescriptor);

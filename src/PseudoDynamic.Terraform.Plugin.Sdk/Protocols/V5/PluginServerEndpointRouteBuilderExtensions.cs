@@ -5,7 +5,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {
     internal static class PluginServerEndpointRouteBuilderExtensions
     {
-        public static IEndpointRouteBuilder MapTerraformPluginProtocolV6<T>(this IEndpointRouteBuilder builder)
+        public static IEndpointRouteBuilder MapTerraformPluginProtocolV5<T>(this IEndpointRouteBuilder builder)
             where T : Provider.ProviderBase
         {
             builder.MapGrpcService<T>();
@@ -13,6 +13,6 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
         }
 
         public static IEndpointRouteBuilder MapTerraformPluginProtocolV5(this IEndpointRouteBuilder builder) =>
-            builder.MapTerraformPluginProtocolV6<ProviderAdapter>();
+            builder.MapTerraformPluginProtocolV5<ProviderAdapter>();
     }
 }

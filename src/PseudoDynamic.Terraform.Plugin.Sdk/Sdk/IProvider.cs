@@ -1,8 +1,9 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public interface IProvider
+    internal interface IProvider
     {
         string FullyQualifiedProviderName { get; }
         string ProviderName { get; }
+        IReadOnlyDictionary<string, ResourceDefinition> ResourceDefinitions { get; }
     }
 }

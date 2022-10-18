@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         public PropertyInfo Property => _underlyingContext.Property;
 
         /// <summary>
-        /// The declaring type that contains the generic type <see cref="VisitContext.VisitedType"/> at index <see cref="GenericArgumentIndex"/>.
+        /// The declaring type that contains the generic type <see cref="VisitContext.VisitType"/> at index <see cref="GenericArgumentIndex"/>.
         /// </summary>
         public Type DeclaringType => NullabilityInfo.Type;
 

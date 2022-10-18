@@ -25,7 +25,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// </summary>
         /// <param name="type"></param>
         /// <param name="attribute"></param>
-        public static bool IsBlockLikeAnnotated(this Type type, [NotNullWhen(true)] out BlockLikeAttribute? attribute)
+        public static bool IsComplexAnnotated(this Type type, [NotNullWhen(true)] out ComplexAttribute? attribute)
         {
             attribute = type.GetCustomAttribute<BlockAttribute>();
             return attribute is not null;

@@ -1,4 +1,4 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Internals.Diagnostics
+﻿namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
     internal class SimpleAsyncProcess : SimpleProcess, ISimpleAsyncProcess
     {
