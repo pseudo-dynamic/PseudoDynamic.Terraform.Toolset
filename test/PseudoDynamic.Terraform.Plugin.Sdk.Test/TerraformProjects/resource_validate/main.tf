@@ -7,4 +7,6 @@ terraform {
   }
 }
 
-resource "debug_validate" "default" {}
+resource "debug_validate" "default" {
+    greeting = "Hello from Terraform!"
+}

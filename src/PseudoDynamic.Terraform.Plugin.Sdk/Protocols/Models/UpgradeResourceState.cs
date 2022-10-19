@@ -4,7 +4,10 @@
     {
         public class Request
         {
-            public string? TypeName { get; set; }
+            public string TypeName {
+                get => _typeName ?? throw new InvalidOperationException("Type name is unexpectedly null");
+                set => _typeName = value;
+            }
 
             // version is the schema_version number recorded in the state file
             public int Version { get; set; }
@@ -15,6 +18,8 @@
             // appropriate older schema. The raw_state will be the json encoded
             // state, or a legacy flat-mapped format.
             public RawState? RawState { get; set; }
+
+            private string? _typeName;
         }
 
         public class Response

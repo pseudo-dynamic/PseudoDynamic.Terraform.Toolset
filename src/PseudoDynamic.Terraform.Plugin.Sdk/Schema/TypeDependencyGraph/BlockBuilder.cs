@@ -19,19 +19,19 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected MonoRangeDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node)
         {
             var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
-            return new MonoRangeDefinition(TerraformTypeConstraint.List, item);
+            return new MonoRangeDefinition(node.Context.VisitType, TerraformTypeConstraint.List, item);
         }
 
         protected MonoRangeDefinition BuildSet(BlockNode<IVisitPropertySegmentContext> node)
         {
             var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
-            return new MonoRangeDefinition(TerraformTypeConstraint.Set, item);
+            return new MonoRangeDefinition(node.Context.VisitType, TerraformTypeConstraint.Set, item);
         }
 
         protected MapDefinition BuildMap(BlockNode<IVisitPropertySegmentContext> node)
         {
             var value = BuildValue(node.ElementAt(1).AsContext<IVisitPropertySegmentContext>()).Value;
-            return new MapDefinition(value);
+            return new MapDefinition(node.Context.VisitType, value);
         }
 
         private bool IsAttributeOptional(BlockNode<IVisitPropertySegmentContext> node)
@@ -44,20 +44,41 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             return nullability == NullabilityState.Nullable;
         }
 
+        private AttributeReflectionMetadata CreateAttributeReflectionMetadata(IVisitPropertySegmentContext context) =>
+            new AttributeReflectionMetadata(context.Property);
+
         protected ObjectAttributeDefinition BuildObjectAttribute(BlockNode<IVisitPropertySegmentContext> node)
         {
-            var attributeName = _attributeNameConvention.Format(node.Context.Property);
+            var context = node.Context;
+            var attributeName = _attributeNameConvention.Format(context.Property);
             var valueResult = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
             var isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
+            var reflectionMetadata = CreateAttributeReflectionMetadata(context);
 
-            return new ObjectAttributeDefinition(attributeName, valueResult.Value) {
-                IsOptional = isOptional
+            return new ObjectAttributeDefinition(context.VisitType, attributeName, valueResult.Value) {
+                IsOptional = isOptional,
+                AttributeReflectionMetadata = reflectionMetadata
             };
         }
 
-        protected ObjectDefinition BuildObject(BlockNode node) => new ObjectDefinition() {
-            Attributes = node.Select(node => BuildObjectAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList()
-        };
+        private ComplexReflectionMetadata CreateComplexReflectionMetadata(ComplexTypeMetadata complexTypeMetadata, IEnumerable<AttributeDefinition> attributes)
+        {
+            return new ComplexReflectionMetadata(
+                complexTypeMetadata!,
+                attributeNamePropertyNameMapping: attributes.ToDictionary(x => x.Name, x => x.AttributeReflectionMetadata.Property.Name),
+                propertyNameAttributeNameMapping: attributes.ToDictionary(x => x.AttributeReflectionMetadata.Property.Name, x => x.Name));
+        }
+
+        protected ObjectDefinition BuildObject(BlockNode node)
+        {
+            var attributes = node.Select(node => BuildObjectAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList();
+            var reflectionMetadata = CreateComplexReflectionMetadata(node.Context.ComplexTypeMetadata!, attributes);
+
+            return new ObjectDefinition(node.Context.VisitType) {
+                Attributes = attributes,
+                ComplexReflectionMetadata = reflectionMetadata
+            };
+        }
 
         protected BlockAttributeDefinition BuildBlockAttribute(ValueResult valueResult)
         {
@@ -77,14 +98,16 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             });
 
             var isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
+            var reflectionMetadata = CreateAttributeReflectionMetadata(context);
 
-            return new BlockAttributeDefinition(attributeName, valueResult.Value) {
+            return new BlockAttributeDefinition(context.VisitType, attributeName, valueResult.Value) {
                 IsComputed = isComputed,
                 IsSensitive = isSensitive,
                 IsDeprecated = isDeprecated,
                 Description = description,
                 DescriptionKind = descriptionKind,
-                IsOptional = isOptional
+                IsOptional = isOptional,
+                AttributeReflectionMetadata = reflectionMetadata
             };
         }
 
@@ -104,7 +127,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected BlockDefinition BuildBlock(BlockNode node)
         {
             var context = node.Context;
-            var visitedType = node.Context.VisitType;
+            var visitType = node.Context.VisitType;
 
             var blockAttributeVersion = context.GetContextualAttribute<BlockAttribute>()?.GetVersion();
 
@@ -116,7 +139,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             var isDeprecated = context.GetContextualAttribute<DeprecatedAttribute>() is not null;
             var descriptionKind = context.GetContextualAttribute<DescriptionKindAttribute>()?.DescriptionKind ?? default;
 
-            var description = visitedType.GetXmlDocsSummary(new XmlDocsOptions() {
+            var description = visitType.GetXmlDocsSummary(new XmlDocsOptions() {
                 FormattingMode = descriptionKind == DescriptionKind.Markdown
                     ? XmlDocsFormattingMode.Markdown
                     : XmlDocsFormattingMode.None
@@ -132,21 +155,26 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
             var attributes = childNodeValueResults
                 .Where(x => !x.IsNestedBlock)
-                .Select(x => BuildBlockAttribute(x))
+                .Select(BuildBlockAttribute)
                 .ToList();
 
             var blocks = childNodeValueResults
                 .Where(x => x.IsNestedBlock)
-                .Select(x => BuildNestedBlockAttribute(x))
+                .Select(BuildNestedBlockAttribute)
                 .ToList();
 
-            return new BlockDefinition() {
+            var reflectionMetadata = CreateComplexReflectionMetadata(
+                node.Context.ComplexTypeMetadata!,
+                ((IEnumerable<AttributeDefinition>)attributes).Concat(blocks));
+
+            return new BlockDefinition(visitType) {
                 Version = version,
                 Attributes = attributes,
                 Blocks = blocks,
                 Description = description,
                 DescriptionKind = descriptionKind,
-                IsDeprecated = isDeprecated
+                IsDeprecated = isDeprecated,
+                ComplexReflectionMetadata = reflectionMetadata
             };
         }
 
@@ -157,13 +185,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             TerraformTypeConstraint.Set => BuildSet(node),
             TerraformTypeConstraint.Map => BuildMap(node),
             TerraformTypeConstraint.Tuple => throw new NotImplementedException("A tuple schema API has not been implemented yet"),
-            _ => new PrimitiveDefinition(valueTypeConstraint)
+            _ => new PrimitiveDefinition(node.Context.VisitType, valueTypeConstraint)
         };
 
         protected ValueResult BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {
             var isTerraformValue = node.TryUnwrapTerraformValue(out var unwrappedNode);
-            var unwrappedContext = unwrappedNode.Context;
             var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint(out var implicitValueTypeConstraints);
             bool isNestedBlock;
             ValueDefinition builtValue;
@@ -177,6 +204,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 if (!singleImplicitValueTypeConstraints.HasValue) {
                     throw new NestedBlockException();
                 }
+
+                var unwrappedContext = unwrappedNode.Context;
 
                 if (singleImplicitValueTypeConstraints.Value.IsComplex()) {
                     builtValue = BuildBlock(unwrappedNode);
@@ -196,7 +225,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 isNestedBlock = false;
             }
 
-            var updatedValue = builtValue with { IsWrappedByTerraformValue = isTerraformValue };
+            var updatedValue = builtValue with {
+                WrappedSourceType = node.Context.VisitType,
+                IsWrappedByTerraformValue = isTerraformValue
+            };
 
             return new ValueResult(updatedValue, unwrappedNode) {
                 IsNestedBlock = isNestedBlock

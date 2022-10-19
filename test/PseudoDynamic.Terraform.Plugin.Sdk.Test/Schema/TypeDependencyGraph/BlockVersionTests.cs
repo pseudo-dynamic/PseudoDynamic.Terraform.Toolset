@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿using PseudoDynamic.Terraform.Plugin.Infrastructure;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     public class BlockVersionTests
     {
@@ -6,16 +8,16 @@
         public void Block_schema_should_have_default_schema_Version()
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.Default));
-            var expectedBlock = new BlockDefinition() { Version = BlockDefinition.DefaultVersion };
-            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+            var expectedBlock = new BlockDefinition(typeof(Blocks.Default)) { Version = BlockDefinition.DefaultVersion };
+            Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         [Fact]
         public void Block_schema_should_have_custom_schema_Version()
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.SchemaVersion));
-            var expectedBlock = new BlockDefinition() { Version = 2 };
-            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+            var expectedBlock = new BlockDefinition(typeof(Blocks.SchemaVersion)) { Version = 2 };
+            Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         [Fact]
@@ -23,14 +25,14 @@
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaVersion));
 
-            var expectedBlock = new BlockDefinition()
+            var expectedBlock = new BlockDefinition(typeof(Blocks.NestedSchemaVersion))
             {
                 Blocks = new[] {
-                    new NestedBlockAttributeDefinition("block", new BlockDefinition() { Version = 2 })
+                    new NestedBlockAttributeDefinition(typeof(Blocks.SchemaVersion),"block", new BlockDefinition(typeof(Blocks.SchemaVersion)) { Version = 2 })
                 }
             };
 
-            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+            Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         [Fact]
@@ -38,14 +40,14 @@
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaOverridenVersion));
 
-            var expectedBlock = new BlockDefinition()
+            var expectedBlock = new BlockDefinition(typeof(Blocks.NestedSchemaOverridenVersion))
             {
                 Blocks = new[] {
-                    new NestedBlockAttributeDefinition("block", new BlockDefinition() { Version = 3 })
+                    new NestedBlockAttributeDefinition(typeof(Blocks.SchemaVersion), "block", new BlockDefinition(typeof(Blocks.SchemaVersion)) { Version = 3 })
                 }
             };
 
-            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+            Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         public class Blocks

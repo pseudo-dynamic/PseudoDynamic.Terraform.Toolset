@@ -43,11 +43,18 @@
 
         public ValueWrapping? ValueWrapping { get; private set; }
 
+        public AttributeReflectionMetadata AttributeReflectionMetadata {
+            get => _attributeReflectionMetadata ?? throw new InvalidOperationException("Attribute reflection metadata has not been set");
+            init => _attributeReflectionMetadata = value;
+        }
+
         private ValueDefinition? _value;
         private bool _isOptional;
         private bool _isRequired = DefaultIsRequired;
+        private AttributeReflectionMetadata? _attributeReflectionMetadata;
 
-        protected AttributeDefinition(string name, ValueDefinition value)
+        protected AttributeDefinition(Type sourceType, string name, ValueDefinition value)
+            : base(sourceType)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Value = value ?? throw new ArgumentNullException(nameof(value));

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using FluentAssertions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +8,6 @@ using Moq;
 using PseudoDynamic.Terraform.Plugin.Infrastructure;
 using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Schema;
-using Shouldly;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -19,8 +19,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var providerName = "registry.terraform.io/pseudo-dynamic/debug";
 
             var resourceMock = new Mock<IResource<ValidateSchema>>();
-            resourceMock.SetupGet(x => x.TypeName).Returns("validate").Verifiable();
-            //resourceMock.Setup(x => x.ValidateConfig()).Verifiable();
+            resourceMock.SetupGet(x => x.TypeName).Returns("validate");
 
             using var host = await new HostBuilder()
                 .ConfigureWebHostDefaults(builder => builder
@@ -28,9 +27,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                     .UseKestrel(options => options.ConfigureEndpointDefaults(endpoints => endpoints.Protocols = HttpProtocols.Http2))
                     .ConfigureServices(services => services
                         .AddTerraformProvider(providerName)
-                            .AddResource(resourceMock.Object, typeof(ValidateSchema))
-                        .Services
-                        .AddAutoMapper(typeof(PluginServerTests).Assembly))
+                            .AddResource(resourceMock.Object, typeof(ValidateSchema)))
                     .Configure(app =>
                     {
                         app.UseRouting();
@@ -41,14 +38,15 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var pluginServer = host.Services.GetRequiredService<IPluginServer>();
             var serverAddress = $"{pluginServer.ServerAddress.Host}:{pluginServer.ServerAddress.Port}";
 
-            using var terraformCommand = new TerraformCommand.WorkingDirectoryCloning("TerraformProjects/resource_empty")
+            using var terraformCommand = new TerraformCommand.WorkingDirectoryCloning("TerraformProjects/resource_validate")
             {
                 TerraformReattachProviders = { { providerName, new TerraformReattachProvider(PluginProtocol.V5, new TerraformReattachProviderAddress(serverAddress)) } }
             };
 
-            Record.Exception(terraformCommand.Init).ShouldBeNull();
-            Record.Exception(terraformCommand.Validate).ShouldBeNull();
+            Record.Exception(terraformCommand.Init).Should().BeNull();
+            Record.Exception(terraformCommand.Validate).Should().BeNull();
 
+            resourceMock.Verify(x => x.ValidateConfig(It.Is<ValidateConfig.Context<ValidateSchema>>(x => x.Config.Greeting.Value == "Hello from Terraform!")));
             resourceMock.VerifyAll();
             resourceMock.VerifyNoOtherCalls();
         }
@@ -56,6 +54,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         [Block]
         public class ValidateSchema
         {
+            public ITerraformValue<string> Greeting { get; }
+
+            public ValidateSchema(ITerraformValue<string> greeting) =>
+                Greeting = greeting;
         }
     }
 }

@@ -1,20 +1,30 @@
-﻿using PseudoDynamic.Terraform.Plugin.Protocols;
+﻿using AutoMapper;
+using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Protocols.Models;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal class ProviderAdapter : IProviderAdapter
     {
-        private readonly IProvider _provider;
+        public static readonly IResource<object>? ResourceDummy;
 
-        public ProviderAdapter(IProvider provider) =>
+        private readonly IProvider _provider;
+        private readonly IMapper _mapper;
+        private readonly IServiceProvider _serviceProvider;
+
+        public ProviderAdapter(IProvider provider, IMapper mapper, IServiceProvider serviceProvider)
+        {
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        }
 
         public async Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request)
         {
             return new GetProviderSchema.Response() {
-                Provider = new Schema.TypeDependencyGraph.BlockDefinition(),
-                ProviderMeta = new Schema.TypeDependencyGraph.BlockDefinition(),
+                Provider = Schema.TypeDependencyGraph.BlockDefinition.Uncomputed(),
+                ProviderMeta = Schema.TypeDependencyGraph.BlockDefinition.Uncomputed(),
                 ResourceSchemas = _provider.ResourceDefinitions.ToDictionary(x => x.Key, x => x.Value.Schema)
             };
         }
@@ -35,7 +45,21 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public async Task<ValidateResourceConfig.Response> ValidateResourceConfig(ValidateResourceConfig.Request request)
         {
-            return new ValidateResourceConfig.Response();
+            var resourceDefinition = _provider.ResourceDefinitions[request.TypeName];
+            var resource = resourceDefinition.Resource;
+            var reports = new Reports();
+
+            var decodingOptions = new DynamicValueDecoder.DecodingOptions() { Reports = reports };
+            var schema = new DynamicValueDecoder(_serviceProvider).DecodeSchema(resourceDefinition.Schema, request.Config!.Msgpack!.Value, decodingOptions);
+
+            var context = ValidateConfig.ContextAccessor.CreateInstance(resourceDefinition.Schema.SourceType, schema, reports);
+            resourceDefinition.ResourceAccessor.GetMethod(nameof(ResourceDummy.ValidateConfig)).Invoke(resource, new object?[] { context });
+
+            var diagnostics = _mapper.Map<IList<Diagnostic>>(reports);
+
+            return new ValidateResourceConfig.Response() {
+                Diagnostics = diagnostics
+            };
         }
 
         public Task<ReadResource.Response> ReadResource(ReadResource.Request request) => throw new NotImplementedException();

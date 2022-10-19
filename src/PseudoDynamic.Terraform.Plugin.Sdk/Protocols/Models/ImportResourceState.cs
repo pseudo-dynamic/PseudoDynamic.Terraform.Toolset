@@ -4,15 +4,21 @@
     {
         public class Request
         {
-            public string? TypeName { get; set; }
+            public string TypeName {
+                get => _typeName ?? throw new InvalidOperationException("Type name is unexpectedly null");
+                set => _typeName = value;
+            }
+
             public string? Id { get; set; }
+
+            private string? _typeName;
         }
 
         public class ImportedResource
         {
             public string? TypeName { get; set; }
             public DynamicValue? State { get; set; }
-            public IEnumerable<byte>? Private { get; set; }
+            public ReadOnlyMemory<byte>? Private { get; set; }
         }
 
         public class Response

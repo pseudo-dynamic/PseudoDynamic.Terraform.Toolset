@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿using PseudoDynamic.Terraform.Plugin.Infrastructure;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
 {
     public class BlockEqualityTests
     {
@@ -6,25 +8,25 @@
         {
             yield return new object[] {
                 typeof(Blocks.ZeroDepth),
-                new BlockDefinition()
+                new BlockDefinition(typeof(Blocks.ZeroDepth))
             };
 
             yield return new object[] {
                 typeof(Blocks.HavingString),
-                new BlockDefinition() {
+                new BlockDefinition(typeof(Blocks.HavingString)) {
                     Attributes = new []{
-                        new BlockAttributeDefinition("string", PrimitiveDefinition.String)
+                        new BlockAttributeDefinition(typeof(string), "string", PrimitiveDefinition.String)
                     }
                 }
             };
 
             yield return new object[] {
                 typeof(Blocks.NestedBlock),
-                new BlockDefinition() {
+                new BlockDefinition(typeof(Blocks.NestedBlock)) {
                     Blocks = new []{
-                        new NestedBlockAttributeDefinition("block", new BlockDefinition() {
+                        new NestedBlockAttributeDefinition(typeof(Blocks.HavingString), "block", new BlockDefinition(typeof(Blocks.HavingString)) {
                                 Attributes = new []{
-                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String)
+                                    new BlockAttributeDefinition(typeof(string), "string", PrimitiveDefinition.String)
                                 }
                             })
                     }
@@ -33,12 +35,13 @@
 
             yield return new object[] {
                 typeof(Blocks.TerraformValueNestedBlock),
-                new BlockDefinition() {
+                new BlockDefinition(typeof(Blocks.TerraformValueNestedBlock)) {
                     Blocks = new []{
-                        new NestedBlockAttributeDefinition("block", new BlockDefinition() {
+                        new NestedBlockAttributeDefinition(typeof(Blocks.HavingString), "block", new BlockDefinition(typeof(Blocks.HavingString)) {
                                 Attributes = new []{
-                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String)
+                                    new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 },
+                                WrappedSourceType = typeof(ITerraformValue<Blocks.HavingString>),
                                 IsWrappedByTerraformValue = true
                             })
                     }
@@ -47,12 +50,13 @@
 
             yield return new object[] {
                 typeof(Blocks.ListTerraformValueNestedBlock),
-                new BlockDefinition() {
+                new BlockDefinition(typeof(Blocks.ListTerraformValueNestedBlock)) {
                     Blocks = new []{
-                        new NestedBlockAttributeDefinition("block", MonoRangeDefinition.List(new BlockDefinition() {
+                        new NestedBlockAttributeDefinition(typeof(IList<ITerraformValue<Blocks.HavingString>>), "block", MonoRangeDefinition.List<IList<ITerraformValue<Blocks.HavingString>>>(new BlockDefinition(typeof(Blocks.HavingString)) {
                                 Attributes = new []{
-                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String)
+                                    new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 },
+                                WrappedSourceType = typeof(ITerraformValue<Blocks.HavingString>),
                                 IsWrappedByTerraformValue = true
                             }))
                     }
@@ -61,11 +65,11 @@
 
             yield return new object[] {
                 typeof(Blocks.HavingBlockList),
-                new BlockDefinition() {
+                new BlockDefinition(typeof(Blocks.HavingBlockList)) {
                     Blocks = new []{
-                        new NestedBlockAttributeDefinition("list_of_blocks", MonoRangeDefinition.List(new BlockDefinition() {
+                        new NestedBlockAttributeDefinition(typeof(IList<Blocks.HavingString>),"list_of_blocks", MonoRangeDefinition.List<IList<Blocks.HavingString>>(new BlockDefinition(typeof(Blocks.HavingString)) {
                                 Attributes = new []{
-                                    new BlockAttributeDefinition("string", PrimitiveDefinition.String)
+                                    new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 }
                             }))
                     }
@@ -74,20 +78,20 @@
 
             yield return new object[] {
                 typeof(Blocks.ListOfStrings),
-                new BlockDefinition() {
+                new BlockDefinition(typeof(Blocks.ListOfStrings)) {
                     Attributes = new []{
-                        new BlockAttributeDefinition("list", MonoRangeDefinition.List(PrimitiveDefinition.String))
+                        new BlockAttributeDefinition(typeof(IList<string>),"list", MonoRangeDefinition.List<IList<string>>(PrimitiveDefinition.String))
                     }
                 }
             };
 
             yield return new object[] {
                 typeof(Blocks.MapOfObjects),
-                new BlockDefinition() {
+                new BlockDefinition(typeof(Blocks.MapOfObjects)) {
                     Attributes = new []{
-                        new BlockAttributeDefinition("dictionary", new MapDefinition(new ObjectDefinition() {
+                        new BlockAttributeDefinition(typeof(IDictionary<string, Blocks.HavingString>),"dictionary", new MapDefinition(typeof(IDictionary<string, Blocks.HavingString>), new ObjectDefinition(typeof(Blocks.HavingString)) {
                             Attributes = new []{
-                                new ObjectAttributeDefinition("string", PrimitiveDefinition.String)
+                                new ObjectAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                             }
                         }))
                     }
@@ -100,7 +104,7 @@
         internal void Block_schema_matches_expected_block_schema(Type schemaType, TerraformDefinition expectedDefinition)
         {
             var actualDefinition = BlockBuilder.Default.BuildBlock(schemaType);
-            Assert.Equal(expectedDefinition, actualDefinition, TerraformDefinitionEqualityComparer.Default);
+            Assert.Equal(expectedDefinition, actualDefinition, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         public class Blocks

@@ -24,9 +24,9 @@
         protected virtual void VisitComplex(VisitContext context)
         {
             context.RememberVisitTypeBeingVisited();
-            var complexMetadata = context.ComplexMetadata!;
+            var complexMetadata = context.ComplexTypeMetadata!;
 
-            foreach (var property in complexMetadata.AllProperties) {
+            foreach (var property in complexMetadata.SupportedProperties) {
                 VisitAfterRewrite(new VisitPropertyContext(context, property));
             }
         }

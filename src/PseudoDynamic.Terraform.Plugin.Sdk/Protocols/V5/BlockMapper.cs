@@ -5,12 +5,10 @@ using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {
-    internal class SchemaMapper : Profile
+    internal class BlockMapper : Profile
     {
-        public SchemaMapper()
+        public BlockMapper()
         {
-            this.AddMapperBase();
-
             var schema = CreateMap<BlockDefinition, Schema>()
                 .ForMember(x => x.Version, o => o.MapFrom(x => x.Version))
                 .ForMember(x => x.Block, o => o.MapFrom(x => x));

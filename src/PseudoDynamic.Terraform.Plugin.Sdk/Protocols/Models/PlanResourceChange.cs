@@ -4,19 +4,25 @@
     {
         public class Request
         {
-            public string? TypeName { get; set; }
+            public string TypeName {
+                get => _typeName ?? throw new InvalidOperationException("Type name is unexpectedly null");
+                set => _typeName = value;
+            }
+
             public DynamicValue? PriorState { get; set; }
             public DynamicValue? ProposedNewState { get; set; }
             public DynamicValue? Config { get; set; }
-            public IEnumerable<byte>? PriorPrivate { get; set; }
+            public ReadOnlyMemory<byte>? PriorPrivate { get; set; }
             public DynamicValue? ProviderMeta { get; set; }
+
+            private string? _typeName;
         }
 
         public class Response
         {
             public DynamicValue? PlannedState { get; set; }
             public IList<AttributePath>? RequiresReplace { get; set; }
-            public IEnumerable<byte>? PlannedPrivate { get; set; }
+            public ReadOnlyMemory<byte>? PlannedPrivate { get; set; }
             public IList<Diagnostic>? Diagnostics { get; set; }
 
 

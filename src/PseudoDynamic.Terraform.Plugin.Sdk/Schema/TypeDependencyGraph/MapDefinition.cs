@@ -11,7 +11,8 @@
         public ValueDefinition Value { get; }
         ValueDefinition INestedValueAccessor.NestedValue => Value;
 
-        public MapDefinition(ValueDefinition value) =>
+        public MapDefinition(Type sourceType, ValueDefinition value)
+            : base(sourceType) =>
             Value = value ?? throw new ArgumentNullException(nameof(value));
 
         protected internal override void Visit(TerraformDefinitionVisitor visitor) =>

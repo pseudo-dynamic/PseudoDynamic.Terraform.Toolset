@@ -11,8 +11,11 @@
     <ItemGroup>
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
         <PackageReference Include="CaseExtensions" Version="1.1.0" />
+        <PackageReference Include="Concurrent.FastReflection.NetStandard" Version="1.2.1.1" />
         <PackageReference Include="Google.Protobuf" Version="3.21.7" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
+        <PackageReference Include="ImmediateReflection" Version="2.0.0" />
+        <PackageReference Include="MessagePack" Version="2.4.35" />
         <PackageReference Include="Namotion.Reflection" Version="2.1.1" />
         <PackageReference Include="Teronis.DotNet.EditorConfig.Base" Version="0.3.0-alpha.1">
             <PrivateAssets>all</PrivateAssets>

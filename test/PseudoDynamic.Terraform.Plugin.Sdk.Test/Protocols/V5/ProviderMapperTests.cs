@@ -4,7 +4,12 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {
     public class ProviderMapperTests
     {
-        private static IMapper Mapper = new MapperConfiguration(config => config.AddProfile<ProviderMapper>()).CreateMapper();
+        private static IMapper Mapper = new MapperConfiguration(config =>
+        {
+            config.AddProfile<ProtocolMapperBase>();
+            config.AddProfile<BlockMapper>();
+            config.AddProfile<ProviderMapper>();
+        }).CreateMapper();
 
         [Fact]
         internal void Mapper_configuration_is_valid() =>

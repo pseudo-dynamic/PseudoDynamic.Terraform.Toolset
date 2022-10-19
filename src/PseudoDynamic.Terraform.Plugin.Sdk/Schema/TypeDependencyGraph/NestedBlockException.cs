@@ -3,7 +3,7 @@
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     [Serializable]
-    internal class NestedBlockException : Exception
+    internal class NestedBlockException : BlockException
     {
         public NestedBlockException()
         {

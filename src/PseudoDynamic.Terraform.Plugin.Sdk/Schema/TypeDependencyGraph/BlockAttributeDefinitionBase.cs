@@ -80,11 +80,12 @@
         /// <summary>
         /// Creates an instance of this type.
         /// </summary>
+        /// <param name="sourceType"></param>
         /// <param name="name"></param>
         /// <param name="value"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public BlockAttributeDefinitionBase(string name, ValueDefinition value)
-            : base(name, value)
+        public BlockAttributeDefinitionBase(Type sourceType, string name, ValueDefinition value)
+            : base(sourceType, name, value)
         {
         }
     }

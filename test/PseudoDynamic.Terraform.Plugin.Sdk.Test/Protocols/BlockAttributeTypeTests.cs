@@ -21,13 +21,13 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
                 Add("\"bool\"", PrimitiveDefinition.Bool);
                 Add("\"dynamic\"", PrimitiveDefinition.Any);
 
-                Add("""["list","string"]""", MonoRangeDefinition.List(PrimitiveDefinition.String));
-                Add("""["list",["list","string"]]""", MonoRangeDefinition.List(MonoRangeDefinition.List(PrimitiveDefinition.String)));
+                Add("""["list","string"]""", MonoRangeDefinition.ListUncomputed(PrimitiveDefinition.String));
+                Add("""["list",["list","string"]]""", MonoRangeDefinition.ListUncomputed(MonoRangeDefinition.ListUncomputed(PrimitiveDefinition.String)));
 
-                Add("""["object",{"list":["list","string"]}]""", new ObjectDefinition()
+                Add("""["object",{"list":["list","string"]}]""", ObjectDefinition.Uncomputed() with
                 {
                     Attributes = new[] {
-                        new ObjectAttributeDefinition("list", MonoRangeDefinition.List(PrimitiveDefinition.String))
+                        ObjectAttributeDefinition.Uncomputed("list", MonoRangeDefinition.ListUncomputed(PrimitiveDefinition.String))
                     }
                 });
             }

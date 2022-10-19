@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿using PseudoDynamic.Terraform.Plugin.Infrastructure;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     public class BlockNullabilityTests
     {
@@ -7,16 +9,16 @@
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(StringBlocks.Optional));
 
-            var expectedBlock = new BlockDefinition()
+            var expectedBlock = new BlockDefinition(typeof(StringBlocks.Optional))
             {
                 Attributes = new[] {
-                    new BlockAttributeDefinition("nullable_string", PrimitiveDefinition.String) {
+                    new BlockAttributeDefinition(typeof(string),"nullable_string", PrimitiveDefinition.String) {
                         IsOptional = true
                     }
                 }
             };
 
-            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+            Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         [Fact]
@@ -24,34 +26,36 @@
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(StringBlocks.Required));
 
-            var expectedBlock = new BlockDefinition()
+            var expectedBlock = new BlockDefinition(typeof(StringBlocks.Required))
             {
                 Attributes = new[] {
-                    new BlockAttributeDefinition("string", PrimitiveDefinition.String) {
+                    new BlockAttributeDefinition(typeof(string), "string", PrimitiveDefinition.String) {
                         IsRequired = true
                     }
                 }
             };
 
-            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+            Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
-
 
         [Fact]
         public void Terraform_value_block_has_optional_string()
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(TeraformValueBlocks.Optional));
 
-            var expectedBlock = new BlockDefinition()
+            var expectedBlock = new BlockDefinition(typeof(TeraformValueBlocks.Optional))
             {
                 Attributes = new[] {
-                    new BlockAttributeDefinition("nullable_string", PrimitiveDefinition.String with { IsWrappedByTerraformValue = true }) {
+                    new BlockAttributeDefinition(typeof(string),"nullable_string", PrimitiveDefinition.String with {
+                        WrappedSourceType = typeof(ITerraformValue<string>),
+                        IsWrappedByTerraformValue = true
+                    }) {
                         IsOptional = true
                     }
                 }
             };
 
-            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+            Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         [Fact]
@@ -59,16 +63,19 @@
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(TeraformValueBlocks.Required));
 
-            var expectedBlock = new BlockDefinition()
+            var expectedBlock = new BlockDefinition(typeof(TeraformValueBlocks.Required))
             {
                 Attributes = new[] {
-                    new BlockAttributeDefinition("string", PrimitiveDefinition.String with { IsWrappedByTerraformValue = true } ) {
+                    new BlockAttributeDefinition(typeof(string), "string", PrimitiveDefinition.String with {
+                        WrappedSourceType = typeof(ITerraformValue<string>),
+                        IsWrappedByTerraformValue = true
+                    }) {
                         IsRequired = true
                     }
                 }
             };
 
-            Assert.Equal(expectedBlock, actualBlock, TerraformDefinitionEqualityComparer.Default);
+            Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         public class StringBlocks

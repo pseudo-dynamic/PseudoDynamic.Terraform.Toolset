@@ -4,6 +4,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal record class NestedBlockAttributeDefinition : BlockAttributeDefinitionBase
     {
+        public static NestedBlockAttributeDefinition Uncomputed(string name, ValueDefinition value) =>
+            new NestedBlockAttributeDefinition(UncomputedSourceType, name, value);
+
         public const int DefaultMinimumItems = 0;
         public const int DefaultMaximumItems = 0;
 
@@ -28,17 +31,17 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             : base(blockAttribute) =>
             ParseValue(blockAttribute.Value);
 
-        private NestedBlockAttributeDefinition(string name, ValueDefinition value)
-            : base(name, value) =>
+        private NestedBlockAttributeDefinition(Type sourceType, string name, ValueDefinition value)
+            : base(sourceType, name, value) =>
             ParseValue(value);
 
-        public NestedBlockAttributeDefinition(string name, RangeDefinition value)
-            : this(name, (ValueDefinition)value)
+        public NestedBlockAttributeDefinition(Type sourceType, string name, RangeDefinition value)
+            : this(sourceType, name, (ValueDefinition)value)
         {
         }
 
-        public NestedBlockAttributeDefinition(string name, BlockDefinition value)
-            : this(name, (ValueDefinition)value)
+        public NestedBlockAttributeDefinition(Type sourceType, string name, BlockDefinition value)
+            : this(sourceType, name, (ValueDefinition)value)
         {
         }
 
@@ -63,10 +66,17 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected internal override void Visit(TerraformDefinitionVisitor visitor) =>
             visitor.VisitNestedBlock(this);
 
-        public virtual bool Equals(NestedBlockAttributeDefinition? definition) =>
-            definition is not null
-            && ValueWrapping == definition.ValueWrapping
-            && MinimumItems == definition.MinimumItems
-            && MaximumItems == definition.MaximumItems;
+        public virtual bool Equals(NestedBlockAttributeDefinition? other) =>
+            other is not null
+            && base.Equals(other)
+            && ValueWrapping == other.ValueWrapping
+            && MinimumItems == other.MinimumItems
+            && MaximumItems == other.MaximumItems;
+
+        public override int GetHashCode() => HashCode.Combine(
+            base.GetHashCode(),
+            ValueWrapping,
+            MinimumItems,
+            MaximumItems);
     }
 }

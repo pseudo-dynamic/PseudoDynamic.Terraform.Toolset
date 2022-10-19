@@ -27,7 +27,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             }
         }
 
-        public ComplexTypeMetadata? ComplexMetadata {
+        public ComplexTypeMetadata? ComplexTypeMetadata {
             get {
                 if (ContextType != VisitContextType.Complex) {
                     throw new NotSupportedException($"Other contexts of type {VisitContextType.Complex.Id} cannot possess complex metadata");
@@ -37,8 +37,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             }
         }
 
-        [MemberNotNullWhen(true, nameof(ComplexMetadata))]
-        public bool HasComplexMetadata => ContextType == VisitContextType.Complex;
+        [MemberNotNullWhen(true, nameof(ComplexTypeMetadata))]
+        public bool HasComplexTypeMetadata => ContextType == VisitContextType.Complex;
 
         Type IVisitContext.VisitType => VisitType;
 

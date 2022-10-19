@@ -5,7 +5,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
     /// <summary>
     /// Holds properties and primary constructor informations.
     /// </summary>
-    internal class ComplexTypeMetadata
+    internal record class ComplexTypeMetadata
     {
         public static ComplexTypeMetadata FromVisitContext(VisitContext context)
         {
@@ -16,14 +16,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             var visitType = context.VisitType;
 
             var allConstructors = visitType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-            ConstructorInfo constructor;
+            ConstructorInfo primaryConstructor;
 
             if (allConstructors.Length == 0) {
                 throw new ComplexTypeException($"Expected at least one public constructor in type of {visitType.FullName}");
             } else if (allConstructors.Length == 1) {
-                constructor = allConstructors.Single();
+                primaryConstructor = allConstructors.Single();
             } else {
-                constructor = allConstructors.Single(x => x.GetCustomAttribute<BlockConstructorAttribute>(inherit: false) != null);
+                primaryConstructor = allConstructors.Single(x => x.GetCustomAttribute<BlockConstructorAttribute>(inherit: false) != null);
             }
 
             var allReadableProperties = visitType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -31,38 +31,53 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
                             && x.GetCustomAttribute<AttributeIgnoreAttribute>(inherit: false) == null)
                 .ToArray();
 
-            var constructorParameters = constructor.GetParameters()
+            var constructorParameters = primaryConstructor.GetParameters();
+
+            var indexedConstructorParameters = constructorParameters
                 .ToDictionary(x => x.Name!, StringComparer.InvariantCultureIgnoreCase);
 
             var constructorSupportedProperties = allReadableProperties
-                .Where(x => constructorParameters.ContainsKey(x.Name))
-                .ToArray();
+                .Where(x => indexedConstructorParameters.ContainsKey(x.Name))
+                .Select(x => (Parameter: indexedConstructorParameters[x.Name], Property: x))
+                .ToList();
 
             var nonConstructorSupportedProperties = allReadableProperties
-                .Except(constructorSupportedProperties)
+                .Except(constructorSupportedProperties.Select(x => x.Property))
                 .Where(x => x.GetSetMethod(nonPublic: false) != null)
-                .ToArray();
+                .ToList();
+
+            var constructorSupportedPropertiesCount = constructorSupportedProperties.Count;
+            var supportedProperties = new PropertyInfo[constructorSupportedPropertiesCount + nonConstructorSupportedProperties.Count];
+
+            for (int i = 0; i < constructorSupportedPropertiesCount; i++) {
+                supportedProperties[i] = constructorSupportedProperties[i].Property;
+            }
+
+            nonConstructorSupportedProperties.CopyTo(supportedProperties, constructorSupportedPropertiesCount);
 
             return new ComplexTypeMetadata(
-                constructor,
+                supportedProperties,
+                primaryConstructor,
                 constructorParameters,
                 constructorSupportedProperties,
                 nonConstructorSupportedProperties);
         }
 
-        public ConstructorInfo Constructor { get; }
-        public Dictionary<string, ParameterInfo> ConstructorParameters { get; }
-        public IEnumerable<PropertyInfo> AllProperties => NonConstructorSupportedProperties.Concat(ConstructorSupportedProperties);
-        public PropertyInfo[] ConstructorSupportedProperties { get; }
-        public PropertyInfo[] NonConstructorSupportedProperties { get; }
+        public IReadOnlyList<PropertyInfo> SupportedProperties { get; }
+        public ConstructorInfo PrimaryConstructor { get; }
+        public IReadOnlyList<ParameterInfo> ConstructorParameters { get; }
+        public IReadOnlyList<(ParameterInfo Parameter, PropertyInfo Property)> ConstructorSupportedProperties { get; }
+        public IReadOnlyList<PropertyInfo> NonConstructorSupportedProperties { get; }
 
         public ComplexTypeMetadata(
-            ConstructorInfo constructor,
-            Dictionary<string, ParameterInfo> constructorParameters,
-            PropertyInfo[] constructorSupportedProperties,
-            PropertyInfo[] nonConstructorSupportedProperties)
+            IReadOnlyList<PropertyInfo> supportedProperties,
+            ConstructorInfo primaryConstructor,
+            IReadOnlyList<ParameterInfo> constructorParameters,
+            IReadOnlyList<(ParameterInfo Parameter, PropertyInfo Property)> constructorSupportedProperties,
+            IReadOnlyList<PropertyInfo> nonConstructorSupportedProperties)
         {
-            Constructor = constructor ?? throw new ArgumentNullException(nameof(constructor));
+            SupportedProperties = supportedProperties ?? throw new ArgumentNullException(nameof(supportedProperties));
+            PrimaryConstructor = primaryConstructor ?? throw new ArgumentNullException(nameof(primaryConstructor));
             ConstructorParameters = constructorParameters ?? throw new ArgumentNullException(nameof(constructorParameters));
             ConstructorSupportedProperties = constructorSupportedProperties ?? throw new ArgumentNullException(nameof(constructorSupportedProperties));
             NonConstructorSupportedProperties = nonConstructorSupportedProperties ?? throw new ArgumentNullException(nameof(nonConstructorSupportedProperties));

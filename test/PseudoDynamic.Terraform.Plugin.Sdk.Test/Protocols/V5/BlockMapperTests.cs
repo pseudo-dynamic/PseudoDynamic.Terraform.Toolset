@@ -5,9 +5,13 @@ using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {
-    public class SchemaMapperTests
+    public class BlockMapperTests
     {
-        private static IMapper Mapper = new MapperConfiguration(config => config.AddProfile<SchemaMapper>()).CreateMapper();
+        private static IMapper Mapper = new MapperConfiguration(config =>
+        {
+            config.AddProfile<ProtocolMapperBase>();
+            config.AddProfile<BlockMapper>();
+        }).CreateMapper();
 
         [Fact]
         internal void Mapper_configuration_is_valid() =>
@@ -31,7 +35,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                     DescriptionKind = StringKind.Markdown,
                     Deprecated = true,
                     Version = 2
-                }, new BlockDefinition()
+                }, BlockDefinition.Uncomputed() with
                 {
                     Description = "goofy",
                     DescriptionKind = DescriptionKind.Markdown,
@@ -39,7 +43,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                     Version = 2
                 });
 
-                var stringList = MonoRangeDefinition.List(PrimitiveDefinition.String);
+                var stringList = MonoRangeDefinition.List<IList<string>>(PrimitiveDefinition.String);
 
                 Add(new Schema.Types.Block()
                 {
@@ -53,10 +57,10 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                             }
                         }
                     }
-                }, new BlockDefinition()
+                }, BlockDefinition.Uncomputed() with
                 {
                     Attributes = new[] {
-                        new BlockAttributeDefinition("list", stringList)
+                        BlockAttributeDefinition.Uncomputed("list", stringList)
                     }
                 });
 
@@ -74,10 +78,10 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                             }
                         }
                     }
-                }, new BlockDefinition()
+                }, BlockDefinition.Uncomputed() with
                 {
                     Blocks = new[] {
-                        new NestedBlockAttributeDefinition("list", MonoRangeDefinition.List(new BlockDefinition()))
+                        NestedBlockAttributeDefinition.Uncomputed("list", MonoRangeDefinition.ListUncomputed(BlockDefinition.Uncomputed()))
                     }
                 });
             }

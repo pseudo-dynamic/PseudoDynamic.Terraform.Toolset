@@ -4,7 +4,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal class TerraformDefinitionEqualityComparer : EqualityComparer<TerraformDefinition>
     {
-        public new static readonly TerraformDefinitionEqualityComparer Default = new TerraformDefinitionEqualityComparer();
+        public new static readonly TerraformDefinitionEqualityComparer Default = new(static (x, y) => object.Equals(x, y));
+
+        private Func<TerraformDefinition?, TerraformDefinition?, bool> _checkEquality;
+
+        public TerraformDefinitionEqualityComparer(Func<TerraformDefinition?, TerraformDefinition?, bool> checkEquality) =>
+            _checkEquality = checkEquality;
 
         public override bool Equals(TerraformDefinition? x, TerraformDefinition? y)
         {
@@ -17,7 +22,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
 
             var definitions = TerraformDefinitionCollector.Default.Queue(x);
-            var definitionVisitor = new EqualityComparingVisitor(definitions);
+            var definitionVisitor = new EqualityComparingVisitor(definitions, _checkEquality);
             definitionVisitor.Visit(y);
             return definitionVisitor.AreEqual;
         }
@@ -33,11 +38,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             private bool _onceVisited;
 
             private readonly Queue<TerraformDefinition> _queue;
+            private readonly Func<TerraformDefinition?, TerraformDefinition?, bool> _checkEquality;
             private readonly int _queueCount;
 
-            public EqualityComparingVisitor(Queue<TerraformDefinition> queue)
+            public EqualityComparingVisitor(Queue<TerraformDefinition> queue, Func<TerraformDefinition?, TerraformDefinition?, bool> checkEquality)
             {
                 _queue = queue ?? throw new ArgumentNullException(nameof(queue));
+                _checkEquality = checkEquality ?? throw new ArgumentNullException(nameof(checkEquality));
                 _queueCount = queue.Count;
             }
 
@@ -51,7 +58,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
                 if (dequeueSucceeded) {
                     _visitCounter++;
-                    _areEqual = x!.Equals(y);
+                    _areEqual = _checkEquality(x, y);
                 }
 
                 if (!dequeueSucceeded || !_areEqual) {
