@@ -1,38 +1,72 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics;
+using System.Text.Json;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 {
     internal class TerraformCommand
     {
+        private static TerraformCommandOptions ProvideOptions(Action<TerraformCommandOptions>? configureOptions)
+        {
+            var options = new TerraformCommandOptions();
+            configureOptions?.Invoke(options);
+            return options;
+        }
+
+
+        public const string TerraformReattachProvidersVariableName = "TF_REATTACH_PROVIDERS";
         private const string TerraformCommandName = "terraform";
 
-        private readonly static Dictionary<string, string> EmptyEnvironmentVariables = new Dictionary<string, string>();
 
         public string? WorkingDirectory { get; init; }
 
-        public IReadOnlyDictionary<string, string> EnvironmentVariables { get; init; } = EmptyEnvironmentVariables;
-
-        public TerraformReattachProviders TerraformReattachProviders { get; } = new TerraformReattachProviders();
-
-        private TerraformProcessStartInfo CreateStartInfo(string? args)
-        {
-            var startInfo = new TerraformProcessStartInfo(
-                TerraformCommandName,
-                args: args,
-                workingDirectory: WorkingDirectory);
-
-            foreach (var environmentVariable in EnvironmentVariables)
-            {
-                startInfo.EnvironmentVariables.Add(environmentVariable.Key, environmentVariable.Value);
-            }
-
-            if (TerraformReattachProviders.Count > 0)
-            {
-                startInfo.EnvironmentVariables.Add(TerraformReattachProviders.VariableName, TerraformReattachProviders.ToJson());
-            }
-
-            return startInfo;
+        public IReadOnlyDictionary<string, string> EnvironmentVariables { 
+            get => environmentVariables; 
+            init => environmentVariables = value ?? throw new ArgumentNullException(nameof(value)); 
         }
+
+        public IReadOnlyDictionary<string, TerraformReattachProvider>? TerraformReattachProviders { get; init; }
+
+        private TerraformProcessStartInfo? _processStartInfoBase;
+        private IReadOnlyDictionary<string, string> environmentVariables = SimpleProcessStartInfo.EmptyEnvironmentVariables;
+
+        internal TerraformCommand(ITerraformCommandOptionsOptions options) =>
+            TerraformReattachProviders = options.TerraformReattachProviders;
+
+        public TerraformCommand(Action<TerraformCommandOptions> configureOptions)
+            : this(ProvideOptions(configureOptions))
+        {
+        }
+
+        private TerraformProcessStartInfo CreateBaseStartInfo()
+        {
+            var processStartInfoBase = _processStartInfoBase;
+
+            if (processStartInfoBase != null)
+            {
+                return processStartInfoBase;
+            }
+
+            var environmentVariables = new Dictionary<string, string>(EnvironmentVariables);
+
+            if (TerraformReattachProviders != null && TerraformReattachProviders.Count > 0)
+            {
+                environmentVariables.Add(TerraformReattachProvidersVariableName, JsonSerializer.Serialize(TerraformReattachProviders));
+            }
+
+            processStartInfoBase = new TerraformProcessStartInfo()
+            {
+                WorkingDirectory = WorkingDirectory,
+                EnvironmentVariables = environmentVariables
+            };
+
+            _processStartInfoBase = processStartInfoBase;
+            return processStartInfoBase;
+        }
+
+        private TerraformProcessStartInfo CreateStartInfo(string? args) => CreateBaseStartInfo() with
+        {
+            Arguments = args
+        };
 
         private string RunCommandThenReadOutput(string? args) => SimpleProcess.StartThenWaitForExitThenReadOutput(
             CreateStartInfo(args),
@@ -46,16 +80,54 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
         public string Apply() => RunCommandThenReadOutput("apply -input=false -auto-approve");
 
-        private class TerraformProcessStartInfo : SimpleProcessStartInfo
+        public interface ITerraformCommandOptionsOptions
         {
-            public TerraformProcessStartInfo(string name, string? args = null, string? workingDirectory = null)
-                : base(name, args, workingDirectory)
+            IReadOnlyDictionary<string, TerraformReattachProvider> TerraformReattachProviders { get; }
+        }
+
+        public class TerraformCommandOptionsBase<DerivedOptions> : ITerraformCommandOptionsOptions
+            where DerivedOptions : TerraformCommandOptionsBase<DerivedOptions>
+        {
+            Dictionary<string, TerraformReattachProvider> TerraformReattachProviders { get; } = new Dictionary<string, TerraformReattachProvider>();
+
+            IReadOnlyDictionary<string, TerraformReattachProvider> ITerraformCommandOptionsOptions.TerraformReattachProviders => TerraformReattachProviders;
+
+            protected TerraformCommandOptionsBase()
+            {
+            }
+
+            public DerivedOptions WithReattachingProvider(string providerName, TerraformReattachProvider provider)
+            {
+                TerraformReattachProviders.Add(providerName, provider);
+                return (DerivedOptions)this;
+            }
+        }
+
+        public class TerraformCommandOptions : TerraformCommandOptionsBase<TerraformCommandOptions>
+        {
+        }
+
+        private record class TerraformProcessStartInfo : SimpleProcessStartInfo
+        {
+            public TerraformProcessStartInfo() : base(TerraformCommandName)
             {
             }
         }
 
-        internal class WorkingDirectoryCloning : TerraformCommand, IDisposable
+        internal interface IWorkingDirectoryCloningOptions
         {
+            string WorkingDirectory { get; }
+        }
+
+        internal class WorkingDirectoryCloning : TerraformCommand, IDisposable, IWorkingDirectoryCloningOptions
+        {
+            private static WorkingDirectoryCloningOptions ProvideOptions(Action<WorkingDirectoryCloningOptions>? configureOptions, out WorkingDirectoryCloningOptions options)
+            {
+                options = new WorkingDirectoryCloningOptions();
+                configureOptions?.Invoke(options);
+                return options;
+            }
+
             public new string WorkingDirectory
             {
                 get => base.WorkingDirectory!;
@@ -66,9 +138,8 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             private bool _isDisposed;
 
             public WorkingDirectoryCloning(Action<WorkingDirectoryCloningOptions>? configureOptions)
+                : base(ProvideOptions(configureOptions, out var options))
             {
-                var options = new WorkingDirectoryCloningOptions();
-                configureOptions?.Invoke(options);
 
                 if (options.DeleteOnDispose
                     && options.DeleteOnlyTempDirectory
@@ -149,7 +220,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 GC.SuppressFinalize(this);
             }
 
-            internal class WorkingDirectoryCloningOptions
+            internal class WorkingDirectoryCloningOptions : TerraformCommandOptionsBase<WorkingDirectoryCloningOptions>
             {
                 public string? WorkingDirectory { get; set; }
                 public string TemporaryWorkingDirectory { get; }

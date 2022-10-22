@@ -1,56 +1,79 @@
-﻿using System.Collections.Specialized;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
     /// <summary>
     /// The start info of a process.
     /// </summary>
-    public class SimpleProcessStartInfo
+    public record class SimpleProcessStartInfo
     {
+        internal readonly static IReadOnlyDictionary<string, string> EmptyEnvironmentVariables = new Dictionary<string, string>();
+
         /// <summary>
         /// The executable to start.
         /// </summary>
-        public string? Executable => ProcessStartInfo.FileName;
+        public string Executable { get; }
 
         /// <summary>
         /// The process arguments.
         /// </summary>
-        public string? Arguments => ProcessStartInfo.Arguments;
+        public string? Arguments { get; init; }
 
-        public StringDictionary EnvironmentVariables => ProcessStartInfo.EnvironmentVariables;
+        /// <summary>
+        /// The working directory is not used to find the executable. Instead, its value applies to the process that is started and only has meaning within the context of the new process.
+        /// </summary>
+        public string? WorkingDirectory { get; init; }
 
-        internal ProcessStartInfo ProcessStartInfo { get; private set; }
+        public IReadOnlyDictionary<string, string> EnvironmentVariables
+        {
+            get => environmentVariables;
+            init => environmentVariables = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        private IReadOnlyDictionary<string, string> environmentVariables = EmptyEnvironmentVariables;
 
         /// <summary>
         /// Creates an instance of type <see cref="SimpleProcessStartInfo" />.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="args"></param>
-        /// <param name="workingDirectory">The working directory is not used to find the executable. Instead, its value applies to the process that is started and only has meaning within the context of the new process.</param>
-        public SimpleProcessStartInfo(string name, string? args = null, string? workingDirectory = null)
-        {
-            workingDirectory ??= string.Empty;
+        /// <param name="executable"></param>
+        public SimpleProcessStartInfo(string executable) =>
+            Executable = executable ?? throw new ArgumentNullException(nameof(executable));
 
-            if (args == null)
+        public ProcessStartInfo CreateProcessStartInfo()
+        {
+            var executable = Executable;
+            var arguments = Arguments;
+            var workingDirectory = WorkingDirectory ?? string.Empty;
+            ProcessStartInfo processStartInfo;
+
+            if (arguments == null)
             {
-                ProcessStartInfo = new ProcessStartInfo(name)
+                processStartInfo = new ProcessStartInfo(executable)
                 {
                     WorkingDirectory = workingDirectory
                 };
             }
             else
             {
-                ProcessStartInfo = new ProcessStartInfo(name, args)
+                processStartInfo = new ProcessStartInfo(executable, arguments)
                 {
                     WorkingDirectory = workingDirectory
                 };
             }
 
-            ProcessStartInfo.UseShellExecute = false;
-            ProcessStartInfo.RedirectStandardOutput = true;
-            ProcessStartInfo.RedirectStandardError = true;
-            ProcessStartInfo.CreateNoWindow = true;
+            if (EnvironmentVariables is not null)
+            {
+                foreach (var environmentVariable in EnvironmentVariables)
+                {
+                    processStartInfo.EnvironmentVariables.Add(environmentVariable.Key, environmentVariable.Value);
+                }
+            }
+
+            processStartInfo.UseShellExecute = false;
+            processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.RedirectStandardError = true;
+            processStartInfo.CreateNoWindow = true;
+            return processStartInfo;
         }
     }
 }

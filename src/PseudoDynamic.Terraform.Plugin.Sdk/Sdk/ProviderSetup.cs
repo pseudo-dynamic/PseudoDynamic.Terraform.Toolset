@@ -2,11 +2,11 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    internal class ProviderBuilder : IProviderBuilder
+    internal class ProviderSetup : IProviderSetup
     {
         public IServiceCollection Services { get; }
 
-        public ProviderBuilder(IServiceCollection services) =>
+        public ProviderSetup(IServiceCollection services) =>
             Services = services;
     }
 }

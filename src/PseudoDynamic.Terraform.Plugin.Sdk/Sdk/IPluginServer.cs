@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
+﻿using PseudoDynamic.Terraform.Plugin.Protocols;
+
+namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     /// <summary>
     /// Represents the plugin server.
@@ -6,5 +8,6 @@
     public interface IPluginServer
     {
         Uri ServerAddress { get; }
+        PluginProtocol PluginProtocol { get; }
     }
 }

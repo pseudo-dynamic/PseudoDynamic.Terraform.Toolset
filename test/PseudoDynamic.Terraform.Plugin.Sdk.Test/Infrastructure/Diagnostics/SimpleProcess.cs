@@ -195,7 +195,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
             }
 
             _errorBuilder = new StringBuilder();
-            _processStartInfo = processStartInfo.ProcessStartInfo;
+            _processStartInfo = processStartInfo.CreateProcessStartInfo();
             _outputReceived = outputReceived;
             ShouldStreamOutput = shouldStreamOutput;
             _errorReceived = errorReceived;
