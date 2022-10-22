@@ -14,9 +14,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         internal static OptionsBuilder<ProviderOptions> AddProviderOptions(this IProviderSetup provider)
         {
             var serviceProvider = provider.Services;
-            var optionsBuilder = serviceProvider.AddOptions<ProviderOptions>();
-            serviceProvider.TryAddSingleton<IPostConfigureOptions<ProviderOptions>, ProviderOptions.RequestResources>();
-            return optionsBuilder;
+            return serviceProvider.AddOptions<ProviderOptions>();
         }
 
         internal static OptionsBuilder<ProviderOptions> ConfigureProviderOptions(this IProviderSetup provider, Action<ProviderOptions> configureOptions) =>
@@ -28,12 +26,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </summary>
         /// <param name="services"></param>
         /// <param name="providerName">Fully-qualified Terraform provider name in form of <![CDATA[<domain-name>/<namespace>/<provider-name>]]> (e.g. registry.terraform.io/pseudo-dynamic/value)</param>
-        /// <param name="pluginProtocol">Overwrites the default or already provided plugin protocol</param>
         public static IProviderSetup AddTerraformProvider(this IServiceCollection services, string providerName)
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddTerraformPluginServer();
             services.TryAddSingleton<IProviderAdapter, ProviderAdapter>();
+            services.TryAddSingleton<ResourceDefinitionFactory>();
             services.TryAddSingleton<IProvider, Provider>();
 
             var providerSetup = new ProviderSetup(services);

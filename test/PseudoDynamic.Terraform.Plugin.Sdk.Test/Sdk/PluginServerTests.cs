@@ -1,29 +1,26 @@
 ﻿using FluentAssertions;
-using Microsoft.Extensions.Hosting;
 using Moq;
 using PseudoDynamic.Terraform.Plugin.Infrastructure;
-using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Schema;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public class PluginServerTests
+    public class PluginServerTests : IClassFixture<PluginHostFixtures.ProtocolV5>
     {
+        private readonly PluginHostFixtureBase _pluginHostFixture;
+
+        public PluginServerTests(PluginHostFixtures.ProtocolV5 pluginHostFixture) =>
+            _pluginHostFixture = pluginHostFixture;
+
         [Fact]
         public async Task Plugin_server_survives_terraform_validate()
         {
             var resourceMock = new Mock<IResource<ValidateSchema>>();
             resourceMock.SetupGet(x => x.TypeName).Returns("validate");
+            _pluginHostFixture.Provider.ReplaceResourceDefinition(new ResourceDescriptor(resourceMock.Object, typeof(ValidateSchema)));
 
-            using var host = await new PluginHostBuilder() { Protocol = PluginProtocol.V5 }
-                .ConfigureTerraformProviderDefaults("registry.terraform.io/pseudo-dynamic/debug", provider => provider
-                    .AddResource(resourceMock.Object, typeof(ValidateSchema)))
-                .StartAsync();
-
-            var terraformCommand = host.Services.GetWorkingDirectoryCloningTerraformCommand("TerraformProjects/resource_validate");
-
-            Record.Exception(terraformCommand.Init).Should().BeNull();
-            Record.Exception(terraformCommand.Validate).Should().BeNull();
+            var terraform = _pluginHostFixture.CreateTerraformCommand("TerraformProjects/resource_validate");
+            Record.Exception(terraform.Validate).Should().BeNull();
 
             resourceMock.Verify(x => x.ValidateConfig(It.Is<ValidateConfig.Context<ValidateSchema>>(x => x.Config.Greeting.Value == "Hello from Terraform!")));
             resourceMock.VerifyAll();

@@ -4,6 +4,8 @@
     {
         string FullyQualifiedProviderName { get; }
         string ProviderName { get; }
-        IReadOnlyDictionary<string, ResourceDefinition> ResourceDefinitions { get; }
+        IReadOnlyDictionary<string, ProviderResourceDefinition> ResourceDefinitions { get; }
+
+        internal void ReplaceResourceDefinition(ResourceDescriptor resourceDescriptor);
     }
 }
