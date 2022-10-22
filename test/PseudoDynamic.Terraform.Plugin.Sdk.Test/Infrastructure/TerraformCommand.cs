@@ -19,9 +19,10 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
         public string? WorkingDirectory { get; init; }
 
-        public IReadOnlyDictionary<string, string> EnvironmentVariables { 
-            get => environmentVariables; 
-            init => environmentVariables = value ?? throw new ArgumentNullException(nameof(value)); 
+        public IReadOnlyDictionary<string, string> EnvironmentVariables
+        {
+            get => environmentVariables;
+            init => environmentVariables = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public IReadOnlyDictionary<string, TerraformReattachProvider>? TerraformReattachProviders { get; init; }
@@ -222,7 +223,12 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
             internal class WorkingDirectoryCloningOptions : TerraformCommandOptionsBase<WorkingDirectoryCloningOptions>
             {
-                public string? WorkingDirectory { get; set; }
+                public string? WorkingDirectory
+                {
+                    get => workingDirectory ?? AppContext.BaseDirectory;
+                    set => workingDirectory = value;
+                }
+
                 public string TemporaryWorkingDirectory { get; }
 
                 /// <summary>
@@ -238,6 +244,8 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 /// Default is <see langword="true"/>.
                 /// </summary>
                 public bool DeleteOnlyTempDirectory { get; set; } = true;
+
+                private string? workingDirectory;
 
                 public WorkingDirectoryCloningOptions() => TemporaryWorkingDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             }

@@ -29,10 +29,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// <param name="services"></param>
         /// <param name="providerName">Fully-qualified Terraform provider name in form of <![CDATA[<domain-name>/<namespace>/<provider-name>]]> (e.g. registry.terraform.io/pseudo-dynamic/value)</param>
         /// <param name="pluginProtocol">Overwrites the default or already provided plugin protocol</param>
-        public static IProviderSetup AddTerraformProvider(this IServiceCollection services, string providerName, PluginProtocol pluginProtocol = PluginProtocol.V6)
+        public static IProviderSetup AddTerraformProvider(this IServiceCollection services, string providerName)
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
-            services.AddTerraformPlugin(pluginProtocol);
+            services.AddTerraformPluginServer();
             services.TryAddSingleton<IProviderAdapter, ProviderAdapter>();
             services.TryAddSingleton<IProvider, Provider>();
 
