@@ -1,14 +1,42 @@
-﻿using PseudoDynamic.Terraform.Plugin.Schema;
+﻿using CSF.Collections;
+using PseudoDynamic.Terraform.Plugin.Schema;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 {
     internal class SchemaFake<T>
     {
+        public static readonly GenericTypeAccessor GenericListEqualityComparerAccessor = new GenericTypeAccessor(typeof(ListEqualityComparer<>));
+        public static readonly GenericTypeAccessor GenericSetEqualityComparerAccessor = new GenericTypeAccessor(typeof(SetEqualityComparer<>));
+        public static readonly GenericTypeAccessor GenericKeyValuePairAccessor = new GenericTypeAccessor(typeof(KeyValuePair<,>));
+
+        static IEqualityComparer<T> GetDefaultEqualityComparer()
+        {
+            var typeOfT = typeof(T);
+
+            if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out var genericTypeArguments))
+            {
+                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.GetTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceConstructor);
+            }
+            else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(ISet<>), out _, out genericTypeArguments))
+            {
+                return (IEqualityComparer<T>)GenericSetEqualityComparerAccessor.GetTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceConstructor);
+            }
+            else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IDictionary<,>), out _, out genericTypeArguments))
+            {
+                var keyValuePairType = GenericKeyValuePairAccessor.GetTypeAccessor(genericTypeArguments).Type;
+                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.GetTypeAccessor(keyValuePairType).CreateInstance(x => x.GetPublicInstanceConstructor);
+            }
+            else
+            {
+                return EqualityComparer<T>.Default;
+            }
+        }
+
         public bool IsNestedBlock { get; init; }
 
         public T Value { get; }
 
-        public ValueHavingSchema Schema
+        public Block Schema
         {
             get
             {
@@ -21,11 +49,11 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
                 if (IsNestedBlock)
                 {
-                    schema = new BlockHavingSchema(Value, _equalityComparer);
+                    schema = new NestedBlock(Value, _equalityComparer);
                 }
                 else
                 {
-                    schema = new ValueHavingSchema(Value, _equalityComparer);
+                    schema = new Block(Value, _equalityComparer);
                 }
 
                 _schema = schema;
@@ -34,12 +62,12 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         }
 
         private readonly IEqualityComparer<T>? _equalityComparer;
-        private SchemaFake<T>.ValueHavingSchema _schema;
+        private SchemaFake<T>.Block _schema;
 
         public SchemaFake(T value, IEqualityComparer<T>? equalityComparer)
         {
             Value = value;
-            _equalityComparer = equalityComparer;
+            _equalityComparer = equalityComparer ?? GetDefaultEqualityComparer();
         }
 
         public SchemaFake(T value) : this(value, null)
@@ -47,29 +75,40 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         }
 
         [Block]
-        internal class ValueHavingSchema : ISchemaFake
+        internal class Block : ISchemaFake
         {
-            public static ValueHavingSchema OfValue(T value) =>
-                new ValueHavingSchema(value);
+            public static Block OfValue(T value) =>
+                new Block(value);
+
+            public static SchemaFake<IList<T>>.Block HavingList(params T[] values) =>
+                new SchemaFake<IList<T>>.Block(values.ToList(), new ListEqualityComparer<T>());
+
+            public static SchemaFake<ISet<T>>.Block HavingSet(params T[] values) =>
+                new SchemaFake<ISet<T>>.Block(values.ToHashSet(), new SetEqualityComparer<T>());
+
+            public static IList<Block> RangeList(params T[] values) =>
+                values.Select(OfValue).ToList();
+
+            public static ISet<Block> RangeSet(params T[] values) =>
+                values.Select(OfValue).ToHashSet();
 
             private readonly IEqualityComparer<T> _equalityComparer;
 
             public virtual T Value { get; }
 
-            object ISchemaFake.Value => Value;
+            object? ISchemaFake.Value => Value;
 
-            internal ValueHavingSchema(T value, IEqualityComparer<T>? equalityComparer)
+            internal Block(T value, IEqualityComparer<T>? equalityComparer)
             {
                 Value = value;
-                _equalityComparer = equalityComparer ?? EqualityComparer<T>.Default;
+                _equalityComparer = equalityComparer ?? GetDefaultEqualityComparer();
             }
 
-            public ValueHavingSchema(T value)
-                : this(value, EqualityComparer<T>.Default) =>
+            public Block(T value) : this(value, null) =>
                 Value = value;
 
             public override bool Equals(object? obj) =>
-                obj is ValueHavingSchema other
+                obj is Block other
                 && _equalityComparer.Equals(Value, other.Value);
 
             public override int GetHashCode() =>
@@ -77,52 +116,69 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         }
 
         [Object]
-        public class ObjectBeingSchema : ValueHavingSchema
+        public class Object : Block
         {
-            public static ObjectBeingSchema OfValue(T value) =>
-                new ObjectBeingSchema(value);
+            public new static Object OfValue(T value) =>
+                new Object(value);
+
+            public new static SchemaFake<IList<T>>.Object HavingList(params T[] values) =>
+                new SchemaFake<IList<T>>.Object(values.ToList(), new ListEqualityComparer<T>());
+
+            public new static SchemaFake<ISet<T>>.Object HavingSet(params T[] values) =>
+                new SchemaFake<ISet<T>>.Object(values.ToHashSet(), new SetEqualityComparer<T>());
+
+            public new static IList<Object> RangeList(params T[] values) =>
+                values.Select(OfValue).ToList();
 
             public override T Value => base.Value;
 
-            public ObjectBeingSchema(T value) : base(value)
+            public Object(T value) : base(value)
             {
             }
 
-            internal ObjectBeingSchema(T value, IEqualityComparer<T>? equalityComparer) : base(value, equalityComparer)
+            internal Object(T value, IEqualityComparer<T>? equalityComparer) : base(value, equalityComparer)
             {
             }
         }
 
         [Block]
-        public class BlockHavingSchema : ValueHavingSchema
+        public class NestedBlock : Block
         {
+            public new static NestedBlock OfValue(T value) =>
+                new NestedBlock(value);
+
+            public new static SchemaFake<IList<T>>.NestedBlock HavingList(params T[] values) =>
+                new SchemaFake<IList<T>>.NestedBlock(values.ToList(), new ListEqualityComparer<T>());
+
+            public new static SchemaFake<ISet<T>>.NestedBlock HavingSet(params T[] values) =>
+                new SchemaFake<ISet<T>>.NestedBlock(values.ToHashSet(), new SetEqualityComparer<T>());
+
+            public new static IList<NestedBlock> RangeList(params T[] values) =>
+                values.Select(OfValue).ToList();
+
+            public new static ISet<NestedBlock> RangeSet(params T[] values) =>
+                values.Select(OfValue).ToHashSet();
+
             [NestedBlock]
             public override T Value => base.Value;
 
-            public BlockHavingSchema(T value) : base(value)
+            internal NestedBlock(T value, IEqualityComparer<T>? equalityComparer) : base(value, equalityComparer)
             {
             }
 
-            internal BlockHavingSchema(T value, IEqualityComparer<T>? equalityComparer) : base(value, equalityComparer)
+            public NestedBlock(T value) : base(value)
             {
             }
         }
 
-        public class TerraformValue : SchemaFake<ITerraformValue<T>>
+        public class TerraformValueFake : SchemaFake<ITerraformValue<T>>
         {
-            public TerraformValue(ITerraformValue<T> value, IEqualityComparer<ITerraformValue<T>>? equalityComparer) : base(value, equalityComparer)
+            private TerraformValueFake(ITerraformValue<T> value, IEqualityComparer<ITerraformValue<T>>? equalityComparer) : base(value, equalityComparer)
             {
             }
 
-            public TerraformValue(ITerraformValue<T> value, IEqualityComparer<T>? equalityComparer) : this(value, new TerraformEqualityEqualityComparer<T>(equalityComparer))
-            {
-            }
-
-            public TerraformValue(ITerraformValue<T> value) : this(value, equalityComparer: default(IEqualityComparer<ITerraformValue<T>>))
-            {
-            }
-
-            public TerraformValue(T value) : this(new TerraformValue<T>() { Value = value }, default(IEqualityComparer<ITerraformValue<T>>))
+            public TerraformValueFake(ITerraformValue<T> value, IEqualityComparer<T>? equalityComparer)
+                : this(value, new TerraformEqualityEqualityComparer<T>(equalityComparer ?? SchemaFake<T>.GetDefaultEqualityComparer()))
             {
             }
         }

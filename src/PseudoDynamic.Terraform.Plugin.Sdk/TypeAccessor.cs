@@ -8,12 +8,13 @@ namespace PseudoDynamic.Terraform.Plugin
         private const BindingFlags _publicInstance = BindingFlags.Instance | BindingFlags.Public;
         private const BindingFlags _privateInstance = BindingFlags.Instance | BindingFlags.NonPublic;
 
-        private readonly Type _type;
+        public Type Type { get; }
+
         private Dictionary<string, MethodCaller<object, object>> _methodByName = new();
         private readonly Dictionary<int, ConstructorInfo> _constructorByParametersCount = new();
 
         public TypeAccessor(Type type) =>
-            _type = type ?? throw new ArgumentNullException(nameof(type));
+            Type = type ?? throw new ArgumentNullException(nameof(type));
 
         public MethodCaller<object, object> GetMethod(string methodName)
         {
@@ -21,7 +22,7 @@ namespace PseudoDynamic.Terraform.Plugin
                 return methodDelegate;
             }
 
-            var method = _type.GetMethod(methodName) ?? throw new InvalidOperationException($"Method {methodName} not found");
+            var method = Type.GetMethod(methodName) ?? throw new InvalidOperationException($"Method {methodName} not found");
             methodDelegate = method.DelegateForCall();
             _methodByName[methodName] = methodDelegate;
             return methodDelegate;
@@ -33,7 +34,7 @@ namespace PseudoDynamic.Terraform.Plugin
                 return cachedConstructor;
             }
 
-            var constructor = _type.GetConstructors(bindingFlags).Single(x => x.GetParameters().Length == parametersCount);
+            var constructor = Type.GetConstructors(bindingFlags).Single(x => x.GetParameters().Length == parametersCount);
             _constructorByParametersCount[parametersCount] = constructor;
             return constructor;
         }
@@ -46,7 +47,7 @@ namespace PseudoDynamic.Terraform.Plugin
         public ConstructorInfo GetPrivateInstanceConstructor(int parametersCount) =>
             GetConstructor(parametersCount, _privateInstance);
 
-        public object InvokeConstructor(Func<TypeAccessor, Func<int, ConstructorInfo>> getConstructorInfo, params object?[] arguments) =>
+        public object CreateInstance(Func<TypeAccessor, Func<int, ConstructorInfo>> getConstructorInfo, params object?[] arguments) =>
             getConstructorInfo(this)(arguments.Length).Invoke(arguments);
     }
 }

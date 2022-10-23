@@ -16,6 +16,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
         public DynamicValueDecoder(IServiceProvider serviceProvider) =>
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
+        /// <summary>
+        /// Enables deserialization through constructor, where constructor is used to inject just decoded block
+        /// attributes as parameters. Other constructor parameters are resolved by service provider.
+        /// </summary>
+        /// <param name="complex"></param>
+        /// <param name="attributes"></param>
+        /// <returns>The instantiated instance.</returns>
         private object ActivateComplex(ComplexDefinition complex, IReadOnlyDictionary<string, object?> attributes)
         {
             var reflectionMetadata = complex.ComplexReflectionMetadata;
@@ -80,6 +87,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
                 }
             }
 
+            // if not a number, we try better
             var numberUtf8 = TryReadUtf8(ref reader);
 
             if (numberUtf8 != null) {
@@ -123,7 +131,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
             var itemCount = reader.ReadArrayHeader();
 
             var listAccessor = ListAccessor.GetTypeAccessor(list.Item.WrappedSourceType);
-            dynamic items = listAccessor.InvokeConstructor(static x => x.GetPublicInstanceConstructor);
+            dynamic items = listAccessor.CreateInstance(static x => x.GetPublicInstanceConstructor);
             var addItem = listAccessor.GetMethod(nameof(IList<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
@@ -139,7 +147,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
             var itemCount = reader.ReadArrayHeader();
 
             var setAccessor = SetAccessor.GetTypeAccessor(set.Item.WrappedSourceType);
-            dynamic items = setAccessor.InvokeConstructor(static x => x.GetPublicInstanceConstructor);
+            dynamic items = setAccessor.CreateInstance(static x => x.GetPublicInstanceConstructor);
             var addItem = setAccessor.GetMethod(nameof(ISet<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
@@ -155,7 +163,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
             var itemCount = reader.ReadMapHeader();
 
             var mapAccessor = DictionaryAccessor.GetTypeAccessor(map.Key.WrappedSourceType, map.Value.WrappedSourceType);
-            dynamic items = mapAccessor.InvokeConstructor(static x => x.GetPublicInstanceConstructor);
+            dynamic items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceConstructor);
             var addItem = mapAccessor.GetMethod(nameof(IDictionary<object, object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
