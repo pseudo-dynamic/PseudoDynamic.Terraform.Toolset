@@ -1,4 +1,5 @@
-﻿using MessagePack;
+﻿using DotNext.Buffers;
+using MessagePack;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
@@ -7,8 +8,16 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
     {
         public void EncodeSchema(ref MessagePackWriter writer, BlockDefinition block, object schema)
         {
-            //var writer = new MessagePackWriter();
-            //writer.
+        }
+
+        public ReadOnlyMemory<byte> EncodeSchema(BlockDefinition block, object schema)
+        {
+            using var bufferWriter = new SparseBufferWriter<byte>(); // TODO: estimate proper defaults
+            var writer = new MessagePackWriter(bufferWriter);
+            EncodeSchema(ref writer, block, schema);
+            var buffer = new byte[bufferWriter.WrittenCount];
+            bufferWriter.CopyTo(buffer);
+            return buffer;
         }
     }
 }
