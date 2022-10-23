@@ -12,10 +12,8 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             return options;
         }
 
-
         public const string TerraformReattachProvidersVariableName = "TF_REATTACH_PROVIDERS";
         private const string TerraformCommandName = "terraform";
-
 
         public string? WorkingDirectory { get; init; }
 

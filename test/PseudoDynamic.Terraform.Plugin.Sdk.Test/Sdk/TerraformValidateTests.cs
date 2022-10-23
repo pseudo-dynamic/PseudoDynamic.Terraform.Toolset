@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Moq;
 using PseudoDynamic.Terraform.Plugin.Infrastructure;
+using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
 using PseudoDynamic.Terraform.Plugin.Schema;
 using System.Numerics;
 
@@ -93,7 +94,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
             _pluginHostFixture.Provider.ReplaceResourceDefinition(new ResourceDescriptor(resourceMock.Object, typeof(Schema)));
 
-            using var terraform = _pluginHostFixture.CreateTerraformCommand("TerraformProjects/resource_validate", filePattern);
+            using var terraform = _pluginHostFixture.CreateTerraformCommand("TerraformProjects/resource-validate", filePattern);
             Record.Exception(terraform.Validate).Should().BeNull();
 
             resourceMock.Verify();

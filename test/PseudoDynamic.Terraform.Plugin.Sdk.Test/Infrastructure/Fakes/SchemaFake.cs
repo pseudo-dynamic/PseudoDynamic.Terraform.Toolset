@@ -1,7 +1,7 @@
 ﻿using CSF.Collections;
 using PseudoDynamic.Terraform.Plugin.Schema;
 
-namespace PseudoDynamic.Terraform.Plugin.Infrastructure
+namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 {
     internal class SchemaFake<T>
     {

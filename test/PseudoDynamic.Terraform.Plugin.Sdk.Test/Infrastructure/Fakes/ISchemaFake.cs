@@ -1,4 +1,4 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Infrastructure
+﻿namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 {
     internal interface ISchemaFake
     {
