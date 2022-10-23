@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MessagePack;
 using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Protocols.Models;
 using PseudoDynamic.Terraform.Plugin.Schema.Transcoding;
@@ -54,7 +55,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var reports = new Reports();
 
             var decodingOptions = new DynamicValueDecoder.DecodingOptions() { Reports = reports };
-            var config = _dynamicValueDecoder.DecodeSchema(resourceDefinition.Schema, request.Config.Msgpack, decodingOptions);
+            var config = _dynamicValueDecoder.DecodeSchema(request.Config.Msgpack, resourceDefinition.Schema, decodingOptions);
 
             var contextArguments = new[] { config, reports };
             var context = ValidateConfig.ContextAccessor
