@@ -2,8 +2,9 @@
 using System.Text;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
+namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
 {
     internal sealed class DynamicValueDecoder
     {

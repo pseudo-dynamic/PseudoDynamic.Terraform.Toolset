@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using PseudoDynamic.Terraform.Plugin.Protocols;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack;
+using PseudoDynamic.Terraform.Plugin.Schema.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
+namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
 {
     [Serializable]
     internal class DynamicValueDecodingException : Exception
