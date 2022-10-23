@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Concurrent.FastReflection.NetStandard;
 using MessagePack;
 using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Protocols.Models;
@@ -57,11 +58,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var decodingOptions = new DynamicValueDecoder.DecodingOptions() { Reports = reports };
             var config = _dynamicValueDecoder.DecodeSchema(request.Config.Msgpack, resourceDefinition.Schema, decodingOptions);
 
-            var contextArguments = new[] { config, reports };
             var context = ValidateConfig.ContextAccessor
                 .GetTypeAccessor(resourceDefinition.Schema.SourceType)
-                .GetPrivateInstanceConstructor(contextArguments.Length)
-                .Invoke(contextArguments);
+                .CreateInstance(x => x.GetPrivateInstanceActivator, config, reports);
 
             await (Task)resourceDefinition.ResourceAccessor
                 .GetMethod(nameof(ResourceDummy.ValidateConfig))

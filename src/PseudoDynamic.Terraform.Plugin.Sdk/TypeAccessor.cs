@@ -54,7 +54,7 @@ namespace PseudoDynamic.Terraform.Plugin
             }
 
             var constructorInfo = GetConstructor(parametersCount, bindingFlags);
-            instanceActivator = Activation.DynamicMethodWeakTyped(constructorInfo);
+            instanceActivator = Activation.ExpressionWeakTyped(constructorInfo);
             _instanceActivatorByParametersCount[parametersCount] = instanceActivator;
             return instanceActivator;
         }
@@ -74,7 +74,7 @@ namespace PseudoDynamic.Terraform.Plugin
             getConstructorInfo(this)(arguments.Length).Invoke(arguments);
 
         /// <summary>
-        /// Creates an instance by invoking a cached dynamic method that represents the constructor.
+        /// Creates an instance by invoking a cached compiled expression that represents the constructor.
         /// </summary>
         /// <param name="getInstanceActivator"></param>
         /// <param name="arguments"></param>
