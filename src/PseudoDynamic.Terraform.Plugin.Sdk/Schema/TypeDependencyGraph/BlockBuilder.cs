@@ -132,7 +132,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             var blockAttributeVersion = context.GetContextualAttribute<BlockAttribute>()?.GetVersion();
 
             if (blockAttributeVersion == null && context.ContextType == VisitContextType.PropertySegment) {
-                blockAttributeVersion = context.GetVisitedTypeAttribute<BlockAttribute>()?.GetVersion();
+                blockAttributeVersion = context.GetVisitTypeAttribute<BlockAttribute>()?.GetVersion();
             }
 
             var version = blockAttributeVersion ?? BlockDefinition.DefaultVersion;
@@ -191,11 +191,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected ValueResult BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {
             var isTerraformValue = node.TryUnwrapTerraformValue(out var unwrappedNode);
-            var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint(out var implicitValueTypeConstraints);
+            var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint();
             bool isNestedBlock;
             ValueDefinition builtValue;
 
             if (explicitTypeConstraint == TerraformTypeConstraint.Block) {
+                var implicitValueTypeConstraints = unwrappedNode.Context.ImplicitTypeConstraints;
+
                 TerraformTypeConstraint? singleImplicitValueTypeConstraints = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
                     ?? (implicitValueTypeConstraints.Count == 1
                         ? implicitValueTypeConstraints.Single()
@@ -215,8 +217,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 } else if (singleImplicitValueTypeConstraints.Value.IsRange()) {
                     builtValue = BuildValue(unwrappedNode, singleImplicitValueTypeConstraints.Value);
                 } else {
-                    throw new NestedBlockException($"The {unwrappedContext.Property.GetPath()} property wants to be a nested block but the property type " +
-                        $"can be implictly object, tuple, block, or list, set or map, that contains implictly object, tuple or block");
+                    throw new NestedBlockException($"The {unwrappedContext.Property.GetPath()} property wants to be a nested block but the property type represents " +
+                        $@"either none, unknown or to many implicit Terraform constraint types: {string.Join(", ", implicitValueTypeConstraints)}
+Allowed Terraform value: either object, tuple, block, or list, set, map with object or block as direct child
+Context type = {unwrappedNode.Context.ContextType}
+Property type = {unwrappedNode.Context.VisitType}");
                 }
 
                 isNestedBlock = true;

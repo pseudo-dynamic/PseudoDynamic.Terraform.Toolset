@@ -11,13 +11,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         private readonly IProvider _provider;
         private readonly IMapper _mapper;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly DynamicValueDecoder _dynamicValueDecoder;
 
-        public ProviderAdapter(IProvider provider, IMapper mapper, IServiceProvider serviceProvider)
+        public ProviderAdapter(IProvider provider, IMapper mapper, DynamicValueDecoder dynamicValueDecoder)
         {
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _dynamicValueDecoder = dynamicValueDecoder;
         }
 
         public async Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request)
@@ -29,7 +29,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             };
         }
 
-        public async Task<ValidateProviderConfig.Response> ValidateProviderConfig(ValidateProviderConfig.Request request) => throw new NotImplementedException();
+        public async Task<ValidateProviderConfig.Response> ValidateProviderConfig(ValidateProviderConfig.Request request) =>
+            new ValidateProviderConfig.Response() {
+                PreparedConfig = request.Config,
+                Diagnostics = new List<Diagnostic>()
+            };
 
         public Task<ConfigureProvider.Response> ConfigureProvider(ConfigureProvider.Request request) => throw new NotImplementedException();
 
@@ -50,10 +54,17 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var reports = new Reports();
 
             var decodingOptions = new DynamicValueDecoder.DecodingOptions() { Reports = reports };
-            var schema = new DynamicValueDecoder(_serviceProvider).DecodeSchema(resourceDefinition.Schema, request.Config!.Msgpack!.Value, decodingOptions);
+            var config = _dynamicValueDecoder.DecodeSchema(resourceDefinition.Schema, request.Config.Msgpack, decodingOptions);
 
-            var context = ValidateConfig.ContextAccessor.CreateInstance(resourceDefinition.Schema.SourceType, schema, reports);
-            resourceDefinition.ResourceAccessor.GetMethod(nameof(ResourceDummy.ValidateConfig)).Invoke(resource, new object?[] { context });
+            var contextArguments = new[] { config, reports };
+            var context = ValidateConfig.ContextAccessor
+                .GetTypeAccessor(resourceDefinition.Schema.SourceType)
+                .GetPrivateInstanceConstructor(contextArguments.Length)
+                .Invoke(contextArguments);
+
+            await (Task)resourceDefinition.ResourceAccessor
+                .GetMethod(nameof(ResourceDummy.ValidateConfig))
+                .Invoke(resource, new object?[] { context });
 
             var diagnostics = _mapper.Map<IList<Diagnostic>>(reports);
 

@@ -21,11 +21,5 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         public abstract TerraformDefinitionType DefinitionType { get; }
 
         protected internal abstract void Visit(TerraformDefinitionVisitor visitor);
-
-        //public virtual bool Equals(TerraformDefinition? other) =>
-        //    other is not null
-        //    && SourceType == other.SourceType;
-
-
     }
 }

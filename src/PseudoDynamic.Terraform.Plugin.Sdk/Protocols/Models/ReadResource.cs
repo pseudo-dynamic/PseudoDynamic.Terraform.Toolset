@@ -10,7 +10,7 @@
             }
 
             public DynamicValue? CurrentState { get; set; }
-            public ReadOnlyMemory<byte>? Private { get; set; }
+            public ReadOnlyMemory<byte> Private { get; set; }
             public DynamicValue? ProviderMeta { get; set; }
 
             private string? _typeName;
@@ -20,7 +20,7 @@
         {
             public DynamicValue? NewState { get; set; }
             public IList<Diagnostic>? Diagnostics { get; set; }
-            public ReadOnlyMemory<byte>? Private { get; set; }
+            public ReadOnlyMemory<byte> Private { get; set; }
         }
     }
 }

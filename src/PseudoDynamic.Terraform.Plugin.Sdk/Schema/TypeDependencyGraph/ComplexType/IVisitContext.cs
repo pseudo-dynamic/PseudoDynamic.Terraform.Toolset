@@ -4,8 +4,9 @@
     {
         VisitContextType ContextType { get; }
         Type VisitType { get; }
+        IReadOnlySet<TerraformTypeConstraint> ImplicitTypeConstraints { get; }
 
-        T? GetVisitedTypeAttribute<T>() where T : Attribute;
+        T? GetVisitTypeAttribute<T>() where T : Attribute;
         T? GetContextualAttribute<T>() where T : Attribute;
     }
 }

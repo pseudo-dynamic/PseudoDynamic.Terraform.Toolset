@@ -12,7 +12,7 @@
             public DynamicValue? PriorState { get; set; }
             public DynamicValue? PlannedState { get; set; }
             public DynamicValue? Config { get; set; }
-            public ReadOnlyMemory<byte>? PlannedPrivate { get; set; }
+            public ReadOnlyMemory<byte> PlannedPrivate { get; set; }
             public DynamicValue? ProviderMeta { get; set; }
 
             private string? _typeName;
@@ -21,7 +21,7 @@
         public class Response
         {
             public DynamicValue? NewState { get; set; }
-            public ReadOnlyMemory<byte>? Private { get; set; }
+            public ReadOnlyMemory<byte> Private { get; set; }
             public IList<Diagnostic>? Diagnostics { get; set; }
 
             // This may be set only by the helper/schema "SDK" in the main Terraform

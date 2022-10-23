@@ -8,5 +8,5 @@ terraform {
 }
 
 resource "debug_validate" "default" {
-    greeting = "Hello from Terraform!"
+    value = 2147483647
 }

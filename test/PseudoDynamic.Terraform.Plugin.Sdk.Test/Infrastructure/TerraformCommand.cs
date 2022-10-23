@@ -141,7 +141,6 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             public WorkingDirectoryCloning(Action<WorkingDirectoryCloningOptions>? configureOptions)
                 : base(ProvideOptions(configureOptions, out var options))
             {
-
                 if (options.DeleteOnDispose
                     && options.DeleteOnlyTempDirectory
                     && !Path.IsPathFullyQualified(options.TemporaryWorkingDirectory))
@@ -159,8 +158,9 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
                 Directory.CreateDirectory(workingDirectory);
                 var workingDirectoryInfo = new DirectoryInfo(workingDirectory);
+                var copyableFilePatterns = options.CopyableFilePatterns;
 
-                foreach (var file in workingDirectoryInfo.EnumerateFiles("*.tf", SearchOption.AllDirectories))
+                foreach (var file in copyableFilePatterns.AsParallel().SelectMany(filePattern => workingDirectoryInfo.EnumerateFiles(filePattern, SearchOption.AllDirectories)))
                 {
                     var relativeDirectory = file.DirectoryName!.Remove(0, workingDirectory.Length);
                     var mirroringDirectory = Path.Combine(options.TemporaryWorkingDirectory, relativeDirectory);
@@ -223,10 +223,18 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
             internal class WorkingDirectoryCloningOptions : TerraformCommandOptionsBase<WorkingDirectoryCloningOptions>
             {
+                private static readonly string[] TerraformFilePattern = new[] { "*.tf" };
+
                 public string? WorkingDirectory
                 {
                     get => workingDirectory ?? AppContext.BaseDirectory;
                     set => workingDirectory = value;
+                }
+
+                public string[] CopyableFilePatterns
+                {
+                    get => copyableFilePatterns;
+                    set => copyableFilePatterns = value ?? throw new ArgumentNullException(nameof(value));
                 }
 
                 public string TemporaryWorkingDirectory { get; }
@@ -246,8 +254,15 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 public bool DeleteOnlyTempDirectory { get; set; } = true;
 
                 private string? workingDirectory;
+                private string[] copyableFilePatterns = TerraformFilePattern;
 
                 public WorkingDirectoryCloningOptions() => TemporaryWorkingDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+                public WorkingDirectoryCloningOptions SetCopyableFilePatterns(params string[] copyableFilePatterns)
+                {
+                    CopyableFilePatterns = copyableFilePatterns;
+                    return this;
+                }
             }
         }
     }

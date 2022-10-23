@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Namotion.Reflection;
 
@@ -30,7 +31,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         public ComplexTypeMetadata? ComplexTypeMetadata {
             get {
                 if (ContextType != VisitContextType.Complex) {
-                    throw new NotSupportedException($"Other contexts of type {VisitContextType.Complex.Id} cannot possess complex metadata");
+                    throw new NotSupportedException($@"Only contexts of type {VisitContextType.Complex.Id} can have complex metadata
+Context type = {ContextType}
+Visit type = {VisitType.FullName}");
                 }
 
                 return _complexMetadata ??= ComplexTypeMetadata.FromVisitContext(this);
@@ -40,6 +43,25 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         [MemberNotNullWhen(true, nameof(ComplexTypeMetadata))]
         public bool HasComplexTypeMetadata => ContextType == VisitContextType.Complex;
 
+        public IReadOnlySet<TerraformTypeConstraint> ImplicitTypeConstraints {
+            get {
+                var implicitTypeConstraints = _implicitTypeConstraints;
+
+                if (implicitTypeConstraints is not null) {
+                    return implicitTypeConstraints;
+                }
+
+                if (GetVisitTypeAttribute<TypeConstraintEvaluationPreventionAttribute>() is not null) {
+                    implicitTypeConstraints = ImmutableHashSet<TerraformTypeConstraint>.Empty;
+                } else {
+                    implicitTypeConstraints = TerraformTypeConstraintEvaluator.Default.Evaluate(VisitType);
+                }
+
+                _implicitTypeConstraints = implicitTypeConstraints;
+                return implicitTypeConstraints;
+            }
+        }
+
         Type IVisitContext.VisitType => VisitType;
 
         private VisitContextType? _contextType;
@@ -47,6 +69,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         private ContextualType? _visitedContextualType;
         private ComplexTypeMetadata? _complexMetadata;
         private bool _computedComplexMetadata;
+        private IReadOnlySet<TerraformTypeConstraint>? _implicitTypeConstraints;
 
         internal VisitContext(IContext context, Type visitedType)
             : base(context) =>
@@ -77,6 +100,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         {
             _contextType = context.ContextType;
             _visitType = context.VisitType;
+            _implicitTypeConstraints = context.ImplicitTypeConstraints;
         }
 
         private void CheckNonDependencyCycle(Type type)
@@ -100,7 +124,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// Gets the contextual attribute from maybe the visited type or property.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public T? GetVisitedTypeAttribute<T>()
+        public T? GetVisitTypeAttribute<T>()
             where T : Attribute =>
             GetVisitedContextualType().GetInheritedAttribute<T>();
 
@@ -110,7 +134,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// <typeparam name="T"></typeparam>
         public virtual T? GetContextualAttribute<T>()
             where T : Attribute =>
-            GetVisitedTypeAttribute<T>();
+            GetVisitTypeAttribute<T>();
 
         public virtual bool Equals(VisitContext? context) =>
             context is not null

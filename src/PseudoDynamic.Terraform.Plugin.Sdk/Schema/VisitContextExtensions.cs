@@ -5,14 +5,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     internal static class VisitContextExtensions
     {
-        internal static TerraformTypeConstraint DetermineExplicitTypeConstraint<TContext>(this TContext context, out IReadOnlySet<TerraformTypeConstraint> implicitTypeConstraints)
+        internal static TerraformTypeConstraint DetermineExplicitTypeConstraint<TContext>(this TContext context)
             where TContext : IVisitPropertySegmentContext
         {
             var property = context.Property;
             var valueType = context.VisitType;
             var valueAttribute = property.GetCustomAttribute<ValueAttribute>(inherit: true);
 
-            implicitTypeConstraints = TerraformTypeConstraintEvaluator.Default.Evaluate(valueType);
+            var implicitTypeConstraints = context.ImplicitTypeConstraints;
             TerraformTypeConstraint typeConstraintResult;
 
             if (valueAttribute is not null) {

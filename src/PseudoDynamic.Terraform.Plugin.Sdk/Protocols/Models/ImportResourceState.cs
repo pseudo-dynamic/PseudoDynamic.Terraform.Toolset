@@ -18,7 +18,7 @@
         {
             public string? TypeName { get; set; }
             public DynamicValue? State { get; set; }
-            public ReadOnlyMemory<byte>? Private { get; set; }
+            public ReadOnlyMemory<byte> Private { get; set; }
         }
 
         public class Response

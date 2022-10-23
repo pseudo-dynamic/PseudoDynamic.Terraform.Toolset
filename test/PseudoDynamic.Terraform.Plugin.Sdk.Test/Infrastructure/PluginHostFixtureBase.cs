@@ -18,12 +18,12 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="workingDirectory"></param>
+        /// <param name="configureOptions"></param>
         /// <param name="preventInit">Prevents from calling terraform init to initialize the working directory.</param>
         /// <returns></returns>
-        internal TerraformCommand CreateTerraformCommand(string workingDirectory, bool preventInit = false)
+        internal TerraformCommand.WorkingDirectoryCloning CreateTerraformCommand(Action<TerraformCommand.WorkingDirectoryCloning.WorkingDirectoryCloningOptions>? configureOptions = null, bool preventInit = false)
         {
-            var terraform = Host.Services.GetWorkingDirectoryCloningTerraformCommand(workingDirectory);
+            var terraform = Host.Services.GetWorkingDirectoryCloningTerraformCommand(configureOptions);
 
             if (!preventInit)
             {
@@ -32,6 +32,28 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
             return terraform;
         }
+
+        /// <summary>
+        /// Creates the Terraform command and calls terraform init.
+        /// </summary>
+        /// <param name="workingDirectory"></param>
+        /// <returns></returns>
+        internal TerraformCommand.WorkingDirectoryCloning CreateTerraformCommand(string workingDirectory) =>
+            CreateTerraformCommand(options => options.WorkingDirectory = workingDirectory);
+
+        /// <summary>
+        /// Creates the Terraform command and calls terraform init.
+        /// </summary>
+        /// <param name="workingDirectory"></param>
+        /// <param name="copyableFilePatterns">
+        /// Specifies custom file patterns that are used to copy matching files from working directory to the temporary directory.
+        /// </param>
+        /// <returns></returns>
+        internal TerraformCommand.WorkingDirectoryCloning CreateTerraformCommand(string workingDirectory, params string[] copyableFilePatterns) => CreateTerraformCommand(options =>
+        {
+            options.WorkingDirectory = workingDirectory;
+            options.CopyableFilePatterns = copyableFilePatterns;
+        });
 
         public async Task InitializeAsync()
         {

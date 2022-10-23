@@ -30,7 +30,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
             yield return new object[] {
                 typeof(PropertyArgumentBlock),
                 new BlockNode(new VisitContext(typeof(PropertyArgumentBlock)) { ContextType = VisitContextType.Complex }) {
-                    new BlockNode(new VisitContext(typeof(List<string>)) { ContextType = VisitContextType.Property }) {
+                    new BlockNode(new VisitContext(typeof(IList<string>)) { ContextType = VisitContextType.Property }) {
                         new BlockNode(new VisitContext(typeof(string)) { ContextType = VisitContextType.PropertyGenericSegment })
                     }
                 }
@@ -86,7 +86,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
         [Block]
         public class PropertyArgumentBlock
         {
-            public List<string> List { get; set; }
+            public IList<string> List { get; set; }
         }
 
         [Block]

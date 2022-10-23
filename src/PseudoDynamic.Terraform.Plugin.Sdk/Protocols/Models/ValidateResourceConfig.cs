@@ -9,9 +9,13 @@
                 set => _typeName = value;
             }
 
-            public DynamicValue? Config { get; set; }
+            public DynamicValue Config {
+                get => _config ?? throw new InvalidOperationException("Config is unexpectedly null");
+                set => _config = value;
+            }
 
             private string? _typeName;
+            private DynamicValue? _config;
         }
 
         public class Response

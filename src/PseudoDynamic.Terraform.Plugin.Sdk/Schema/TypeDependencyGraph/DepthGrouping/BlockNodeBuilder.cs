@@ -118,7 +118,8 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
             {
                 var visitedType = context.VisitType;
 
-                if (visitedType.IsComplexAnnotated(out _)) {
+                if ((context.ImplicitTypeConstraints.Count == 1 && context.ImplicitTypeConstraints.Single().IsComplex())
+                    || visitedType.IsComplexAnnotated(out _)) {
                     rewrittenContext = new VisitPropertyContext(context, context.VisitType) { ContextType = VisitContextType.Complex.Inherits(context.ContextType) };
                     return true;
                 }

@@ -23,5 +23,10 @@
             && WrappedSourceType == other.WrappedSourceType
             && IsWrappedByTerraformValue == other.IsWrappedByTerraformValue
             && TypeConstraint == other.TypeConstraint;
+
+        public override int GetHashCode() => HashCode.Combine(
+            WrappedSourceType,
+            IsWrappedByTerraformValue,
+            TypeConstraint);
     }
 }

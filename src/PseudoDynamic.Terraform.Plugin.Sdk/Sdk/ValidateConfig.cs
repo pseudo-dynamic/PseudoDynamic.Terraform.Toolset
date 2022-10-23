@@ -4,7 +4,7 @@
     {
         internal static readonly GenericTypeAccessor ContextAccessor = new(typeof(Context<>));
 
-        public class Context<Schema>
+        public class Context<Schema> : ResourceContext
         {
             public Schema Config { get; }
             public Reports Reports { get; }

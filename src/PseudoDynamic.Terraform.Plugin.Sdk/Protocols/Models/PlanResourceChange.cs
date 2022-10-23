@@ -12,7 +12,7 @@
             public DynamicValue? PriorState { get; set; }
             public DynamicValue? ProposedNewState { get; set; }
             public DynamicValue? Config { get; set; }
-            public ReadOnlyMemory<byte>? PriorPrivate { get; set; }
+            public ReadOnlyMemory<byte> PriorPrivate { get; set; }
             public DynamicValue? ProviderMeta { get; set; }
 
             private string? _typeName;
@@ -22,7 +22,7 @@
         {
             public DynamicValue? PlannedState { get; set; }
             public IList<AttributePath>? RequiresReplace { get; set; }
-            public ReadOnlyMemory<byte>? PlannedPrivate { get; set; }
+            public ReadOnlyMemory<byte> PlannedPrivate { get; set; }
             public IList<Diagnostic>? Diagnostics { get; set; }
 
 

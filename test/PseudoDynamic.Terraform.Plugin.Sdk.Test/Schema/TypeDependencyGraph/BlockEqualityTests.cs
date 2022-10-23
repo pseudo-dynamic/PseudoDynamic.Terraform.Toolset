@@ -1,6 +1,6 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Infrastructure;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     public class BlockEqualityTests
     {
