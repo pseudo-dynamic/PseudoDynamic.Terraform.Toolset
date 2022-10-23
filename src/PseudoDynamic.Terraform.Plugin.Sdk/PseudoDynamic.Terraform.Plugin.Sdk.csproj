@@ -21,6 +21,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="TypeKitchen.Creation" Version="1.2.12" />
     </ItemGroup>
 
     <ItemGroup>

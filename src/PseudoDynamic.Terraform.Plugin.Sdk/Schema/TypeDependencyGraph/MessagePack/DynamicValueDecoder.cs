@@ -131,7 +131,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
             var itemCount = reader.ReadArrayHeader();
 
             var listAccessor = ListAccessor.GetTypeAccessor(list.Item.WrappedSourceType);
-            dynamic items = listAccessor.CreateInstance(static x => x.GetPublicInstanceConstructor);
+            dynamic items = listAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = listAccessor.GetMethod(nameof(IList<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
@@ -147,7 +147,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
             var itemCount = reader.ReadArrayHeader();
 
             var setAccessor = SetAccessor.GetTypeAccessor(set.Item.WrappedSourceType);
-            dynamic items = setAccessor.CreateInstance(static x => x.GetPublicInstanceConstructor);
+            dynamic items = setAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = setAccessor.GetMethod(nameof(ISet<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
@@ -163,7 +163,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.MessagePack
             var itemCount = reader.ReadMapHeader();
 
             var mapAccessor = DictionaryAccessor.GetTypeAccessor(map.Key.WrappedSourceType, map.Value.WrappedSourceType);
-            dynamic items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceConstructor);
+            dynamic items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = mapAccessor.GetMethod(nameof(IDictionary<object, object>.Add));
 
             for (int i = 0; i < itemCount; i++) {

@@ -15,16 +15,16 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 
             if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out var genericTypeArguments))
             {
-                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.GetTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceConstructor);
+                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.GetTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
             }
             else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(ISet<>), out _, out genericTypeArguments))
             {
-                return (IEqualityComparer<T>)GenericSetEqualityComparerAccessor.GetTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceConstructor);
+                return (IEqualityComparer<T>)GenericSetEqualityComparerAccessor.GetTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
             }
             else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IDictionary<,>), out _, out genericTypeArguments))
             {
                 var keyValuePairType = GenericKeyValuePairAccessor.GetTypeAccessor(genericTypeArguments).Type;
-                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.GetTypeAccessor(keyValuePairType).CreateInstance(x => x.GetPublicInstanceConstructor);
+                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.GetTypeAccessor(keyValuePairType).CreateInstance(x => x.GetPublicInstanceActivator);
             }
             else
             {
