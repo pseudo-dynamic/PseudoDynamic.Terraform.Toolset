@@ -16,16 +16,16 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 
             if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out var genericTypeArguments))
             {
-                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.GetTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
+                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.MakeGenericTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
             }
             else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(ISet<>), out _, out genericTypeArguments))
             {
-                return (IEqualityComparer<T>)GenericSetEqualityComparerAccessor.GetTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
+                return (IEqualityComparer<T>)GenericSetEqualityComparerAccessor.MakeGenericTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
             }
             else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IDictionary<,>), out _, out genericTypeArguments))
             {
-                var keyValuePairType = GenericKeyValuePairAccessor.GetTypeAccessor(genericTypeArguments).Type;
-                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.GetTypeAccessor(keyValuePairType).CreateInstance(x => x.GetPublicInstanceActivator);
+                var keyValuePairType = GenericKeyValuePairAccessor.MakeGenericTypeAccessor(genericTypeArguments).Type;
+                return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.MakeGenericTypeAccessor(keyValuePairType).CreateInstance(x => x.GetPublicInstanceActivator);
             }
             else
             {
@@ -92,6 +92,10 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 
             public static ISet<Block> RangeSet(params T[] values) =>
                 values.Select(OfValue).ToHashSet();
+
+            public static IDictionary<TKey, Block> RangeMap<TKey>(params (TKey Key, T Value)[] values)
+                where TKey : notnull =>
+                values.ToDictionary(x => x.Key, x => OfValue(x.Value));
 
             private readonly IEqualityComparer<T> _equalityComparer;
 
@@ -180,6 +184,11 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 
             public TerraformValueFake(ITerraformValue<T> value, IEqualityComparer<T>? equalityComparer)
                 : this(value, new TerraformEqualityEqualityComparer<T>(equalityComparer ?? SchemaFake<T>.GetDefaultEqualityComparer()))
+            {
+            }
+
+            public TerraformValueFake(ITerraformValue<T> value)
+                : this(value, default(IEqualityComparer<T>))
             {
             }
         }

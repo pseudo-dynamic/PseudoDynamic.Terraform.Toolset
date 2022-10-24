@@ -1,18 +1,52 @@
 ﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using DotNext.Buffers;
-using ObjectAccessor = FastMember.ObjectAccessor;
 using MessagePack;
 using PseudoDynamic.Terraform.Plugin.Reflection;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
-using System.Runtime.CompilerServices;
+using ObjectAccessor = FastMember.ObjectAccessor;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
 {
     internal class DynamicValueEncoder
     {
+        internal readonly static DynamicValueEncoder Default = new DynamicValueEncoder();
+
+        private readonly static TypeAccessor DynamicValueEncoderAccessor = new TypeAccessor(typeof(DynamicValueEncoder));
         private readonly static GenericTypeAccessor CollectionEncoderAccessor = new GenericTypeAccessor(typeof(CollectionEncoder<>));
-        private readonly static GenericTypeAccessor DictionaryEncoderAccessor = new GenericTypeAccessor(typeof(CollectionEncoder<>));
+        private readonly static GenericTypeAccessor DictionaryEncoderAccessor = new GenericTypeAccessor(typeof(DictionaryEncoder<,>));
+
+        private readonly static Dictionary<Type, EncodeTerraformValueCompiledMethod> EncodeTerraformValueCompiledMethods = new Dictionary<Type, EncodeTerraformValueCompiledMethod>();
+
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DynamicValueEncoder))]
+        private static void EncodeTerraformValue<T>(DynamicValueEncoder encoder, ref MessagePackWriter writer, ValueDefinition value, ITerraformValue<T> terraformValue)
+        {
+            if (terraformValue.IsUnknown) {
+                writer.WriteExtensionFormat(new ExtensionResult(0, ReadOnlySequence<byte>.Empty));
+                return;
+            }
+
+            if (terraformValue.IsNull) {
+                writer.WriteNil();
+                return;
+            }
+
+            encoder.EncodeNonNullValue(ref writer, value, terraformValue.Value);
+        }
+
+        private static EncodeTerraformValueCompiledMethod.EncodeTerraformValueDelegate GetEncodeTerraformValueDelegate(Type terraformValueType, Type valueType)
+        {
+            if (EncodeTerraformValueCompiledMethods.TryGetValue(terraformValueType, out var compiledMethod)) {
+                return compiledMethod.EncodeTerraformValue;
+            }
+
+            compiledMethod = new EncodeTerraformValueCompiledMethod(terraformValueType, valueType);
+            EncodeTerraformValueCompiledMethods[terraformValueType] = compiledMethod;
+            return compiledMethod.EncodeTerraformValue;
+        }
 
         public void EncodeNumber(ref MessagePackWriter writer, ValueDefinition value, object content)
         {
@@ -66,7 +100,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
 
         private void EncodeMonoRange(ref MessagePackWriter writer, MonoRangeDefinition range, object content)
         {
-            var collectionEncoder = (ICollectionEncoder)CollectionEncoderAccessor.GetTypeAccessor(range.Item.SourceType).CreateInstance(x => x.GetPublicInstanceActivator, content);
+            var collectionEncoder = (ICollectionEncoder)CollectionEncoderAccessor.MakeGenericTypeAccessor(range.Item.SourceType).CreateInstance(x => x.GetPublicInstanceActivator, content);
+            collectionEncoder.WriteHeader(ref writer);
             var itemEnumerator = collectionEncoder.GetEnumerator(range.Item);
 
             while (itemEnumerator.MoveNext()) {
@@ -77,9 +112,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         private void EncodeMap(ref MessagePackWriter writer, MapDefinition dictionary, object content)
         {
             var dictionaryEncoder = (IDictionaryEncoder)DictionaryEncoderAccessor
-                .GetTypeAccessor(dictionary.Key.SourceType, dictionary.Value.SourceType)
+                .MakeGenericTypeAccessor(dictionary.Key.SourceType, dictionary.Value.SourceType)
                 .CreateInstance(x => x.GetPublicInstanceActivator, content);
 
+            dictionaryEncoder.WriteHeader(ref writer);
             var itemEnumerator = dictionaryEncoder.GetEnumerator();
 
             while (itemEnumerator.MoveNext()) {
@@ -144,46 +180,33 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         public void EncodeValue(ref MessagePackWriter writer, ValueDefinition value, object? content)
         {
             if (content is null) {
-                goto nil;
+                writer.WriteNil();
+                return;
             }
 
             if (value.IsWrappedByTerraformValue) {
-                var terraformValue = (ITerraformValue)content;
-
-                if (terraformValue.IsUnknown) {
-                    writer.WriteExtensionFormat(new ExtensionResult(0, ReadOnlySequence<byte>.Empty));
-                    return;
-                }
-
-                if (terraformValue.IsNull) {
-                    goto nil;
-                }
-
-                EncodeValue(ref writer, value, terraformValue.Value);
+                GetEncodeTerraformValueDelegate(value.OuterType, value.SourceType).Invoke(this, ref writer, value, content);
                 return;
             }
 
             EncodeNonNullValue(ref writer, value, content);
-            return;
-
-            nil:
-            writer.WriteNil();
         }
 
-        public void EncodeSchema(ref MessagePackWriter writer, BlockDefinition block, object schema)
+        public void EncodeSchema(ref MessagePackWriter writer, BlockDefinition block, object content)
         {
-            if (schema is null) {
+            if (content is null) {
                 throw new DynamicValueEncodingException("The very first encoding schema cannot be null");
             }
 
-            EncodeComplex(ref writer, block, schema);
+            EncodeComplex(ref writer, block, content);
         }
 
-        public ReadOnlyMemory<byte> EncodeSchema(BlockDefinition block, object schema)
+        public ReadOnlyMemory<byte> EncodeSchema(BlockDefinition block, object content)
         {
             using var bufferWriter = new SparseBufferWriter<byte>(); // TODO: estimate proper defaults
             var writer = new MessagePackWriter(bufferWriter);
-            EncodeSchema(ref writer, block, schema);
+            EncodeSchema(ref writer, block, content);
+            writer.Flush();
             var buffer = new byte[bufferWriter.WrittenCount];
             bufferWriter.CopyTo(buffer);
             return buffer;
@@ -191,26 +214,26 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
 
         private interface ICollectionEncoder
         {
-            void WriteArrayHeader(ref MessagePackWriter writer);
+            void WriteHeader(ref MessagePackWriter writer);
             IEnumerator<object?> GetEnumerator(TerraformDefinition item);
         }
 
         private class CollectionEncoder<TItem> : ICollectionEncoder
         {
-            public ICollection<TItem> List { get; }
+            public ICollection<TItem> Collection { get; }
 
-            public CollectionEncoder(ICollection<TItem> list) =>
-                List = list;
+            public CollectionEncoder(ICollection<TItem> collection) =>
+                Collection = collection;
 
-            public void WriteArrayHeader(ref MessagePackWriter writer) =>
-                writer.WriteArrayHeader(List.Count);
+            public virtual void WriteHeader(ref MessagePackWriter writer) =>
+                writer.WriteArrayHeader(Collection.Count);
 
             public virtual IEnumerator<object?> GetEnumerator(TerraformDefinition item)
             {
-                var enumerator = List.GetEnumerator();
+                var enumerator = Collection.GetEnumerator();
 
                 if (!item.SourceType.IsValueType) {
-                    return Unsafe.As<IEnumerator<object>>(List.GetEnumerator());
+                    return Unsafe.As<IEnumerator<object>>(Collection.GetEnumerator());
                 }
 
                 return Cast();
@@ -226,24 +249,55 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
 
         private interface IDictionaryEncoder
         {
-            void WriteArrayHeader(ref MessagePackWriter writer);
+            void WriteHeader(ref MessagePackWriter writer);
             IEnumerator<object?> GetEnumerator();
         }
 
         private class DictionaryEncoder<TKey, TValue> : CollectionEncoder<KeyValuePair<TKey, TValue>>, IDictionaryEncoder
         {
-            public DictionaryEncoder(ICollection<KeyValuePair<TKey, TValue>> list) : base(list)
+            public DictionaryEncoder(ICollection<KeyValuePair<TKey, TValue>> collection) : base(collection)
             {
             }
 
+            public override void WriteHeader(ref MessagePackWriter writer) =>
+                writer.WriteMapHeader(Collection.Count);
+
             public virtual IEnumerator<object?> GetEnumerator()
             {
-                var enumerator = List.GetEnumerator();
+                var enumerator = Collection.GetEnumerator();
 
                 while (enumerator.MoveNext()) {
                     yield return enumerator.Current.Key;
                     yield return enumerator.Current.Value;
                 }
+            }
+        }
+
+        private class EncodeTerraformValueCompiledMethod
+        {
+            internal delegate void EncodeTerraformValueDelegate(DynamicValueEncoder encoder, ref MessagePackWriter writer, ValueDefinition value, object terraformValue);
+
+            private readonly static MethodAccessor EncodeTerraformValueAccessor = DynamicValueEncoderAccessor.GetMethodAccessor(static x => x.GetPrivateStaticMethod, nameof(EncodeTerraformValue));
+
+            public EncodeTerraformValueDelegate EncodeTerraformValue { get; }
+
+            public EncodeTerraformValueCompiledMethod(Type terraformValueType, Type valueType)
+            {
+                var method = EncodeTerraformValueAccessor.MakeGenericMethod(valueType);
+                ParameterExpression param1 = Expression.Parameter(typeof(DynamicValueEncoder), "encoder");
+                ParameterExpression param2 = Expression.Parameter(typeof(MessagePackWriter).MakeByRefType(), "writer");
+                ParameterExpression param3 = Expression.Parameter(typeof(ValueDefinition), "value");
+                ParameterExpression param4 = Expression.Parameter(typeof(object), "terraformValue");
+
+                MethodCallExpression body = Expression.Call(
+                    null,
+                    method,
+                    param1,
+                    param2,
+                    param3,
+                    terraformValueType.IsValueType ? Expression.Unbox(param4, terraformValueType) : Expression.Convert(param4, terraformValueType));
+
+                EncodeTerraformValue = Expression.Lambda<EncodeTerraformValueDelegate>(body, param1, param2, param3, param4).Compile();
             }
         }
     }

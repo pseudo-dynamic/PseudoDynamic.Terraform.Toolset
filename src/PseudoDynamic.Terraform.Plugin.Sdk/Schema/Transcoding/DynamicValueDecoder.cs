@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using System.Text;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,8 +23,17 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
 
         private object DecodeNumber(ref MessagePackReader reader, ValueDefinition value)
         {
+            if (TryReadUtf8(ref reader, out var utf8Number)) {
+                if (value.SourceType == typeof(BigInteger)) {
+                    return BigInteger.Parse(utf8Number);
+                } else {
+                    return Convert.ChangeType(utf8Number, value.SourceType);
+                }
+            }
+
             // We make it dynamic, so the explicit BigInteger user-conversion works.
-            dynamic? number = TryReadNumber(ref reader);
+            dynamic? number = TryReadMessagePackDrivenNumber(ref reader)
+                ?? TryReadSchemaDrivenNumber(ref reader, value);
 
             if (number != null) {
                 if (value.SourceType == typeof(BigInteger)) {
@@ -33,20 +43,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
                 }
             }
 
-            // if not a number, we try better
-            var numberUtf8 = TryReadUtf8(ref reader);
+            throw new DynamicValueDecodingException($"The Terraform number representation for {value.SourceType.FullName} could not be found");
 
-            if (numberUtf8 != null) {
-                if (value.SourceType == typeof(BigInteger)) {
-                    return BigInteger.Parse(numberUtf8);
-                } else {
-                    return Convert.ChangeType(numberUtf8, value.SourceType);
-                }
-            }
-
-            throw new DynamicValueDecodingException($"The Terraform number \"{numberUtf8}\" is not representable as {value.SourceType.FullName}");
-
-            object? TryReadNumber(ref MessagePackReader reader) => reader.NextCode switch {
+            static object? TryReadMessagePackDrivenNumber(ref MessagePackReader reader) => reader.NextCode switch {
                 MessagePackCode.UInt8 => reader.ReadByte(),
                 MessagePackCode.Int8 => reader.ReadSByte(),
                 MessagePackCode.UInt16 => reader.ReadUInt16(),
@@ -60,13 +59,34 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
                 _ => null
             };
 
-            static string? TryReadUtf8(ref MessagePackReader reader)
-            {
-                var bytes = reader.ReadStringSequence();
+            static object? TryReadSchemaDrivenNumber(ref MessagePackReader reader, ValueDefinition value) => Type.GetTypeCode(value.SourceType) switch {
+                TypeCode.Byte => reader.ReadByte(),
+                TypeCode.SByte => reader.ReadSByte(),
+                TypeCode.UInt16 => reader.ReadUInt16(),
+                TypeCode.Int16 => reader.ReadInt16(),
+                TypeCode.UInt32 => reader.ReadUInt32(),
+                TypeCode.Int32 => reader.ReadInt32(),
+                TypeCode.Single => reader.ReadSingle(),
+                TypeCode.UInt64 => reader.ReadUInt64(),
+                TypeCode.Int64 => reader.ReadInt64(),
+                TypeCode.Double => reader.ReadDouble(),
+                _ => null
+            };
 
-                return bytes.HasValue
-                    ? Encoding.UTF8.GetString(bytes.Value)
-                    : null;
+            static bool TryReadUtf8(ref MessagePackReader reader, [NotNullWhen(true)] out string? utf8String)
+            {
+                if (reader.NextMessagePackType == MessagePackType.String) {
+                    var bytes = reader.ReadStringSequence();
+
+                    utf8String = bytes.HasValue
+                        ? Encoding.UTF8.GetString(bytes.Value)
+                        : string.Empty;
+
+                    return true;
+                }
+
+                utf8String = null;
+                return false;
             }
         }
 
@@ -76,9 +96,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         {
             var itemCount = reader.ReadArrayHeader();
 
-            var listAccessor = ListAccessor.GetTypeAccessor(list.Item.DeclaringType);
+            var listAccessor = ListAccessor.MakeGenericTypeAccessor(list.Item.OuterType);
             var items = listAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
-            var addItem = listAccessor.GetMethod(nameof(IList<object>.Add));
+            var addItem = listAccessor.GetMethodCaller(nameof(IList<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
                 var item = DecodeValue(ref reader, list.Item, options).Value;
@@ -92,9 +112,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         {
             var itemCount = reader.ReadArrayHeader();
 
-            var setAccessor = SetAccessor.GetTypeAccessor(set.Item.DeclaringType);
+            var setAccessor = SetAccessor.MakeGenericTypeAccessor(set.Item.OuterType);
             var items = setAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
-            var addItem = setAccessor.GetMethod(nameof(ISet<object>.Add));
+            var addItem = setAccessor.GetMethodCaller(nameof(ISet<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
                 var item = DecodeValue(ref reader, set.Item, options).Value;
@@ -108,9 +128,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         {
             var itemCount = reader.ReadMapHeader();
 
-            var mapAccessor = DictionaryAccessor.GetTypeAccessor(map.Key.DeclaringType, map.Value.DeclaringType);
+            var mapAccessor = DictionaryAccessor.MakeGenericTypeAccessor(map.Key.OuterType, map.Value.OuterType);
             var items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
-            var addItem = mapAccessor.GetMethod(nameof(IDictionary<object, object>.Add));
+            var addItem = mapAccessor.GetMethodCaller(nameof(IDictionary<object, object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
                 var key = reader.ReadString();

@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using FastMember;
 using Namotion.Reflection;
 using PseudoDynamic.Terraform.Plugin.Schema.Conventions;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
@@ -232,7 +231,7 @@ Property type = {unwrappedNode.Context.VisitType}");
             }
 
             var updatedValue = builtValue with {
-                DeclaringType = node.Context.VisitType,
+                OuterType = node.Context.VisitType,
                 IsWrappedByTerraformValue = isTerraformValue
             };
 

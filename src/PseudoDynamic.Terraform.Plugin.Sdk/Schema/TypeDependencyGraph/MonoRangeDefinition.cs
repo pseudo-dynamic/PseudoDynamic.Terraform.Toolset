@@ -1,6 +1,6 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
-    internal record class MonoRangeDefinition : RangeDefinition, INestedValueAccessor
+    internal record class MonoRangeDefinition : RangeDefinition, INestedValueProvider
     {
         internal static MonoRangeDefinition List<SourceType>(ValueDefinition item) =>
             new MonoRangeDefinition(typeof(SourceType), TerraformTypeConstraint.List, item);
@@ -19,7 +19,7 @@
         public override TerraformTypeConstraint TypeConstraint { get; }
 
         public ValueDefinition Item { get; }
-        ValueDefinition INestedValueAccessor.NestedValue => Item;
+        ValueDefinition INestedValueProvider.NestedValue => Item;
 
         public MonoRangeDefinition(Type sourceType, TerraformTypeConstraint typeConstraint, ValueDefinition item)
             : base(sourceType)

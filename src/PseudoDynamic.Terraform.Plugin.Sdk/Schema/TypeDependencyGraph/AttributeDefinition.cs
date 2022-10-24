@@ -57,14 +57,14 @@
             : base(sourceType)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            _value = value ?? throw new ArgumentNullException(nameof(value));
             ParseValue(value);
         }
 
         private void ParseValue(ValueDefinition value)
         {
-            if (value is INestedValueAccessor nestedValueAccessor) {
-                ValueWrapping = nestedValueAccessor.NestedValue.TypeConstraint.ToValueWrapping();
+            if (value is INestedValueProvider) {
+                ValueWrapping = value.TypeConstraint.ToValueWrapping();
             }
         }
 

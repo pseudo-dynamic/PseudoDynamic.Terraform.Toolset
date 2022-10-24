@@ -50,7 +50,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         {
             ValueDefinition block;
 
-            if (value is INestedValueAccessor nestedValueAccessor) {
+            if (value is INestedValueProvider nestedValueAccessor) {
                 block = nestedValueAccessor.NestedValue;
             } else {
                 block = value;

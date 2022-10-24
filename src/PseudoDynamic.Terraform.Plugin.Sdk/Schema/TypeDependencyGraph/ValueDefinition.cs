@@ -5,13 +5,13 @@
         /// <summary>
         /// If differing from <see cref="TerraformDefinition.SourceType"/>
         /// then <see cref="TerraformDefinition.SourceType"/> was computed
-        /// from <see cref="DeclaringType"/>. It could then be the case,
+        /// from <see cref="OuterType"/>. It could then be the case,
         /// that <see cref="TerraformDefinition.SourceType"/> was used as
-        /// type parameter of <see cref="DeclaringType"/>.
+        /// type parameter of <see cref="OuterType"/>.
         /// </summary>
-        public Type DeclaringType {
-            get => _delcaringType ?? SourceType;
-            init => _delcaringType = value;
+        public Type OuterType {
+            get => _outerType ?? SourceType;
+            init => _outerType = value;
         }
 
         /// <summary>
@@ -23,7 +23,7 @@
 
         public abstract TerraformTypeConstraint TypeConstraint { get; }
 
-        private Type? _delcaringType;
+        private Type? _outerType;
 
         protected ValueDefinition(Type sourceType) : base(sourceType)
         {
@@ -32,12 +32,12 @@
         public virtual bool Equals(ValueDefinition? other) =>
             other is not null
             && base.Equals(other)
-            && DeclaringType == other.DeclaringType
+            && OuterType == other.OuterType
             && IsWrappedByTerraformValue == other.IsWrappedByTerraformValue
             && TypeConstraint == other.TypeConstraint;
 
         public override int GetHashCode() => HashCode.Combine(
-            DeclaringType,
+            OuterType,
             IsWrappedByTerraformValue,
             TypeConstraint);
     }

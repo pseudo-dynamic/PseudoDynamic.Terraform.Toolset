@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Concurrent.FastReflection.NetStandard;
-using MessagePack;
 using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Protocols.Models;
 using PseudoDynamic.Terraform.Plugin.Schema.Transcoding;
@@ -59,11 +57,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var config = _dynamicValueDecoder.DecodeSchema(request.Config.Msgpack, resourceDefinition.Schema, decodingOptions);
 
             var context = ValidateConfig.ContextAccessor
-                .GetTypeAccessor(resourceDefinition.Schema.SourceType)
+                .MakeGenericTypeAccessor(resourceDefinition.Schema.SourceType)
                 .CreateInstance(x => x.GetPrivateInstanceActivator, config, reports);
 
             await (Task)resourceDefinition.ResourceAccessor
-                .GetMethod(nameof(ResourceDummy.ValidateConfig))
+                .GetMethodCaller(nameof(ResourceDummy.ValidateConfig))
                 .Invoke(resource, new object?[] { context });
 
             var diagnostics = _mapper.Map<IList<Diagnostic>>(reports);

@@ -20,7 +20,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
             var constructorArguments = new[] { isNullable, value, isNull, isUnknown };
 
             return TerraformValueAccessor
-                .GetTypeAccessor(typeArgument)
+                .MakeGenericTypeAccessor(typeArgument)
                 .GetPrivateInstanceConstructor(constructorArguments.Length)
                 .Invoke(constructorArguments)
                 ?? throw new InvalidOperationException();

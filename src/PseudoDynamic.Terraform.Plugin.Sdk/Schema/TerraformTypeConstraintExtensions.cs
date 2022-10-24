@@ -18,7 +18,7 @@
             or TerraformTypeConstraint.Bool
             or TerraformTypeConstraint.Object
             or TerraformTypeConstraint.Tuple
-            or TerraformTypeConstraint.Block => default,
+            or TerraformTypeConstraint.Block => null,
             TerraformTypeConstraint.List => ValueWrapping.List,
             TerraformTypeConstraint.Set => ValueWrapping.Set,
             TerraformTypeConstraint.Map => ValueWrapping.Map,

@@ -4,7 +4,7 @@
     /// Assumes that the implementation has a nested value.
     /// This applies to all range type constraints.
     /// </summary>
-    internal interface INestedValueAccessor
+    internal interface INestedValueProvider
     {
         ValueDefinition NestedValue { get; }
     }

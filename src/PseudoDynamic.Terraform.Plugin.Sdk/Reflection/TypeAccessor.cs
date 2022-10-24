@@ -6,27 +6,57 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
 {
     internal class TypeAccessor
     {
+        private const BindingFlags PrivateStaticBindings = BindingFlags.Static | BindingFlags.NonPublic;
+
         private const BindingFlags PublicInstanceBindings = BindingFlags.Instance | BindingFlags.Public;
         private const BindingFlags PrivateInstanceBindings = BindingFlags.Instance | BindingFlags.NonPublic;
 
         public Type Type { get; }
 
-        private Dictionary<string, MethodCaller<object, object>> _methodByName = new();
+        private Dictionary<string, MethodInfo> _methodByName = new();
+        private Dictionary<string, MethodAccessor> _methodAccessorByName = new();
+        private Dictionary<string, MethodCaller<object, object>> _methodCallerByName = new();
         private readonly Dictionary<int, ConstructorInfo> _constructorByParametersCount = new();
         private readonly Dictionary<int, CreateInstance> _instanceActivatorByParametersCount = new();
 
         public TypeAccessor(Type type) =>
             Type = type ?? throw new ArgumentNullException(nameof(type));
 
-        public MethodCaller<object, object> GetMethod(string methodName)
+        public MethodInfo GetMethod(string methodName, BindingFlags bindingFlags)
         {
-            if (_methodByName.TryGetValue(methodName, out var methodDelegate)) {
+            if (_methodByName.TryGetValue(methodName, out var method)) {
+                return method;
+            }
+
+            method = Type.GetMethod(methodName, bindingFlags) ?? throw new InvalidOperationException($"Method {methodName} not found");
+            _methodByName[methodName] = method;
+            return method;
+        }
+
+        public MethodInfo GetPrivateStaticMethod(string methodName) =>
+            GetMethod(methodName, PrivateStaticBindings);
+
+        public MethodAccessor GetMethodAccessor(Func<TypeAccessor, Func<string, MethodInfo>> getMethod, string methodName)
+        {
+            if (_methodAccessorByName.TryGetValue(methodName, out var methodAccessor)) {
+                return methodAccessor;
+            }
+
+            var method = getMethod(this)(methodName);
+            methodAccessor = new MethodAccessor(method);
+            _methodAccessorByName[methodName] = methodAccessor;
+            return methodAccessor;
+        }
+
+        public MethodCaller<object, object> GetMethodCaller(string methodName)
+        {
+            if (_methodCallerByName.TryGetValue(methodName, out var methodDelegate)) {
                 return methodDelegate;
             }
 
             var method = Type.GetMethod(methodName) ?? throw new InvalidOperationException($"Method {methodName} not found");
             methodDelegate = method.DelegateForCall();
-            _methodByName[methodName] = methodDelegate;
+            _methodCallerByName[methodName] = methodDelegate;
             return methodDelegate;
         }
 

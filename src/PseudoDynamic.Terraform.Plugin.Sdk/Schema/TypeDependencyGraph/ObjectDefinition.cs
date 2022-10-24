@@ -20,7 +20,7 @@
             }
         }
 
-        int IAttributeAccessor.Count => Attributes.Count + Attributes.Count;
+        int IAttributeAccessor.Count => Attributes.Count;
 
         IEnumerable<AttributeDefinition> IAttributeAccessor.GetEnumerator() => Attributes;
 

@@ -9,7 +9,7 @@
         public GenericTypeAccessor(Type genericTypeDefinition) =>
             _genericTypeDefinition = genericTypeDefinition ?? throw new ArgumentNullException(nameof(genericTypeDefinition));
 
-        public TypeAccessor GetTypeAccessor(Type missingTypeArgument)
+        public TypeAccessor MakeGenericTypeAccessor(Type missingTypeArgument)
         {
             if (_typeAccessorByTypeArgument.TryGetValue(missingTypeArgument, out var typeAccessor)) {
                 return typeAccessor;
@@ -20,7 +20,7 @@
             return typeAccessor;
         }
 
-        public TypeAccessor GetTypeAccessor(params Type[] missingTypeArguments)
+        public TypeAccessor MakeGenericTypeAccessor(params Type[] missingTypeArguments)
         {
             if (_typeAccessorByTwoTypeArgument.TryGetValue(missingTypeArguments, out var typeAccessor)) {
                 return typeAccessor;

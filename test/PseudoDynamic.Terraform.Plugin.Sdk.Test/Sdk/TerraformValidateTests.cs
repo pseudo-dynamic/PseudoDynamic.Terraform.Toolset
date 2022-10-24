@@ -4,6 +4,7 @@ using PseudoDynamic.Terraform.Plugin.Infrastructure;
 using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
 using PseudoDynamic.Terraform.Plugin.Schema;
 using System.Numerics;
+using static PseudoDynamic.Terraform.Plugin.Infrastructure.CollectionFactories;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -51,17 +52,23 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             foreach (var resource in NestedBlockRangeResources(SchemaFake<string>.Block.RangeList("first_nested", "second_nested"), "config_nested_block_list")) yield return resource;
             foreach (var resource in NestedBlockRangeResources(SchemaFake<string>.Block.RangeSet("tf_second_csharp_first", "tf_first_csharp_second"), "config_nested_block_set")) yield return resource;
 
+            foreach (var resource in NestedBlockRangeResources(SchemaFake<string>.Block.RangeMap(
+                    ("first_nested_block", "first_nested_block_attribute"),
+                    ("second_nested_block", "second_nested_block_attribute")),
+                "config_nested_block_map"))
+                yield return resource;
+
             IEnumerable<object?[]> AdvancedResources<T>(
                 T value,
                 string fileName,
                 bool isUnknown = false,
                 IEqualityComparer<T>? equalityComparer = null,
                 bool isNestedBlock = false,
-                bool withoutWrapping = false)
+                bool notWrappable = false)
             {
                 var filePattern = $"{fileName}.tf";
                 yield return new object[] { new SchemaFake<T>(value, equalityComparer) { IsNestedBlock = isNestedBlock, }.Schema, filePattern };
-                if (!withoutWrapping) yield return new object[] { new SchemaFake<T>.TerraformValueFake(TerraformValue.OfValue<T>(value, isUnknown), equalityComparer) { IsNestedBlock = isNestedBlock }.Schema, filePattern };
+                if (!notWrappable) yield return new object[] { new SchemaFake<T>.TerraformValueFake(TerraformValue.OfValue<T>(value, isUnknown), equalityComparer) { IsNestedBlock = isNestedBlock }.Schema, filePattern };
             }
 
             IEnumerable<object?[]> UnknownResources<T>(T value, string fileName, bool isUnknown, IEqualityComparer<T>? equalityComparer = null) =>
@@ -74,11 +81,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 AdvancedResources<SchemaFake<T>.Block>(new SchemaFake<T>.Block(value), fileName, isNestedBlock: true);
 
             IEnumerable<object?[]> NestedBlockRangeResources<T>(T value, string fileName) =>
-                AdvancedResources<T>(value, fileName, isNestedBlock: true, withoutWrapping: true);
-
-            IList<T> List<T>(params T[] items) => new List<T>(items);
-            ISet<T> Set<T>(params T[] items) => new HashSet<T>(items);
-            IDictionary<string, T> Map<T>(params (string, T)[] items) => new Dictionary<string, T>(items.Select(x => new KeyValuePair<string, T>(x.Item1, x.Item2)));
+                AdvancedResources<T>(value, fileName, isNestedBlock: true, notWrappable: true);
         }
 
         [Theory]
