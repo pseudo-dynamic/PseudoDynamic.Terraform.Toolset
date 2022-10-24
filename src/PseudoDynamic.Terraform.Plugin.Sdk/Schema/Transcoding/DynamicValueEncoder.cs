@@ -148,8 +148,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         public void EncodeNonNullValue(ref MessagePackWriter writer, ValueDefinition value, object content)
         {
             switch (value.TypeConstraint) {
-                case TerraformTypeConstraint.Any:
-                    throw new NotImplementedException($"The encoding of Terraform constraint type {TerraformTypeConstraint.Any} is not implemented");
+                case TerraformTypeConstraint.Dynamic:
+                    throw new NotImplementedException($"The encoding of Terraform constraint type {TerraformTypeConstraint.Dynamic} is not implemented");
                 case TerraformTypeConstraint.String:
                     writer.Write((string)content);
                     break;

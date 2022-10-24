@@ -16,7 +16,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         [InlineData(new object[] { typeof(BigInteger), TerraformTypeConstraint.Number })]
         [InlineData(new object[] { typeof(string), TerraformTypeConstraint.String })]
         [InlineData(new object[] { typeof(bool), TerraformTypeConstraint.Bool })]
-        [InlineData(new object[] { typeof(object), TerraformTypeConstraint.Any })]
+        [InlineData(new object[] { typeof(object), TerraformTypeConstraint.Dynamic })]
         [InlineData(new object[] { typeof(IList<string>), TerraformTypeConstraint.List })]
         [InlineData(new object[] { typeof(ISet<string>), TerraformTypeConstraint.Set })]
         [InlineData(new object[] { typeof(IDictionary<string, string>), TerraformTypeConstraint.Map })]

@@ -2,7 +2,7 @@
 {
     public enum TerraformTypeConstraint
     {
-        Any,
+        Dynamic,
         Number,
         String,
         Bool,

@@ -12,7 +12,7 @@
             terraformType.IsMonoRange() || terraformType == TerraformTypeConstraint.Map;
 
         public static ValueWrapping? ToValueWrapping(this TerraformTypeConstraint typeConstraint) => typeConstraint switch {
-            TerraformTypeConstraint.Any
+            TerraformTypeConstraint.Dynamic
             or TerraformTypeConstraint.Number
             or TerraformTypeConstraint.String
             or TerraformTypeConstraint.Bool

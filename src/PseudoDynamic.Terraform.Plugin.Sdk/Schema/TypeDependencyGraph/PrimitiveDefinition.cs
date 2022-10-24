@@ -5,7 +5,7 @@
         public static readonly PrimitiveDefinition String = new(typeof(string), TerraformTypeConstraint.String);
         public static readonly PrimitiveDefinition Number = new(typeof(int), TerraformTypeConstraint.Number);
         public static readonly PrimitiveDefinition Bool = new(typeof(bool), TerraformTypeConstraint.Bool);
-        public static readonly PrimitiveDefinition Any = new(typeof(object), TerraformTypeConstraint.Any);
+        public static readonly PrimitiveDefinition Any = new(typeof(object), TerraformTypeConstraint.Dynamic);
 
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.Primitive;
 

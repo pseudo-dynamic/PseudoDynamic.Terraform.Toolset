@@ -13,7 +13,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
             TerraformTypeConstraint.Map => "map",
             TerraformTypeConstraint.Object => "object",
             TerraformTypeConstraint.Tuple => "tuple",
-            TerraformTypeConstraint.Any => "dynamic",
+            TerraformTypeConstraint.Dynamic => "dynamic",
             _ => throw new NotSupportedException($"{typeConstraint} is not convertible to a string and cannot be used to represent a block attribute (nested) type")
         };
 

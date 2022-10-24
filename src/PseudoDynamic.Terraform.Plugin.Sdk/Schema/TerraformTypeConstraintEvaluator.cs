@@ -24,7 +24,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         };
 
         private TerraformTypeConstraint EvaluateClassType(Type classType) => classType switch {
-            var _ when classType == typeof(object) => TerraformTypeConstraint.Any,
+            var _ when classType == typeof(object) => TerraformTypeConstraint.Dynamic,
             // We now say it is a "object" but upper context can change to "block" or "tuple"
             _ => TerraformTypeConstraint.Object
         };
