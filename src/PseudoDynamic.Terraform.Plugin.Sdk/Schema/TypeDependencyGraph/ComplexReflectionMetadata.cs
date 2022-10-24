@@ -7,20 +7,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
     /// </summary>
     internal record class ComplexReflectionMetadata : ComplexTypeMetadata
     {
-        public IReadOnlyDictionary<string, string> AttributeNamePropertyNameMapping { get; }
         public IReadOnlyDictionary<string, string> PropertyNameAttributeNameMapping { get; }
 
         public ComplexReflectionMetadata(
             ComplexTypeMetadata complexTypeMetadata,
-            IReadOnlyDictionary<string, string> attributeNamePropertyNameMapping,
             IReadOnlyDictionary<string, string> propertyNameAttributeNameMapping)
-            : base(complexTypeMetadata)
-        {
-            AttributeNamePropertyNameMapping = attributeNamePropertyNameMapping ?? throw new ArgumentNullException(nameof(attributeNamePropertyNameMapping));
+            : base(complexTypeMetadata) =>
             PropertyNameAttributeNameMapping = propertyNameAttributeNameMapping ?? throw new ArgumentNullException(nameof(propertyNameAttributeNameMapping));
-        }
-
-        public string GetPropertyName(string attributeName) =>
-            AttributeNamePropertyNameMapping[attributeName];
     }
 }

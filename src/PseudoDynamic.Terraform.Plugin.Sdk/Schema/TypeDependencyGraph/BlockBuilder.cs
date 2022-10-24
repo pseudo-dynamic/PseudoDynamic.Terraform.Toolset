@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using FastMember;
 using Namotion.Reflection;
 using PseudoDynamic.Terraform.Plugin.Schema.Conventions;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
@@ -61,18 +62,20 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             };
         }
 
-        private ComplexReflectionMetadata CreateComplexReflectionMetadata(ComplexTypeMetadata complexTypeMetadata, IEnumerable<AttributeDefinition> attributes)
+        private ComplexReflectionMetadata CreateComplexReflectionMetadata(VisitContext context, IEnumerable<AttributeDefinition> attributes)
         {
+            var complexTypeMetadata = context.ComplexTypeMetadata!;
+            var propertyNameAttributeNameMapping = attributes.ToDictionary(x => x.AttributeReflectionMetadata.Property.Name, x => x.Name);
+
             return new ComplexReflectionMetadata(
-                complexTypeMetadata!,
-                attributeNamePropertyNameMapping: attributes.ToDictionary(x => x.Name, x => x.AttributeReflectionMetadata.Property.Name),
-                propertyNameAttributeNameMapping: attributes.ToDictionary(x => x.AttributeReflectionMetadata.Property.Name, x => x.Name));
+                complexTypeMetadata,
+                propertyNameAttributeNameMapping);
         }
 
         protected ObjectDefinition BuildObject(BlockNode node)
         {
             var attributes = node.Select(node => BuildObjectAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList();
-            var reflectionMetadata = CreateComplexReflectionMetadata(node.Context.ComplexTypeMetadata!, attributes);
+            var reflectionMetadata = CreateComplexReflectionMetadata(node.Context, attributes);
 
             return new ObjectDefinition(node.Context.VisitType) {
                 Attributes = attributes,
@@ -163,9 +166,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 .Select(BuildNestedBlockAttribute)
                 .ToList();
 
-            var reflectionMetadata = CreateComplexReflectionMetadata(
-                node.Context.ComplexTypeMetadata!,
-                ((IEnumerable<AttributeDefinition>)attributes).Concat(blocks));
+            var reflectionMetadata = CreateComplexReflectionMetadata(node.Context, ((IEnumerable<AttributeDefinition>)attributes).Concat(blocks));
 
             return new BlockDefinition(visitType) {
                 Version = version,
@@ -231,7 +232,7 @@ Property type = {unwrappedNode.Context.VisitType}");
             }
 
             var updatedValue = builtValue with {
-                WrappedSourceType = node.Context.VisitType,
+                DeclaringType = node.Context.VisitType,
                 IsWrappedByTerraformValue = isTerraformValue
             };
 

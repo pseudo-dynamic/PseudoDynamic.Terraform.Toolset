@@ -1,4 +1,5 @@
 ﻿using CSF.Collections;
+using PseudoDynamic.Terraform.Plugin.Reflection;
 using PseudoDynamic.Terraform.Plugin.Schema;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes

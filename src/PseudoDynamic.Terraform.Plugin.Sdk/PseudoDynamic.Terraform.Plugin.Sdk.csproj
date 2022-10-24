@@ -13,6 +13,7 @@
         <PackageReference Include="CaseExtensions" Version="1.1.0" />
         <PackageReference Include="Concurrent.FastReflection.NetStandard" Version="1.2.1.1" />
         <PackageReference Include="DotNext.IO" Version="4.7.3" />
+        <PackageReference Include="FastMember.Signed" Version="1.5.0" />
         <PackageReference Include="Google.Protobuf" Version="3.21.7" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
         <PackageReference Include="ImmediateReflection" Version="2.0.0" />

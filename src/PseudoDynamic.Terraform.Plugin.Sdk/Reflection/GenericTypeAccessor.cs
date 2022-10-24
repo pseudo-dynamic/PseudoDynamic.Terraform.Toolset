@@ -1,4 +1,4 @@
-﻿namespace PseudoDynamic.Terraform.Plugin
+﻿namespace PseudoDynamic.Terraform.Plugin.Reflection
 {
     internal class GenericTypeAccessor
     {

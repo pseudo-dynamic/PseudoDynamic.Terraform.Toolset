@@ -3,7 +3,7 @@
     /// <summary>
     /// Defines an attribute of one block.
     /// </summary>
-    internal record class ObjectDefinition : ComplexDefinition, IAbstractAttributeAccessor
+    internal record class ObjectDefinition : ComplexDefinition, IAttributeAccessor
     {
         public static ObjectDefinition Uncomputed() => new ObjectDefinition(UncomputedSourceType);
 
@@ -20,6 +20,10 @@
             }
         }
 
+        int IAttributeAccessor.Count => Attributes.Count + Attributes.Count;
+
+        IEnumerable<AttributeDefinition> IAttributeAccessor.GetEnumerator() => Attributes;
+
         private IReadOnlyList<ObjectAttributeDefinition> _attributes = Array.Empty<ObjectAttributeDefinition>();
         private IReadOnlyDictionary<string, int>? _indexedAttributes;
 
@@ -27,7 +31,7 @@
         {
         }
 
-        AttributeDefinition IAbstractAttributeAccessor.GetAbstractAttribute(string attributeName)
+        AttributeDefinition IAttributeAccessor.GetAttribute(string attributeName)
         {
             _indexedAttributes ??= ToDictionary(_attributes);
 

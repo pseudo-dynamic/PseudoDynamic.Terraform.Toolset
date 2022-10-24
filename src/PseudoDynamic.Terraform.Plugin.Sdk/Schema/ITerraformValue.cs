@@ -1,33 +1,34 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using PseudoDynamic.Terraform.Plugin.Schema.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     /// <summary>
-    /// Represents a value that follows the conventions of a value of Terraform, that can be null or unknown.
+    /// <para>
+    /// Represents the adapter for <see cref="DynamicValueEncoder"/>.
+    /// </para>
+    /// <para>
+    /// Not intended being consumed by third-parties!
+    /// </para>
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <remarks>
-    /// If you model a schema, and you want to have access to <see cref="IsNull"/> or <see cref="IsUnknown"/>
-    /// of a value, then you can use <see cref="ITerraformValue{T}"/> or <see cref="TerraformValue{T}"/> to
-    /// wrap any type, that is representable by a Terraform type constraint.
-    /// </remarks>
-    [TypeConstraintEvaluationPrevention]
-    public interface ITerraformValue<[TerraformValueType] out T>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface ITerraformValue
     {
         /// <summary>
         /// The deserialized Terraform value.
         /// </summary>
-        T Value { get; }
+        internal object? Value { get; }
 
         /// <summary>
         /// True means <see cref="Value"/> is null.
         /// </summary>
         [MemberNotNullWhen(false, nameof(Value))]
-        bool IsNull { get; }
+        internal bool IsNull { get; }
 
         /// <summary>
         /// True indicates, that <see cref="Value"/> is not yet known.
         /// </summary>
-        bool IsUnknown { get; }
+        internal bool IsUnknown { get; }
     }
 }

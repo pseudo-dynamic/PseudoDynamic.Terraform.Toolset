@@ -6,6 +6,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
     {
         protected readonly static Type UncomputedSourceType = typeof(object);
 
+        /// <summary>
+        /// Represents the source type, the type this definition is actually
+        /// representing.
+        /// </summary>
         public virtual Type SourceType { get; }
 
         protected TerraformDefinition(Type sourceType) => SourceType = sourceType;

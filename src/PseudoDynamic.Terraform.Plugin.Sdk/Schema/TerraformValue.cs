@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema
+﻿using PseudoDynamic.Terraform.Plugin.Reflection;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     public static class TerraformValue
     {

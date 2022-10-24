@@ -2,6 +2,7 @@
 using System.Text;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
+using PseudoDynamic.Terraform.Plugin.Reflection;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
@@ -16,62 +17,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
 
         public DynamicValueDecoder(IServiceProvider serviceProvider) =>
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-
-        /// <summary>
-        /// Enables deserialization through constructor, where constructor is used to inject just decoded block
-        /// attributes as parameters. Other constructor parameters are resolved by service provider.
-        /// </summary>
-        /// <param name="complex"></param>
-        /// <param name="attributes"></param>
-        /// <returns>The instantiated instance.</returns>
-        private object ActivateComplex(ComplexDefinition complex, IReadOnlyDictionary<string, object?> attributes)
-        {
-            var reflectionMetadata = complex.ComplexReflectionMetadata;
-            var constructorParametersCount = reflectionMetadata.ConstructorParameters.Count;
-            var constructorArguments = new object?[constructorParametersCount];
-            var constructorSupportedPropertiesCount = reflectionMetadata.ConstructorSupportedProperties.Count;
-            var missingConstructorArgumentIndexes = new HashSet<int>(Enumerable.Range(0, constructorParametersCount));
-
-            for (int i = 0; i < constructorSupportedPropertiesCount; i++) {
-                var (constructorSupportedParameter, constructorSupportedProperty) = reflectionMetadata.ConstructorSupportedProperties[i];
-                var constructorSupportedParameterPosition = constructorSupportedParameter.Position;
-                missingConstructorArgumentIndexes.Remove(constructorSupportedParameterPosition);
-                var attributeName = reflectionMetadata.PropertyNameAttributeNameMapping[constructorSupportedProperty.Name];
-                constructorArguments[constructorSupportedParameterPosition] = attributes[attributeName];
-            }
-
-            foreach (var missingConstructorArgumentIndex in missingConstructorArgumentIndexes) {
-                var constructorParameter = reflectionMetadata.ConstructorParameters[missingConstructorArgumentIndex];
-                constructorArguments[missingConstructorArgumentIndex] = _serviceProvider.GetRequiredService(constructorParameter.ParameterType);
-            }
-
-            return reflectionMetadata.PrimaryConstructor.Invoke(constructorArguments);
-        }
-
-        private object DecodeComplex(ref MessagePackReader reader, ComplexDefinition complex, DecodingOptions options)
-        {
-            if (complex is not IAbstractAttributeAccessor abstractAttributeAccessor) {
-                throw new NotImplementedException($"Block does not implement {typeof(IAbstractAttributeAccessor).FullName}");
-            }
-
-            var parsedAttributes = new Dictionary<string, object?>();
-            var attributesCount = reader.ReadMapHeader();
-
-            for (int i = 0; i < attributesCount; i++) {
-                var attributeName = reader.ReadString();
-                var attribute = abstractAttributeAccessor.GetAbstractAttribute(attributeName);
-                var attributeRequired = attribute.IsRequired;
-                var attributeValueResult = DecodeValue(ref reader, attribute.Value, options, attributeRequired);
-
-                if (!attributeValueResult.IsUnknown && attributeRequired && attributeValueResult.IsNull) {
-                    options.Reports.Error($"The attribute \"{attributeName}\" is required and must not be null");
-                }
-
-                parsedAttributes.Add(attributeName, attributeValueResult.Value);
-            }
-
-            return ActivateComplex(complex, parsedAttributes);
-        }
 
         private string DecodeString(ref MessagePackReader reader) => reader.ReadString();
 
@@ -131,8 +76,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         {
             var itemCount = reader.ReadArrayHeader();
 
-            var listAccessor = ListAccessor.GetTypeAccessor(list.Item.WrappedSourceType);
-            dynamic items = listAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
+            var listAccessor = ListAccessor.GetTypeAccessor(list.Item.DeclaringType);
+            var items = listAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = listAccessor.GetMethod(nameof(IList<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
@@ -147,8 +92,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         {
             var itemCount = reader.ReadArrayHeader();
 
-            var setAccessor = SetAccessor.GetTypeAccessor(set.Item.WrappedSourceType);
-            dynamic items = setAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
+            var setAccessor = SetAccessor.GetTypeAccessor(set.Item.DeclaringType);
+            var items = setAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = setAccessor.GetMethod(nameof(ISet<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
@@ -163,8 +108,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         {
             var itemCount = reader.ReadMapHeader();
 
-            var mapAccessor = DictionaryAccessor.GetTypeAccessor(map.Key.WrappedSourceType, map.Value.WrappedSourceType);
-            dynamic items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
+            var mapAccessor = DictionaryAccessor.GetTypeAccessor(map.Key.DeclaringType, map.Value.DeclaringType);
+            var items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = mapAccessor.GetMethod(nameof(IDictionary<object, object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
@@ -176,6 +121,62 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
             return items;
         }
 
+        /// <summary>
+        /// Enables deserialization through constructor, where constructor is used to inject just decoded block
+        /// attributes as parameters. Other constructor parameters are resolved by service provider.
+        /// </summary>
+        /// <param name="complex"></param>
+        /// <param name="attributes"></param>
+        /// <returns>The instantiated instance.</returns>
+        private object ActivateComplex(ComplexDefinition complex, IReadOnlyDictionary<string, object?> attributes)
+        {
+            var reflectionMetadata = complex.ComplexReflectionMetadata;
+            var constructorParametersCount = reflectionMetadata.ConstructorParameters.Count;
+            var constructorArguments = new object?[constructorParametersCount];
+            var constructorSupportedPropertiesCount = reflectionMetadata.ConstructorSupportedProperties.Count;
+            var missingConstructorArgumentIndexes = new HashSet<int>(Enumerable.Range(0, constructorParametersCount));
+
+            for (int i = 0; i < constructorSupportedPropertiesCount; i++) {
+                var (constructorSupportedParameter, constructorSupportedProperty) = reflectionMetadata.ConstructorSupportedProperties[i];
+                var constructorSupportedParameterPosition = constructorSupportedParameter.Position;
+                missingConstructorArgumentIndexes.Remove(constructorSupportedParameterPosition);
+                var attributeName = reflectionMetadata.PropertyNameAttributeNameMapping[constructorSupportedProperty.Name];
+                constructorArguments[constructorSupportedParameterPosition] = attributes[attributeName];
+            }
+
+            foreach (var missingConstructorArgumentIndex in missingConstructorArgumentIndexes) {
+                var constructorParameter = reflectionMetadata.ConstructorParameters[missingConstructorArgumentIndex];
+                constructorArguments[missingConstructorArgumentIndex] = _serviceProvider.GetRequiredService(constructorParameter.ParameterType);
+            }
+
+            return reflectionMetadata.PrimaryConstructor.Invoke(constructorArguments);
+        }
+
+        private object DecodeComplex(ref MessagePackReader reader, ComplexDefinition complex, DecodingOptions options)
+        {
+            if (complex is not IAttributeAccessor abstractAttributeAccessor) {
+                throw new NotImplementedException($"Complex definition does not implement {typeof(IAttributeAccessor).FullName}");
+            }
+
+            var parsedAttributes = new Dictionary<string, object?>();
+            var attributesCount = reader.ReadMapHeader();
+
+            for (int i = 0; i < attributesCount; i++) {
+                var attributeName = reader.ReadString();
+                var attribute = abstractAttributeAccessor.GetAttribute(attributeName);
+                var attributeRequired = attribute.IsRequired;
+                var attributeValueResult = DecodeValue(ref reader, attribute.Value, options, attributeRequired);
+
+                if (!attributeValueResult.IsUnknown && attributeRequired && attributeValueResult.IsNull) {
+                    options.Reports.Error($"The attribute \"{attributeName}\" is required and must not be null");
+                }
+
+                parsedAttributes.Add(attributeName, attributeValueResult.Value);
+            }
+
+            return ActivateComplex(complex, parsedAttributes);
+        }
+
         private object DecodeNonNullValue(ValueDefinition value, ref MessagePackReader reader, DecodingOptions options) => value.TypeConstraint switch {
             TerraformTypeConstraint.String => DecodeString(ref reader),
             TerraformTypeConstraint.Number => DecodeNumber(ref reader, value),
@@ -185,7 +186,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
             TerraformTypeConstraint.Map => DecodeMap(ref reader, (MapDefinition)value, options),
             TerraformTypeConstraint.Object => DecodeComplex(ref reader, (ObjectDefinition)value, options),
             TerraformTypeConstraint.Block => DecodeComplex(ref reader, (BlockDefinition)value, options),
-            _ => throw new NotSupportedException()
+            _ => throw new NotImplementedException($"The decoding of this Terraform constraint type is not implemented: {value.TypeConstraint}")
         };
 
         private ValueResult DecodeValue(ref MessagePackReader reader, ValueDefinition value, DecodingOptions options, bool isResultRequired = false)
@@ -228,7 +229,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
                 throw new ArgumentNullException(nameof(options));
             }
 
-            return DecodeComplex(ref reader, block, options) ?? throw new InvalidOperationException("The first decoding block must have a non-nil map header");
+            return DecodeComplex(ref reader, block, options) ?? throw new InvalidOperationException("The very first decoding block must have a non-nil map header");
         }
 
         public object DecodeSchema(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)

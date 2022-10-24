@@ -3,7 +3,7 @@
     /// <summary>
     /// Defines an attribute of one block.
     /// </summary>
-    internal record class BlockDefinition : ComplexDefinition, IAbstractAttributeAccessor
+    internal record class BlockDefinition : ComplexDefinition, IAttributeAccessor
     {
         internal static BlockDefinition Uncomputed() =>
             new BlockDefinition(new BlockDefinition(UncomputedSourceType));
@@ -33,6 +33,11 @@
                 _blocks = value;
             }
         }
+
+        int IAttributeAccessor.Count => Attributes.Count + Blocks.Count;
+
+        IEnumerable<AttributeDefinition> IAttributeAccessor.GetEnumerator() =>
+            ((IEnumerable<AttributeDefinition>)Attributes).Concat(Blocks);
 
         /// <summary>
         /// The description of this attribute.
@@ -71,20 +76,23 @@
                 return;
             }
 
-            if (attributesCount != 0) {
+            bool havingAttributes = attributesCount > 0;
+            bool havingBlocks = blocksCount > 0;
+
+            if (havingAttributes) {
                 PreventAttributeDuplicates(attributes, nameof(Attributes));
             }
 
-            if (blocksCount != 0) {
+            if (havingBlocks) {
                 PreventAttributeDuplicates(blocks, nameof(Blocks));
             }
 
-            if (attributesCount != 0 && blocksCount != 0) {
-                PreventAttributeDuplicates(attributes.Concat(Blocks), static data => $"The block {data.AdditionalData.FullName} cannot have a nested block and an attribute with the same name: {data.AttributeName}", SourceType);
+            if (havingAttributes && havingBlocks) {
+                PreventAttributeDuplicates(attributes.Concat(blocks), static data => $"The block {data.AdditionalData.FullName} cannot have a nested block and an attribute with the same name: {data.AttributeName}", SourceType);
             }
         }
 
-        AttributeDefinition IAbstractAttributeAccessor.GetAbstractAttribute(string attributeName)
+        AttributeDefinition IAttributeAccessor.GetAttribute(string attributeName)
         {
             _indexedAttributes ??= ToDictionary(_attributes);
 

@@ -1,4 +1,5 @@
-﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+﻿using PseudoDynamic.Terraform.Plugin.Reflection;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
