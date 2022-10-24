@@ -1,34 +1,43 @@
-﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using PseudoDynamic.Terraform.Plugin.Schema.Transcoding;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     /// <summary>
-    /// <para>
-    /// Represents the adapter for <see cref="DynamicValueEncoder"/>.
-    /// </para>
-    /// <para>
-    /// Not intended being consumed by third-parties!
-    /// </para>
+    /// Represents a value that follows the conventions of a value of Terraform, that can be null or unknown.
     /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public interface ITerraformValue
+    /// <typeparam name="T"></typeparam>
+    /// <remarks>
+    /// If you model a schema, and you want to have access to <see cref="IsNull"/> or <see cref="IsUnknown"/>
+    /// of a value, then you can use <see cref="ITerraformValue{T}"/> or <see cref="TerraformValue{T}"/> to
+    /// wrap any type, that is representable by a Terraform type constraint.
+    /// </remarks>
+    [TypeConstraintEvaluationPrevention]
+    public interface ITerraformValue<[TerraformValueType] out T>
     {
         /// <summary>
         /// The deserialized Terraform value.
         /// </summary>
-        internal object? Value { get; }
+        T Value { get; }
 
         /// <summary>
         /// True means <see cref="Value"/> is null.
         /// </summary>
         [MemberNotNullWhen(false, nameof(Value))]
-        internal bool IsNull { get; }
+        bool IsNull { get; }
+
+        /// <summary>
+        /// A shortcut for <see cref="TerraformValue{T}.Null"/>.
+        /// </summary>
+        ITerraformValue<T> AsNull => TerraformValue<T>.Null;
 
         /// <summary>
         /// True indicates, that <see cref="Value"/> is not yet known.
         /// </summary>
-        internal bool IsUnknown { get; }
+        bool IsUnknown { get; }
+
+        /// <summary>
+        /// A shortcut for <see cref="TerraformValue{T}.Unknown"/>.
+        /// </summary>
+        ITerraformValue<T> AsUnknown => TerraformValue<T>.Unknown;
     }
 }

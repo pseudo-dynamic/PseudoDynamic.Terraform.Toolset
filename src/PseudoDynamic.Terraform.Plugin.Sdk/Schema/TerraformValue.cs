@@ -4,14 +4,25 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     public static class TerraformValue
     {
-        public static TerraformValue<T> OfValue<T>(T value, bool isUnknown = false) =>
-            isUnknown ? OfUnknown<T>(isUnknown) : new TerraformValue<T>() { Value = value };
+        /// <summary>
+        /// Creates a Terraform value of <paramref name="value"/>, that can result into a Terraform null value if <paramref name="value"/> is <see langword="null"/>.
+        /// If <paramref name="isUnknown"/> is true, then the result will be a Terraform unknown value.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <param name="isUnknown"></param>
+        /// <returns>A non-null instance.</returns>
+        public static TerraformValue<T> OfValue<T>(T value, bool isUnknown) =>
+            isUnknown ? TerraformValue<T>.Unknown : new TerraformValue<T>(value);
 
-        public static TerraformValue<T> OfNull<T>(bool isNull, bool isUnknown = false) =>
-            isUnknown ? OfUnknown<T>(isUnknown) : new TerraformValue<T>() { IsNull = isNull };
-
-        public static TerraformValue<T> OfUnknown<T>(bool isUnknown) =>
-            new TerraformValue<T>() { IsUnknown = isUnknown };
+        /// <summary>
+        /// Creates a Terraform value of <paramref name="value"/>, that can result into a Terraform null value if <paramref name="value"/> is <see langword="null"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <returns>A non-null instance.</returns>
+        public static TerraformValue<T> OfValue<T>(T value) =>
+            new TerraformValue<T>(value);
 
         private static readonly GenericTypeAccessor TerraformValueAccessor = new GenericTypeAccessor(typeof(TerraformValue<>));
 

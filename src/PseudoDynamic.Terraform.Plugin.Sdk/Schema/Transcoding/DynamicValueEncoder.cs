@@ -22,6 +22,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Transcoding
         private readonly static Dictionary<Type, EncodeTerraformValueCompiledMethod> EncodeTerraformValueCompiledMethods = new Dictionary<Type, EncodeTerraformValueCompiledMethod>();
 
         [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(DynamicValueEncoder))]
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used via reflection")]
         private static void EncodeTerraformValue<T>(DynamicValueEncoder encoder, ref MessagePackWriter writer, ValueDefinition value, ITerraformValue<T> terraformValue)
         {
             if (terraformValue.IsUnknown) {

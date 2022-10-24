@@ -10,6 +10,16 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
     public sealed class TerraformValue<[TerraformValueType] T> : ITerraformValue<T>, IEquatable<TerraformValue<T>>
     {
         /// <summary>
+        /// Representing a Terraform null.
+        /// </summary>
+        public static readonly TerraformValue<T> Null = new TerraformValue<T>();
+
+        /// <summary>
+        /// Representing a Terraform unknown.
+        /// </summary>
+        public static readonly TerraformValue<T> Unknown = new TerraformValue<T>() { IsUnknown = true };
+
+        /// <summary>
         /// The value.
         /// </summary>
         public T Value {
@@ -24,12 +34,17 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
                 return value!; // If the user has created an instance manually we do not enforce nullability check
             }
 
-            init {
+            private init {
                 _value = value;
 
+                // For the case value is reference or Nullable<>
+                // type and its HasValue is false.
+                if (ReferenceEquals(value, null)) {
+                    _isNotNull = false;
+                }
                 // We only know when value is not equals default,
                 // that the value canont be not null.
-                if (!Equals(value, default)) {
+                else if (!Equals(value, default)) {
                     _isNotNull = true;
                     _isUnknown = false;
                 }
@@ -43,7 +58,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         public bool IsNull {
             get => !_isNotNull;
 
-            init {
+            private init {
                 _isNotNull = !value;
 
                 // if null, then we set default value
@@ -54,12 +69,18 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         }
 
         /// <summary>
+        /// A shortcut for <see cref="TerraformValue{T}.AsNull"/>.
+        /// </summary>
+        public TerraformValue<T> AsNull => Null;
+        ITerraformValue<T> ITerraformValue<T>.AsNull => AsNull;
+
+        /// <summary>
         /// Specifies that the value is unknown, but known at apply-time.
         /// </summary>
         public bool IsUnknown {
             get => _isUnknown;
 
-            init {
+            private init {
                 _isUnknown = value;
 
                 if (value) {
@@ -69,17 +90,16 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
             }
         }
 
+        /// <summary>
+        /// A shortcut for <see cref="TerraformValue{T}.Unknown"/>.
+        /// </summary>
+        public TerraformValue<T> AsUnknown => Unknown;
+        ITerraformValue<T> ITerraformValue<T>.AsUnknown => AsUnknown;
+
         private bool? _isNullable;
         private bool _isNotNull;
         private T? _value;
         private bool _isUnknown;
-
-        /// <summary>
-        /// Creates an immutable Terraform value.
-        /// </summary>
-        public TerraformValue()
-        {
-        }
 
         /// <summary>
         /// Creates an instance of this type.
@@ -102,6 +122,19 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         /// </summary>
         /// <param name="isNullable">A hint whether value is nullable.</param>
         internal TerraformValue(bool isNullable) => _isNullable = isNullable;
+
+        /// <summary>
+        /// Creates a Terraform null value.
+        /// </summary>
+        public TerraformValue()
+        {
+        }
+
+        /// <summary>
+        /// Creates a Terraform value of <paramref name="value"/>, that can result into a Terraform null value if <paramref name="value"/> is <see langword="null"/>.
+        /// </summary>
+        /// <param name="value"></param>
+        public TerraformValue(T value) => Value = value;
 
         private bool Equals(ITerraformValue<T> other) =>
             EqualityComparer<T>.Default.Equals(_value, other.Value)
