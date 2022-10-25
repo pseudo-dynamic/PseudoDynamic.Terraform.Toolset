@@ -73,14 +73,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 case TypeCode.Int32:
                     writer.Write((int)content);
                     break;
-                case TypeCode.Single:
-                    writer.Write((float)content);
-                    break;
                 case TypeCode.UInt64:
                     writer.Write((ulong)content);
                     break;
                 case TypeCode.Int64:
                     writer.Write((long)content);
+                    break;
+                case TypeCode.Single:
+                    writer.Write((float)content);
                     break;
                 case TypeCode.Double:
                     writer.Write((double)content);

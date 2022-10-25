@@ -44,7 +44,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 }
             }
 
-            throw new TerraformDynamicMessagePackDecodingException($"The Terraform number representation for {value.SourceType.FullName} could not be found");
+            throw new TerraformDynamicMessagePackDecodingException($"The Terraform number cannot be converted to {value.SourceType.FullName}");
 
             static object? TryReadMessagePackDrivenNumber(ref MessagePackReader reader) => reader.NextCode switch {
                 MessagePackCode.UInt8 => reader.ReadByte(),
@@ -53,9 +53,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 MessagePackCode.Int16 => reader.ReadInt16(),
                 MessagePackCode.UInt32 => reader.ReadUInt32(),
                 MessagePackCode.Int32 => reader.ReadInt32(),
-                MessagePackCode.Float32 => reader.ReadSingle(),
                 MessagePackCode.UInt64 => reader.ReadUInt64(),
                 MessagePackCode.Int64 => reader.ReadInt64(),
+                MessagePackCode.Float32 => reader.ReadSingle(),
                 MessagePackCode.Float64 => reader.ReadDouble(),
                 _ => null
             };
@@ -67,9 +67,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 TypeCode.Int16 => reader.ReadInt16(),
                 TypeCode.UInt32 => reader.ReadUInt32(),
                 TypeCode.Int32 => reader.ReadInt32(),
-                TypeCode.Single => reader.ReadSingle(),
                 TypeCode.UInt64 => reader.ReadUInt64(),
                 TypeCode.Int64 => reader.ReadInt64(),
+                TypeCode.Single => reader.ReadSingle(),
                 TypeCode.Double => reader.ReadDouble(),
                 _ => null
             };
