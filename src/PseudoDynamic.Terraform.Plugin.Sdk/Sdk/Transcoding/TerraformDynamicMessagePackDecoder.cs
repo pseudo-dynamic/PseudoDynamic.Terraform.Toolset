@@ -134,6 +134,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             var addItem = mapAccessor.GetMethodCaller(nameof(IDictionary<object, object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
+                // CONSIDER: allow key type other than string
                 var key = reader.ReadString();
                 var value = DecodeValue(ref reader, map.Value, options).Value;
                 addItem.Invoke(items, new[] { key, value });

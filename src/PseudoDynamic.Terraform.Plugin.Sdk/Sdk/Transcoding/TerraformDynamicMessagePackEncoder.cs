@@ -121,12 +121,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             var itemEnumerator = dictionaryEncoder.GetEnumerator();
 
             while (itemEnumerator.MoveNext()) {
-                writer.Write((string)itemEnumerator.Current!); // We never expect key being null
-
-                if (!itemEnumerator.MoveNext()) {
-                    throw new TerraformDynamicMessagePackEncodingException("A criticial failure happend because the value after key was missing while encoding a map entry");
-                }
-
+                // CONSIDER: allow key type other than string
+                writer.Write((string?)itemEnumerator.Current);
+                _ = itemEnumerator.MoveNext(); // Can never be false
                 EncodeValue(ref writer, dictionary.Value, itemEnumerator.Current); // The value of its corresponding key
             }
         }

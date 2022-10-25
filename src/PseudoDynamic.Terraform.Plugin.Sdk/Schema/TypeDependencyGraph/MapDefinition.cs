@@ -6,6 +6,7 @@
 
         public override TerraformTypeConstraint TypeConstraint => TerraformTypeConstraint.Map;
 
+        // CONSIDER: allow key type other than string
         public ValueDefinition Key { get; } = PrimitiveDefinition.String;
 
         public ValueDefinition Value { get; }
