@@ -18,6 +18,11 @@
         <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
         <PackageReference Include="ImmediateReflection" Version="2.0.0" />
         <PackageReference Include="MessagePack" Version="2.4.35" />
+        <!-- TODO: -->
+        <!--<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>-->
         <PackageReference Include="Namotion.Reflection" Version="2.1.1" />
         <PackageReference Include="Teronis.DotNet.EditorConfig.Base" Version="0.3.0-alpha.1">
             <PrivateAssets>all</PrivateAssets>
@@ -27,11 +32,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="**/*.proto" GrpcServices="Server" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Protocols\V5\tfplugin5.3.proto" />
+        <!-- https://chromium.googlesource.com/external/github.com/grpc/grpc/+/HEAD/src/csharp/BUILD-INTEGRATION.md -->
+        <Protobuf Include="**/*.proto" GrpcServices="server" Access="internal" />
     </ItemGroup>
 
 </Project>

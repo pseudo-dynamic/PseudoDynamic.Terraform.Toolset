@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using PseudoDynamic.Terraform.Plugin.Protocols;
-using PseudoDynamic.Terraform.Plugin.Schema.Transcoding;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -31,7 +31,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.AddTerraformPluginServer();
-            services.TryAddSingleton<DynamicValueDecoder>();
+            services.TryAddSingleton<TerraformDynamicMessagePackDecoder>();
             services.TryAddSingleton<IProviderAdapter, ProviderAdapter>();
             services.TryAddSingleton<ResourceDefinitionFactory>();
             services.TryAddSingleton<IProvider, Provider>();

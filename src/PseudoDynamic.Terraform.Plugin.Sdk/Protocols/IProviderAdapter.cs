@@ -2,28 +2,28 @@
 {
     internal interface IProviderAdapter
     {
-        Task<Models.GetProviderSchema.Response> GetProviderSchema(Models.GetProviderSchema.Request request);
+        Task<Consolidation.GetProviderSchema.Response> GetProviderSchema(Consolidation.GetProviderSchema.Request request);
 
-        Task<Models.ConfigureProvider.Response> ConfigureProvider(Models.ConfigureProvider.Request request);
+        Task<Consolidation.ConfigureProvider.Response> ConfigureProvider(Consolidation.ConfigureProvider.Request request);
 
-        Task<Models.ValidateProviderConfig.Response> ValidateProviderConfig(Models.ValidateProviderConfig.Request request);
+        Task<Consolidation.ValidateProviderConfig.Response> ValidateProviderConfig(Consolidation.ValidateProviderConfig.Request request);
 
-        Task<Models.ReadDataSource.Response> ReadDataSource(Models.ReadDataSource.Request request);
+        Task<Consolidation.ReadDataSource.Response> ReadDataSource(Consolidation.ReadDataSource.Request request);
 
-        Task<Models.ValidateDataResourceConfig.Response> ValidateDataResourceConfig(Models.ValidateDataResourceConfig.Request request);
+        Task<Consolidation.ValidateDataResourceConfig.Response> ValidateDataResourceConfig(Consolidation.ValidateDataResourceConfig.Request request);
 
-        Task<Models.ReadResource.Response> ReadResource(Models.ReadResource.Request request);
+        Task<Consolidation.ReadResource.Response> ReadResource(Consolidation.ReadResource.Request request);
 
-        Task<Models.ValidateResourceConfig.Response> ValidateResourceConfig(Models.ValidateResourceConfig.Request request);
+        Task<Consolidation.ValidateResourceConfig.Response> ValidateResourceConfig(Consolidation.ValidateResourceConfig.Request request);
 
-        Task<Models.UpgradeResourceState.Response> UpgradeResourceState(Models.UpgradeResourceState.Request request);
+        Task<Consolidation.UpgradeResourceState.Response> UpgradeResourceState(Consolidation.UpgradeResourceState.Request request);
 
-        Task<Models.PlanResourceChange.Response> PlanResourceChange(Models.PlanResourceChange.Request request);
+        Task<Consolidation.PlanResourceChange.Response> PlanResourceChange(Consolidation.PlanResourceChange.Request request);
 
-        Task<Models.ApplyResourceChange.Response> ApplyResourceChange(Models.ApplyResourceChange.Request request);
+        Task<Consolidation.ApplyResourceChange.Response> ApplyResourceChange(Consolidation.ApplyResourceChange.Request request);
 
-        Task<Models.ImportResourceState.Response> ImportResourceState(Models.ImportResourceState.Request request);
+        Task<Consolidation.ImportResourceState.Response> ImportResourceState(Consolidation.ImportResourceState.Request request);
 
-        Task<Models.StopProvider.Response> StopProvider(Models.StopProvider.Request request);
+        Task<Consolidation.StopProvider.Response> StopProvider(Consolidation.StopProvider.Request request);
     }
 }

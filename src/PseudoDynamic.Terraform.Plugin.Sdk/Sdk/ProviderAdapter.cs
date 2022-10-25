@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using PseudoDynamic.Terraform.Plugin.Protocols;
-using PseudoDynamic.Terraform.Plugin.Protocols.Models;
-using PseudoDynamic.Terraform.Plugin.Schema.Transcoding;
+using PseudoDynamic.Terraform.Plugin.Protocols.Consolidation;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -11,9 +11,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         private readonly IProvider _provider;
         private readonly IMapper _mapper;
-        private readonly DynamicValueDecoder _dynamicValueDecoder;
+        private readonly TerraformDynamicMessagePackDecoder _dynamicValueDecoder;
 
-        public ProviderAdapter(IProvider provider, IMapper mapper, DynamicValueDecoder dynamicValueDecoder)
+        public ProviderAdapter(IProvider provider, IMapper mapper, TerraformDynamicMessagePackDecoder dynamicValueDecoder)
         {
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
@@ -53,7 +53,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var resource = resourceDefinition.Resource;
             var reports = new Reports();
 
-            var decodingOptions = new DynamicValueDecoder.DecodingOptions() { Reports = reports };
+            var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
             var config = _dynamicValueDecoder.DecodeSchema(request.Config.Msgpack, resourceDefinition.Schema, decodingOptions);
 
             var context = ValidateConfig.ContextAccessor

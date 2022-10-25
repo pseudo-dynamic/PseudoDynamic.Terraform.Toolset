@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using PseudoDynamic.Terraform.Plugin.Conventions;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
 {

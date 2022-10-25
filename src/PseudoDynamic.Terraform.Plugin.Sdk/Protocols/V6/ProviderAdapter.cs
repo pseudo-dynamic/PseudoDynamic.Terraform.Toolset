@@ -2,7 +2,7 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Protocols.V6
 {
-    public class ProviderAdapter : Provider.ProviderBase
+    internal class ProviderAdapter : Provider.ProviderBase
     {
         public override Task<GetProviderSchema.Types.Response> GetProviderSchema(GetProviderSchema.Types.Request request, ServerCallContext context)
         {

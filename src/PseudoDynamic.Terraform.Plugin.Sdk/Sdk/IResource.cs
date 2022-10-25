@@ -21,36 +21,36 @@
     /// <para>
     /// The <b>plan stage</b> looks like this:
     /// <br/>- [routes: Validate, Plan, Create, Update, Delete]
-    /// <br/>--- (new process)
-    /// <br/>--- <see cref="ValidateConfig"/>
+    /// <br/>1. (new process)
+    /// <br/>2. <see cref="ValidateConfig"/>
     /// <br/>- [routes: Plan, Create, Update, Delete] (depends on prior steps)
-    /// <br/>--- (new process)
-    /// <br/>--- <see cref="MigrateState"/> except for [routes: Create]
-    /// <br/>--- <see cref="ReviseState"/> except for [routes: Create]
-    /// <br/>--- <see cref="Plan"/>
+    /// <br/>3. (new process)
+    /// <br/>4. <see cref="MigrateState"/> except for [routes: Create]
+    /// <br/>5. <see cref="ReviseState"/> except for [routes: Create]
+    /// <br/>6. <see cref="Plan"/>
     /// <br/>- [routes: Delete] (depends on prior steps)
-    /// <br/>--- (new process)
-    /// <br/>--- <see cref="MigrateState"/>
+    /// <br/>7. (new process)
+    /// <br/>8. <see cref="MigrateState"/>
     /// </para>
     /// <para>
     /// The <b>apply stage</b> consists almost of the same methods as the plan stage:
     /// <br/>- [routes: Create, Update, Delete]
-    /// <br/>--- (new process)
-    /// <br/>--- <see cref="MigrateState"/> except for [routes: Create]
-    /// <br/>--- <see cref="ValidateConfig"/> except for [routes: Delete]
-    /// <br/>--- <see cref="Plan"/> except for [routes: Delete]
+    /// <br/>1. (new process)
+    /// <br/>2. <see cref="MigrateState"/> except for [routes: Create]
+    /// <br/>3. <see cref="ValidateConfig"/> except for [routes: Delete]
+    /// <br/>4. <see cref="Plan"/> except for [routes: Delete]
     /// <br/>- [routes: Create] (depends on prior steps)
-    /// <br/>--- <see cref="Create"/>
+    /// <br/>5. <see cref="Create"/>
     /// <br/>- [routes: Update] (depends on prior steps)
-    /// <br/>--- <see cref="Update"/> (may be skipped if TF sees no change)
+    /// <br/>6. <see cref="Update"/> (may be skipped if TF sees no change)
     /// <br/>- [routes: Delete] (depends on prior steps)
-    /// <br/>--- <see cref="Delete"/>
+    /// <br/>7. <see cref="Delete"/>
     /// </para>
     /// <br/>The <b>Import route</b> is special as it does not follow the flow of the plan
     /// or apply stage at all:
     /// <br/>- (new process)
-    /// <br/>- <see cref="ImportState"/>
-    /// <br/>- <see cref="ReviseState"/>
+    /// <br/>1. <see cref="ImportState"/>
+    /// <br/>2. <see cref="ReviseState"/>
     /// </summary>
     /// <typeparam name="Schema"></typeparam>
     public interface IResource<Schema> : IResourceInfo

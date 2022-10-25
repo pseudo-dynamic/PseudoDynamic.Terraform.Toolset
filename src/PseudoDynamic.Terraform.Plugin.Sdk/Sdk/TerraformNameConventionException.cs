@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using PseudoDynamic.Terraform.Plugin.Conventions;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
