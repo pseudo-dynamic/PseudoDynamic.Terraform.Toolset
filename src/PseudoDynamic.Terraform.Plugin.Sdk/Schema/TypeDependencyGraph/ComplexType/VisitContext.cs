@@ -51,7 +51,7 @@ Visit type = {VisitType.FullName}");
                     return implicitTypeConstraints;
                 }
 
-                if (GetVisitTypeAttribute<TypeConstraintEvaluationPreventionAttribute>() is not null) {
+                if (GetVisitTypeAttribute<SkipImplicitTypeConstraintEvaluationAttribute>() is not null) {
                     implicitTypeConstraints = ImmutableHashSet<TerraformTypeConstraint>.Empty;
                 } else {
                     implicitTypeConstraints = TerraformTypeConstraintEvaluator.Default.Evaluate(VisitType);

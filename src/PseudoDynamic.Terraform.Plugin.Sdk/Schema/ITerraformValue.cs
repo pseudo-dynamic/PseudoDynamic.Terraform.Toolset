@@ -11,7 +11,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
     /// of a value, then you can use <see cref="ITerraformValue{T}"/> or <see cref="TerraformValue{T}"/> to
     /// wrap any type, that is representable by a Terraform type constraint.
     /// </remarks>
-    [TypeConstraintEvaluationPrevention]
+    [SkipImplicitTypeConstraintEvaluation]
     public interface ITerraformValue<[TerraformValueType] out T>
     {
         /// <summary>

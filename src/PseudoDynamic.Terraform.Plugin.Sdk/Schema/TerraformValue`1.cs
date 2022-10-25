@@ -6,7 +6,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
     /// Represents the value in the view of Terraform where it can be null or unknown.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [TypeConstraintEvaluationPrevention]
+    [SkipImplicitTypeConstraintEvaluation]
     public sealed class TerraformValue<[TerraformValueType] T> : ITerraformValue<T>, IEquatable<TerraformValue<T>>
     {
         /// <summary>
