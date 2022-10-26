@@ -17,16 +17,16 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public static IPluginHostBuilder ConfigureTerraformProviderDefaults(this IPluginHostBuilder pluginServer, string providerName, Action<IProviderSetup>? setupProvider = null)
         {
             pluginServer.ConfigureWebHost(builder => builder
-                    .UseKestrel()
-                    .ConfigureServices(services => {
-                        services.AddKestrelLoopbackListener();
-                        var providerSetup = services.AddTerraformProvider(providerName);
-                        setupProvider?.Invoke(providerSetup);
-                    })
-                    .Configure(app => {
-                        app.UseRouting();
-                        app.UseEndpoints(endpoints => endpoints.MapTerraformPlugin());
-                    }));
+                .UseKestrel()
+                .ConfigureServices(services => {
+                    services.AddKestrelLoopbackListener();
+                    var providerSetup = services.AddTerraformProvider(providerName);
+                    setupProvider?.Invoke(providerSetup);
+                })
+                .Configure(app => {
+                    app.UseRouting();
+                    app.UseEndpoints(endpoints => endpoints.MapTerraformPlugin());
+                }));
 
             return pluginServer;
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting.Server.Features;
+﻿using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using PseudoDynamic.Terraform.Plugin.Protocols;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
@@ -32,5 +33,16 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// domain name, otherwise Terraform may have trouble to contact this server.
         /// </remarks>
         public Func<string, string?>? ServerAddressFilter { get; set; }
+
+        /// <summary>
+        /// The client certificate Terraform will use to contact this server. If setting it, you
+        /// should customize Kestrel in such a way, that it accepts this client certificate.
+        /// </summary>
+        /// <remarks>
+        /// Do not set it, if you are using <see cref="PluginHostBuilderExtensions.ConfigureTerraformProviderDefaults(IPluginHostBuilder, string, Action{IProviderSetup}?)"/>,
+        /// otherwsie an exception is thrown. This is because this method sets up a default listener
+        /// for Kestrel with HTTPS enabled and a self-signed certificate.
+        /// </remarks>
+        public X509Certificate2? ClientCertificate { get; set; }
     }
 }

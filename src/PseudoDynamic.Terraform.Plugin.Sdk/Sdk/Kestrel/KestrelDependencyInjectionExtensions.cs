@@ -10,6 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
         {
             if (!services.Any(x => x.ImplementationType == typeof(KestrelLoopbackListenerConfiguration))) {
                 services.AddSingleton<IPostConfigureOptions<KestrelServerOptions>, KestrelLoopbackListenerConfiguration>();
+                services.AddSingleton<IPostConfigureOptions<PluginServerOptions>, KestrelLoopbackListenerConfiguration>();
             }
 
             return services;
