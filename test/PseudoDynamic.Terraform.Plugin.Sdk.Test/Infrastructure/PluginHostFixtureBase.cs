@@ -57,7 +57,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
         public async Task InitializeAsync()
         {
-            var host = new PluginHostBuilder() { Protocol = PluginProtocol }
+            var host = new PluginHostBuilder() { Protocol = PluginProtocol, IsDebuggable = true, }
                 .ConfigureTerraformProviderDefaults(ProviderName)
                 .Build();
 

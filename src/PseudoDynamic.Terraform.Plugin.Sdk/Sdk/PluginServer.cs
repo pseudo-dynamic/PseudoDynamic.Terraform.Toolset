@@ -10,23 +10,41 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public Uri ServerAddress => _serverAddress.Value;
         public PluginProtocol PluginProtocol { get; }
 
-        Lazy<Uri> _serverAddress;
+        private Lazy<Uri> _serverAddress;
 
-        public PluginServer(IServer server, IOptions<PluginOptions> pluginOptions)
+        public PluginServer(IServer server, IOptions<PluginServerOptions> options)
         {
-            var unwrappedPluginOptions = pluginOptions?.Value ?? throw new ArgumentNullException(nameof(pluginOptions));
-            PluginProtocol = unwrappedPluginOptions.Protocol ?? throw new InvalidOperationException($"The plugin protocol has not been configured inside an instance of {typeof(PluginOptions).FullName}");
+            var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            PluginProtocol = unwrappedOptions.Protocol ?? throw new InvalidOperationException($"The plugin protocol has not been configured inside an instance of {typeof(PluginServerOptions).FullName}");
 
             // Server port is only initialized after the server has been started, therefore we delay it because the
             // access to the lazy server address of this instance is expected to happen after the server started.
             _serverAddress = new Lazy<Uri>(() => {
-                var serverAddresses = server.Features.Get<IServerAddressesFeature>();
+                var serverAddressesProvider = server.Features.Get<IServerAddressesFeature>();
 
-                if (serverAddresses is null) {
+                if (serverAddressesProvider is null || serverAddressesProvider.Addresses.Count == 0) {
                     throw new InvalidOperationException("The plugin server needs at least one available server address");
                 }
 
-                var serverAddressString = serverAddresses.Addresses.First();
+                string? serverAddressString;
+
+                if (unwrappedOptions.ServerAddressFilter != null) {
+                    var enumerator = serverAddressesProvider.Addresses.GetEnumerator();
+
+                    do {
+                        if (!enumerator.MoveNext()) {
+                            throw new InvalidOperationException("The custom server address filter could estimate a server address");
+                        }
+
+                        if (enumerator.Current != null) {
+                            serverAddressString = enumerator.Current;
+                            break;
+                        }
+                    } while (true);
+                } else {
+                    serverAddressString = serverAddressesProvider.Addresses.First();
+                }
+
                 var serverAddressUri = new Uri(serverAddressString);
 
                 if (serverAddressUri.Port == 0) {

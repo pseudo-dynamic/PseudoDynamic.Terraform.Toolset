@@ -2,17 +2,24 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using PseudoDynamic.Terraform.Plugin.Protocols;
+using PseudoDynamic.Terraform.Plugin.Sdk.Kestrel;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    internal static class PluginServerBuilderExtensions
+    public static class PluginHostBuilderExtensions
     {
+        /// <summary>
+        /// Applies Terraform provider defaults.
+        /// </summary>
+        /// <param name="pluginServer"></param>
+        /// <param name="providerName"></param>
+        /// <param name="setupProvider"></param>
         public static IPluginHostBuilder ConfigureTerraformProviderDefaults(this IPluginHostBuilder pluginServer, string providerName, Action<IProviderSetup>? setupProvider = null)
         {
             pluginServer.ConfigureWebHost(builder => builder
-                    .UseUrls("http://127.0.0.1:0")
                     .UseKestrel()
                     .ConfigureServices(services => {
+                        services.AddKestrelLoopbackListener();
                         var providerSetup = services.AddTerraformProvider(providerName);
                         setupProvider?.Invoke(providerSetup);
                     })

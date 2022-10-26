@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     /// <summary>
     /// Contains extension methods for <see cref="IProvider"/>.
     /// </summary>
-    public static class ProviderDependencyInjectionExtensions
+    public static class ProviderSetupDependencyInjectionExtensions
     {
         internal static OptionsBuilder<ProviderOptions> AddProviderOptions(this IProviderSetup provider)
         {
@@ -24,7 +24,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// <summary>
         /// Makes the Terraform provider available by enabling gRPC, registering required
         /// services and give you the chance to register resources and data sources.
-        /// </summary>
         /// <param name="services"></param>
         /// <param name="providerName">Fully-qualified Terraform provider name in form of <![CDATA[<domain-name>/<namespace>/<provider-name>]]> (e.g. registry.terraform.io/pseudo-dynamic/value)</param>
         public static IProviderSetup AddTerraformProvider(this IServiceCollection services, string providerName)
@@ -37,19 +36,19 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             services.TryAddSingleton<IProvider, Provider>();
 
             var providerSetup = new ProviderSetup(services);
-            providerSetup.ConfigureProviderOptions(o => o.FullyQualifiedProviderName = providerName);
+            providerSetup.ConfigureProviderOptions(provider => provider.FullyQualifiedProviderName = providerName);
             return providerSetup;
         }
 
         internal static IProviderSetup AddResource(this IProviderSetup provider, Type resourceType, Type schemaType)
         {
-            provider.AddProviderOptions().Configure(o => o.ResourceDescriptors.Add(new ResourceDescriptor(resourceType, schemaType)));
+            provider.AddProviderOptions().Configure(provider => provider.ResourceDescriptors.Add(new ResourceDescriptor(resourceType, schemaType)));
             return provider;
         }
 
         internal static IProviderSetup AddResource(this IProviderSetup provider, object resource, Type schemaType)
         {
-            provider.AddProviderOptions().Configure(o => o.ResourceDescriptors.Add(new ResourceDescriptor(resource, schemaType)));
+            provider.AddProviderOptions().Configure(provider => provider.ResourceDescriptors.Add(new ResourceDescriptor(resource, schemaType)));
             return provider;
         }
     }

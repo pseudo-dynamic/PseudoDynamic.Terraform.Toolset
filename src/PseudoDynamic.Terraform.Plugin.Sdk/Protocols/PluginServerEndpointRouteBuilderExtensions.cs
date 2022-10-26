@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
     {
         /// <summary>
         /// Tells gRPC what protocol-specific implementation needs to be called. The protocol version
-        /// you specified previously by <see cref="ProviderDependencyInjectionExtensions.AddTerraformProvider(IServiceCollection, string, PluginProtocol)"/>
+        /// you specified previously by <see cref="ProviderSetupDependencyInjectionExtensions.AddTerraformProvider(IServiceCollection, string, PluginProtocol)"/>
         /// is used.
         /// </summary>
         /// <param name="builder"></param>

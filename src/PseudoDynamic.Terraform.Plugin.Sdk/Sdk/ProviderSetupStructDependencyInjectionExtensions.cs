@@ -1,6 +1,6 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public static class ProviderStructDependencyInjectionExtensions
+    public static class ProviderSetupStructDependencyInjectionExtensions
     {
         public static IProviderSetup AddResource<Resource, Schema>(this IProviderSetup provider)
             where Resource : IResource<Schema>
