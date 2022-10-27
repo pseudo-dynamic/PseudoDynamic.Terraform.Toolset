@@ -16,7 +16,6 @@
         <PackageReference Include="FastMember.Signed" Version="1.5.0" />
         <PackageReference Include="Google.Protobuf" Version="3.21.7" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
-        <PackageReference Include="ImmediateReflection" Version="2.0.0" />
         <PackageReference Include="MessagePack" Version="2.4.35" />
         <!-- TODO: -->
         <!--<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3">
@@ -25,6 +24,8 @@
         </PackageReference>-->
         <PackageReference Include="Namotion.Reflection" Version="2.1.1" />
         <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
         <PackageReference Include="Teronis.DotNet.EditorConfig.Base" Version="0.3.0-alpha.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

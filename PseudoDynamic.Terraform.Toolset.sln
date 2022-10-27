@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C96B942D-A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseudoDynamic.Terraform.Plugin.Sdk.Test", "test\PseudoDynamic.Terraform.Plugin.Sdk.Test\PseudoDynamic.Terraform.Plugin.Sdk.Test.csproj", "{46E641F7-E67A-41B5-9A46-9BF4311DC4D8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integration-test", "integration-test", "{8F8D2E3B-7BA4-44BA-9A66-45D5EB501437}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TerraformValidatable", "test\PseudoDynamic.Terraform.Plugin.Sdk.Test\CSharpProjects\terraform-validate\TerraformValidatable.csproj", "{A452C300-6A6D-43A3-ACBB-1C97DC49A5D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,12 +27,17 @@ Global
 		{46E641F7-E67A-41B5-9A46-9BF4311DC4D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46E641F7-E67A-41B5-9A46-9BF4311DC4D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46E641F7-E67A-41B5-9A46-9BF4311DC4D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A452C300-6A6D-43A3-ACBB-1C97DC49A5D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A452C300-6A6D-43A3-ACBB-1C97DC49A5D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A452C300-6A6D-43A3-ACBB-1C97DC49A5D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A452C300-6A6D-43A3-ACBB-1C97DC49A5D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{46E641F7-E67A-41B5-9A46-9BF4311DC4D8} = {C96B942D-A325-43E4-966F-53AA61F3904E}
+		{A452C300-6A6D-43A3-ACBB-1C97DC49A5D3} = {8F8D2E3B-7BA4-44BA-9A66-45D5EB501437}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1F794517-EBA4-4434-9BE1-B8325D65E835}

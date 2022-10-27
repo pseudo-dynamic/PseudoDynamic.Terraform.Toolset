@@ -12,84 +12,122 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             return options;
         }
 
-        public const string TerraformReattachProvidersVariableName = "TF_REATTACH_PROVIDERS";
+        private const string TfReattachProvidersVariableName = "TF_REATTACH_PROVIDERS";
+        private const string TfCliConfigFileVariableName = "TF_CLI_CONFIG_FILE";
         private const string TerraformCommandName = "terraform";
 
         public string? WorkingDirectory { get; init; }
+        public IReadOnlyDictionary<string, string> EnvironmentVariables { get; }
+        public IReadOnlyDictionary<string, TerraformReattachProvider>? TerraformReattachProviders { get; }
+        public string TfCliConfigFile { get; }
 
-        public IReadOnlyDictionary<string, string> EnvironmentVariables
+        private TerraformProcessStartInfo? _preparedProcessStartInfo;
+
+        internal TerraformCommand(ITerraformCommandOptionsOptions options)
         {
-            get => environmentVariables;
-            init => environmentVariables = value ?? throw new ArgumentNullException(nameof(value));
+            TerraformReattachProviders = new Dictionary<string, TerraformReattachProvider>(options.TerraformReattachProviders);
+            EnvironmentVariables = new Dictionary<string, string>(options.EnvironmentVariables);
+            TfCliConfigFile = options.TfCliConfigFile;
         }
-
-        public IReadOnlyDictionary<string, TerraformReattachProvider>? TerraformReattachProviders { get; init; }
-
-        private TerraformProcessStartInfo? _processStartInfoBase;
-        private IReadOnlyDictionary<string, string> environmentVariables = SimpleProcessStartInfo.EmptyEnvironmentVariables;
-
-        internal TerraformCommand(ITerraformCommandOptionsOptions options) =>
-            TerraformReattachProviders = options.TerraformReattachProviders;
 
         public TerraformCommand(Action<TerraformCommandOptions> configureOptions)
             : this(ProvideOptions(configureOptions))
         {
         }
 
-        private TerraformProcessStartInfo CreateBaseStartInfo()
+        private TerraformProcessStartInfo PrepareStartInfo()
         {
-            var processStartInfoBase = _processStartInfoBase;
+            var processStartInfo = _preparedProcessStartInfo;
 
-            if (processStartInfoBase != null)
+            if (processStartInfo != null)
             {
-                return processStartInfoBase;
+                return processStartInfo;
             }
 
             var environmentVariables = new Dictionary<string, string>(EnvironmentVariables);
 
             if (TerraformReattachProviders != null && TerraformReattachProviders.Count > 0)
             {
-                environmentVariables.Add(TerraformReattachProvidersVariableName, JsonSerializer.Serialize(TerraformReattachProviders));
+                environmentVariables.Add(TfReattachProvidersVariableName, JsonSerializer.Serialize(TerraformReattachProviders));
             }
 
-            processStartInfoBase = new TerraformProcessStartInfo()
+            if (TfCliConfigFile != null)
+            {
+                environmentVariables.Add(TfCliConfigFileVariableName, TfCliConfigFile);
+            }
+
+            processStartInfo = new TerraformProcessStartInfo()
             {
                 WorkingDirectory = WorkingDirectory,
                 EnvironmentVariables = environmentVariables
             };
 
-            _processStartInfoBase = processStartInfoBase;
-            return processStartInfoBase;
+            _preparedProcessStartInfo = processStartInfo;
+            return processStartInfo;
         }
 
-        private TerraformProcessStartInfo CreateStartInfo(string? args) => CreateBaseStartInfo() with
+        private TerraformProcessStartInfo UpgradeStartInfo(string? args) => PrepareStartInfo() with
         {
             Arguments = args
         };
 
         private string RunCommandThenReadOutput(string? args) => SimpleProcess.StartThenWaitForExitThenReadOutput(
-            CreateStartInfo(args),
-            shouldThrowOnNonZeroCode: true);
+            UpgradeStartInfo(args),
+            shouldThrowOnNonZeroCode: true,
+            shouldStreamError: true);
+
+        private Task<string> RunCommandThenReadOutputAsync(string? args, CancellationToken cancellationToken) => SimpleProcess.StartThenWaitForExitThenReadOutputAsync(
+            UpgradeStartInfo(args),
+            shouldThrowOnNonZeroCode: true,
+            cancellationToken: cancellationToken);
 
         public string Init() => RunCommandThenReadOutput("init");
 
         public string Validate() => RunCommandThenReadOutput("validate");
 
+        //public Task<string> ValidateAsync(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("validate", cancellationToken);
+
         public string Plan() => RunCommandThenReadOutput("plan -input=false");
 
         public string Apply() => RunCommandThenReadOutput("apply -input=false -auto-approve");
 
-        public interface ITerraformCommandOptionsOptions
+        internal interface ITerraformCommandOptionsOptions
         {
-            IReadOnlyDictionary<string, TerraformReattachProvider> TerraformReattachProviders { get; }
+            IEnumerable<KeyValuePair<string, string>> EnvironmentVariables { get; }
+            IEnumerable<KeyValuePair<string, TerraformReattachProvider>> TerraformReattachProviders { get; }
+            string TfCliConfigFile { get; }
         }
 
         public class TerraformCommandOptionsBase<DerivedOptions> : ITerraformCommandOptionsOptions
             where DerivedOptions : TerraformCommandOptionsBase<DerivedOptions>
         {
-            Dictionary<string, TerraformReattachProvider> TerraformReattachProviders { get; } = new Dictionary<string, TerraformReattachProvider>();
+            public IDictionary<string, string> EnvironmentVariables
+            {
+                get => _environmentVariables;
+                set => _environmentVariables = value ?? throw new ArgumentNullException(nameof(value));
+            }
 
-            IReadOnlyDictionary<string, TerraformReattachProvider> ITerraformCommandOptionsOptions.TerraformReattachProviders => TerraformReattachProviders;
+            IEnumerable<KeyValuePair<string, string>> ITerraformCommandOptionsOptions.EnvironmentVariables => EnvironmentVariables;
+
+            public IDictionary<string, TerraformReattachProvider> TerraformReattachProviders
+            {
+                get => _terraformReattachProviders;
+                set => _terraformReattachProviders = value ?? throw new ArgumentNullException(nameof(value));
+            }
+
+            IEnumerable<KeyValuePair<string, TerraformReattachProvider>> ITerraformCommandOptionsOptions.TerraformReattachProviders => TerraformReattachProviders;
+
+            /// <summary>
+            /// A file path, specifying a configuration file as it is described here:
+            /// <see href="https://developer.hashicorp.com/terraform/cli/config/config-file">https://developer.hashicorp.com/terraform/cli/config/config-file</see>.
+            /// </summary>
+            /// <remarks>
+            /// Use it to abbreviate the setting of the corresponding environment variable, namely <b>TF_CLI_CONFIG_FILE</b>.
+            /// </remarks>
+            public string? TfCliConfigFile { get; set; }
+
+            private IDictionary<string, string> _environmentVariables = new Dictionary<string, string>();
+            private IDictionary<string, TerraformReattachProvider> _terraformReattachProviders = new Dictionary<string, TerraformReattachProvider>();
 
             protected TerraformCommandOptionsBase()
             {
@@ -127,6 +165,8 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 return options;
             }
 
+            public string OriginalWorkingDirectory { get; }
+
             public new string WorkingDirectory
             {
                 get => base.WorkingDirectory!;
@@ -154,16 +194,17 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                         : (Path.Combine(Environment.CurrentDirectory, options.WorkingDirectory)))
                     : Environment.CurrentDirectory;
 
-                Directory.CreateDirectory(workingDirectory);
                 var workingDirectoryInfo = new DirectoryInfo(workingDirectory);
+                workingDirectory = workingDirectoryInfo.FullName;
+                OriginalWorkingDirectory = workingDirectory;
+                Directory.CreateDirectory(workingDirectory);
                 var copyableFilePatterns = options.CopyableFilePatterns;
 
                 foreach (var file in copyableFilePatterns.AsParallel().SelectMany(filePattern => workingDirectoryInfo.EnumerateFiles(filePattern, SearchOption.AllDirectories)))
                 {
                     var relativeDirectory = file.DirectoryName!.Remove(0, workingDirectory.Length);
-                    var mirroringDirectory = Path.Combine(options.TemporaryWorkingDirectory, relativeDirectory);
+                    var mirroringDirectory = options.TemporaryWorkingDirectory + relativeDirectory;
                     Directory.CreateDirectory(mirroringDirectory); // May be redudant but we don't care
-
                     var mirroringFile = Path.Combine(mirroringDirectory, file.Name);
                     file.CopyTo(mirroringFile);
                 }

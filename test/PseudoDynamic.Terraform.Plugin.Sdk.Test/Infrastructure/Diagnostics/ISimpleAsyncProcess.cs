@@ -19,7 +19,7 @@
         /// Waits for exit asynchronously.
         /// </summary>
         /// <returns>The exit code.</returns>
-        Task<int> WaitForExitAsync();
+        Task<int> WaitForExitAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Kills the process.

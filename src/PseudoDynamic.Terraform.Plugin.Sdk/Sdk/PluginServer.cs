@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Hosting.Server;
+﻿using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PseudoDynamic.Terraform.Plugin.Protocols;
 
@@ -7,15 +10,23 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal class PluginServer : IPluginServer
     {
+        internal const PluginProtocol DefaultProtocol = PluginProtocol.V6;
+
         public Uri ServerAddress => _serverAddress.Value;
         public PluginProtocol PluginProtocol { get; }
 
+        private X509Certificate2? _clientCertificate;
         private Lazy<Uri> _serverAddress;
+        private readonly ILogger<PluginServer> _logger;
 
-        public PluginServer(IServer server, IOptions<PluginServerOptions> options)
+        public PluginServer(IServer server, IOptions<PluginServerOptions> options, IHostApplicationLifetime applicationLifetime, ILogger<PluginServer> logger)
         {
             var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
             PluginProtocol = unwrappedOptions.Protocol ?? throw new InvalidOperationException($"The plugin protocol has not been configured inside an instance of {typeof(PluginServerOptions).FullName}");
+
+            if (!unwrappedOptions.IsDebuggable) {
+                _clientCertificate = unwrappedOptions.ClientCertificate ?? throw new InvalidOperationException($"The plugin client certificate has not been configured inside an instance of {typeof(PluginServerOptions).FullName}");
+            }
 
             // Server port is only initialized after the server has been started, therefore we delay it because the
             // access to the lazy server address of this instance is expected to happen after the server started.
@@ -59,6 +70,22 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                     return serverAddressUri;
                 }
             });
+
+            if (!unwrappedOptions.IsDebuggable) {
+                applicationLifetime.ApplicationStarted.Register(WriteTerraformHandshake);
+            }
+            _logger = logger;
+        }
+
+        private void WriteTerraformHandshake()
+        {
+            var serverAddress = ServerAddress;
+            // Terraform seems not to like Base64 padding, so we trim
+            var base64EncodedCertificate = Convert.ToBase64String(_clientCertificate!.RawData).TrimEnd('=');
+            var terraformHandshake = $"1|{PluginProtocol.ToVersionNumber()}|tcp|{serverAddress.Host}:{serverAddress.Port}|grpc|{base64EncodedCertificate}";
+            _logger.LogInformation($"Writing Terraform handshake{Environment.NewLine}" + terraformHandshake);
+            // Terraform reads until newline and stucks if non is present
+            Console.WriteLine(terraformHandshake);
         }
     }
 }

@@ -19,25 +19,23 @@
         {
         }
 
-        public async Task<int> WaitForExitAsync()
+        public async Task<int> WaitForExitAsync(CancellationToken cancellationToken = default)
         {
             EnsureProcessStarted();
 
-            if (!ShouldStreamOutput)
-            {
-                string endAsync = await Process.StandardOutput.ReadToEndAsync();
-                ReceiveOutput(endAsync);
-            }
+            //if (!ShouldStreamOutput)
+            //{
+            //    string endAsync = await Process.StandardOutput.ReadToEndAsync();
+            //    ReceiveOutput(endAsync);
+            //}
 
-            if (!ShouldStreamError)
-            {
-                string endAsync = await Process.StandardError.ReadToEndAsync();
-                ReceiveError(endAsync);
-            }
+            //if (!ShouldStreamError)
+            //{
+            //    string endAsync = await Process.StandardError.ReadToEndAsync();
+            //    ReceiveError(endAsync);
+            //}
 
-#if NET5_0_OR_GREATER
-            await Process.WaitForExitAsync();
-#endif
+            await Process.WaitForExitAsync(cancellationToken);
             await Task.Run(new Action(Process.WaitForExit));
             ThrowOnNonZeroExitCode();
             return Process.ExitCode;

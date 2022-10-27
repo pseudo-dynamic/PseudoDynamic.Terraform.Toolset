@@ -10,13 +10,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
 {
     internal class KestrelLoopbackListenerConfiguration : IPostConfigureOptions<KestrelServerOptions>, IPostConfigureOptions<PluginServerOptions>
     {
-        private readonly IServiceProvider _serviceProvider;
-        private X509Certificate2? _selfSignedCertificate;
+        private static X509Certificate2? _selfSignedCertificate;
 
-        public KestrelLoopbackListenerConfiguration(IServiceProvider serviceProvider) =>
-            _serviceProvider = serviceProvider;
-
-        private X509Certificate2 CreateSelfSignedCertificate()
+        private static X509Certificate2 CreateSelfSignedCertificate()
         {
             var rsaKeyPair = Certificate.BouncyCastle.GenerateRsaKeyPair(2048);
             var issuer = new X509Name("CN=127.0.0.1");
@@ -26,8 +22,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
             return Certificate.GenerateSelfSignedCertificate(bouncyCastleCertificate, rsaKeyPair.Private);
         }
 
-        private X509Certificate2 GetSelfSignedCertificate() =>
-            _selfSignedCertificate ?? CreateSelfSignedCertificate();
+        private static X509Certificate2 GetSelfSignedCertificate() =>
+            _selfSignedCertificate ??= CreateSelfSignedCertificate();
+
+        private readonly IServiceProvider _serviceProvider;
+
+        public KestrelLoopbackListenerConfiguration(IServiceProvider serviceProvider) =>
+            _serviceProvider = serviceProvider;
 
         public void PostConfigure(string _, PluginServerOptions options)
         {
@@ -50,12 +51,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
                 var selfSignedCertificate = GetSelfSignedCertificate();
 
                 if (pluginServerOptions.ClientCertificate?.Thumbprint != selfSignedCertificate.Thumbprint) {
-                    throw new InvalidOperationException("You should not set the client certificate of the plugin server options, if you are using the Terraform provider defaults of the plugin host builder");
+                    throw new InvalidOperationException("Do not set the client certificate of the plugin server options manually when using UseTerraformPluginServer()");
                 }
 
                 options.Listen(ipAddress, randomPort, listen => listen.UseHttps(http => {
                     http.ServerCertificate = selfSignedCertificate;
-                    http.AllowAnyClientCertificate();
                 }));
             }
         }

@@ -7,13 +7,28 @@
 		<RootNamespace>PseudoDynamic.Terraform.Plugin</RootNamespace>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<LangVersion>preview</LangVersion>
-
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="TerraformProjects/**/*">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="CSharpProjects/**/*" />
+		<Compile Remove="CSharpProjects/**/*" />
+		<EmbeddedResource Remove="CSharpProjects/**/*" />
+		<Compile Remove="CSharpProjects/**/*" />
+		
+		<None Remove="CSharpProjects/**/*" />
+		<None Include="CSharpProjects/**/*.tf">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="CSharpProjects/terraform-validate/bin/**/*">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Visible>false</Visible>
 		</None>
 	</ItemGroup>
 
@@ -38,6 +53,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\PseudoDynamic.Terraform.Plugin.Sdk\PseudoDynamic.Terraform.Plugin.Sdk.csproj" />
+		<ProjectReference Include="CSharpProjects\terraform-validate\TerraformValidatable.csproj" />
 	</ItemGroup>
 
 </Project>

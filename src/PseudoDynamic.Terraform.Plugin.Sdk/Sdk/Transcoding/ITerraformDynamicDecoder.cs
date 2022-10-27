@@ -8,7 +8,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
     public interface ITerraformDynamicDecoder
     {
         /// <summary>
-        /// Tries to decodes a unknown part of your schema.
+        /// Tries to decodes an unknown part of your schema.
         /// </summary>
         /// <typeparam name="Schema">The type you want to try to decode this unknown schema part to.</typeparam>
         /// <param name="unknown"></param>

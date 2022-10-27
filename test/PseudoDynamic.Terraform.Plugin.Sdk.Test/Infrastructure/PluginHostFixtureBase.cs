@@ -1,37 +1,26 @@
-﻿using FluentAssertions;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Sdk;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 {
-    public abstract class PluginHostFixtureBase : IAsyncLifetime
+    public abstract class PluginHostFixtureBase : IAsyncLifetime, IPluginServerSpecification
     {
         public virtual string ProviderName => "registry.terraform.io/pseudo-dynamic/debug";
+        public abstract PluginProtocol Protocol { get; }
+        public bool IsDebuggable => true;
+        public IWebHost Host { get; private set; } = null!;
 
-        public abstract PluginProtocol PluginProtocol { get; }
-
-        public IHost Host { get; private set; } = null!;
         internal IProvider Provider { get; private set; } = null!;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="configureOptions"></param>
-        /// <param name="preventInit">Prevents from calling terraform init to initialize the working directory.</param>
         /// <returns></returns>
-        internal TerraformCommand.WorkingDirectoryCloning CreateTerraformCommand(Action<TerraformCommand.WorkingDirectoryCloning.WorkingDirectoryCloningOptions>? configureOptions = null, bool preventInit = false)
-        {
-            var terraform = Host.Services.GetWorkingDirectoryCloningTerraformCommand(configureOptions);
-
-            if (!preventInit)
-            {
-                Record.Exception(terraform.Init).Should().BeNull();
-            }
-
-            return terraform;
-        }
+        internal TerraformCommand.WorkingDirectoryCloning CreateTerraformCommand(Action<TerraformCommand.WorkingDirectoryCloning.WorkingDirectoryCloningOptions>? configureOptions = null) =>
+            Host.Services.GetWorkingDirectoryCloningTerraformCommand(configureOptions);
 
         /// <summary>
         /// Creates the Terraform command and calls terraform init.
@@ -57,8 +46,23 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
         public async Task InitializeAsync()
         {
-            var host = new PluginHostBuilder() { Protocol = PluginProtocol, IsDebuggable = true, }
-                .ConfigureTerraformProviderDefaults(ProviderName)
+            var host = new WebHostBuilder()
+                .UseTerraformPluginServerCore(this)
+                .ConfigureServices(services =>
+                {
+                    services.AddOptions<ProviderOptions>().Configure(options =>
+                    {
+                        options.FullyQualifiedProviderName = ProviderName;
+                    });
+
+                    services.AddOptions<PluginServerOptions>().Configure(options =>
+                    {
+                        options.Protocol = Protocol;
+                        options.IsDebuggable = true;
+                    });
+
+                    services.AddTerraformProvider();
+                })
                 .Build();
 
             Host = host;

@@ -6,12 +6,12 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
     {
         public class ProtocolV5 : PluginHostFixtureBase
         {
-            public override PluginProtocol PluginProtocol => PluginProtocol.V5;
+            public override PluginProtocol Protocol => PluginProtocol.V5;
         }
 
         public class ProtocolV6 : PluginHostFixtureBase
         {
-            public override PluginProtocol PluginProtocol => PluginProtocol.V6;
+            public override PluginProtocol Protocol => PluginProtocol.V6;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public static IEnumerable<object?[]> Produce_terraform_validatable_config_schemas()
         {
             // unknown
-            foreach (var resource in UnknownResources(default(string), "config_string_unknown", true)) yield return resource;
+            foreach (var resource in Resources(default(string), "config_string_unknown", isUnknown: true)) yield return resource;
 
             // string
             foreach (var resource in Resources("Hello from Terraform!", "config_string")) yield return resource;
@@ -48,17 +48,31 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             foreach (var resource in Resources(SchemaFake<string>.Object.RangeList("first", "second"), "config_object_list")) yield return resource;
 
             // nested block
-            foreach (var resource in NestedBlockResources("nested", "config_nested_block")) yield return resource;
-            foreach (var resource in NestedBlockRangeResources(SchemaFake<string>.Block.RangeList("first_nested", "second_nested"), "config_nested_block_list")) yield return resource;
-            foreach (var resource in NestedBlockRangeResources(SchemaFake<string>.Block.RangeSet("tf_second_csharp_first", "tf_first_csharp_second"), "config_nested_block_set")) yield return resource;
+            foreach (var resource in Resources(new SchemaFake<string>.Block("nested"), "config_nested_block", isNestedBlock: true)) yield return resource;
 
-            foreach (var resource in NestedBlockRangeResources(SchemaFake<string>.Block.RangeMap(
-                    ("first_nested_block", "first_nested_block_attribute"),
-                    ("second_nested_block", "second_nested_block_attribute")),
-                "config_nested_block_map"))
+            foreach (var resource in Resources(
+                SchemaFake<string>.Block.RangeList("first_nested", "second_nested"),
+                "config_nested_block_list",
+                isNestedBlock: true,
+                notWrappable: true))
                 yield return resource;
 
-            IEnumerable<object?[]> AdvancedResources<T>(
+            foreach (var resource in Resources(
+                SchemaFake<string>.Block.RangeSet("tf_second_csharp_first", "tf_first_csharp_second"),
+                "config_nested_block_set",
+                isNestedBlock: true,
+                notWrappable: true))
+                yield return resource;
+
+            foreach (var resource in Resources(SchemaFake<string>.Block.RangeMap(
+                    ("first_nested_block", "first_nested_block_attribute"),
+                    ("second_nested_block", "second_nested_block_attribute")),
+                "config_nested_block_map",
+                isNestedBlock: true,
+                notWrappable: true))
+                yield return resource;
+
+            IEnumerable<object?[]> Resources<T>(
                 T value,
                 string fileName,
                 bool isUnknown = false,
@@ -70,23 +84,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 yield return new object[] { new SchemaFake<T>(value, equalityComparer) { IsNestedBlock = isNestedBlock, }.Schema, filePattern };
                 if (!notWrappable) yield return new object[] { new SchemaFake<T>.TerraformValueFake(TerraformValue.OfValue<T>(value, isUnknown), equalityComparer) { IsNestedBlock = isNestedBlock }.Schema, filePattern };
             }
-
-            IEnumerable<object?[]> UnknownResources<T>(T value, string fileName, bool isUnknown, IEqualityComparer<T>? equalityComparer = null) =>
-                AdvancedResources<T>(value, fileName, isUnknown: isUnknown, equalityComparer: equalityComparer);
-
-            IEnumerable<object?[]> Resources<T>(T value, string fileName) =>
-                AdvancedResources<T>(value, fileName, isUnknown: false, equalityComparer: null);
-
-            IEnumerable<object?[]> NestedBlockResources<T>(T value, string fileName) =>
-                AdvancedResources<SchemaFake<T>.Block>(new SchemaFake<T>.Block(value), fileName, isNestedBlock: true);
-
-            IEnumerable<object?[]> NestedBlockRangeResources<T>(T value, string fileName) =>
-                AdvancedResources<T>(value, fileName, isNestedBlock: true, notWrappable: true);
         }
 
         [Theory]
         [MemberData(nameof(Produce_terraform_validatable_config_schemas))]
-        internal async Task Terraform_validate_config_schema<Resource, Schema, Value>(Schema expectedConfig, string filePattern)
+        internal void Terraform_validate_config_schema<Schema>(Schema expectedConfig, string filePattern)
             where Schema : class, ISchemaFake
         {
             var resourceMock = new Mock<IResource<Schema>>();
@@ -98,7 +100,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             _pluginHostFixture.Provider.ReplaceResourceDefinition(new ResourceDescriptor(resourceMock.Object, typeof(Schema)));
 
             using var terraform = _pluginHostFixture.CreateTerraformCommand("TerraformProjects/resource-validate", filePattern);
-            Record.Exception(terraform.Validate).Should().BeNull();
+            terraform.Init();
+            terraform.Validate();
 
             resourceMock.Verify();
             Assert.Equal(expectedConfig, actualContext?.Config);

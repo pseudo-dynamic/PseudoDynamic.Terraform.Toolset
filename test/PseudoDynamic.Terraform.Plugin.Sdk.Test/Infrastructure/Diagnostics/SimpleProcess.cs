@@ -57,7 +57,8 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
           bool shouldStreamOutput = false,
           Action<string?>? errorReceived = null,
           bool shouldStreamError = false,
-          bool shouldThrowOnNonZeroCode = false)
+          bool shouldThrowOnNonZeroCode = false,
+          CancellationToken cancellationToken = default)
         {
             using var process = new SimpleAsyncProcess(
                 startInfo,
@@ -68,7 +69,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
                 shouldThrowOnNonZeroCode);
 
             process.Start();
-            return await process.WaitForExitAsync();
+            return await process.WaitForExitAsync(cancellationToken);
         }
 
         /// <summary>
@@ -106,12 +107,14 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         /// <param name="errorReceived"></param>
         /// <param name="shouldStreamError"></param>
         /// <param name="shouldThrowOnNonZeroCode"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>The read output.</returns>
         public static async Task<string> StartThenWaitForExitThenReadOutputAsync(
           SimpleProcessStartInfo startInfo,
           Action<string?>? errorReceived = null,
           bool shouldStreamError = false,
-          bool shouldThrowOnNonZeroCode = false)
+          bool shouldThrowOnNonZeroCode = false,
+          CancellationToken cancellationToken = default)
         {
             StringBuilder outputBuilder = new StringBuilder();
 
@@ -123,7 +126,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
                 shouldThrowOnNonZeroCode: shouldThrowOnNonZeroCode);
 
             process.Start();
-            _ = await process.WaitForExitAsync();
+            _ = await process.WaitForExitAsync(cancellationToken);
             return outputBuilder.ToString();
         }
 
@@ -391,15 +394,15 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         {
             EnsureProcessStarted();
 
-            if (!ShouldStreamOutput)
-            {
-                ReceiveOutput(Process.StandardOutput.ReadToEnd());
-            }
+            //if (!ShouldStreamOutput)
+            //{
+            //    ReceiveOutput(Process.StandardOutput.ReadToEnd());
+            //}
 
-            if (!ShouldStreamError)
-            {
-                ReceiveError(Process.StandardError.ReadToEnd());
-            }
+            //if (!ShouldStreamError)
+            //{
+            //    ReceiveError(Process.StandardError.ReadToEnd());
+            //}
 
             Process.WaitForExit();
             ThrowOnNonZeroExitCode();
