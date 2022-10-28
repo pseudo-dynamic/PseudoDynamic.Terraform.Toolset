@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Microsoft.Extensions.Options;
 using PseudoDynamic.Terraform.Plugin.Conventions;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -21,8 +22,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         private readonly Dictionary<string, ProviderResourceDefinition> _resourceDefinitions;
         private readonly ResourceDefinitionFactory _resourceDefinitionFactory;
+        private readonly DynamicDefinitionResolver _dynamicResolver;
 
-        public Provider(ResourceDefinitionFactory resourceDefinitionFactory, IOptionsSnapshot<ProviderOptions> providerOptions)
+        public Provider(ResourceDefinitionFactory resourceDefinitionFactory, IOptionsSnapshot<ProviderOptions> providerOptions, DynamicDefinitionResolver dynamicResolver)
         {
             var unwrappedProviderOptions = providerOptions?.Value ?? throw new ArgumentNullException(nameof(providerOptions));
             _resourceDefinitions = new Dictionary<string, ProviderResourceDefinition>();
@@ -31,9 +33,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             ProviderName = FullyQualifiedProviderName.Split("/").Last();
             SnakeCaseProviderName = SnakeCaseConvention.Default.Format(ProviderName);
             _resourceDefinitionFactory = resourceDefinitionFactory;
+            _dynamicResolver = dynamicResolver;
 
             foreach (var resourceDescriptor in unwrappedProviderOptions.ResourceDescriptors) {
-                AddResourceDefinition(resourceDescriptor);
+                var resourceDefinition = AddResourceDefinition(resourceDescriptor);
+                _dynamicResolver.AddPreloadable(resourceDefinition.Schema);
             }
         }
 
@@ -45,7 +49,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             return new ProviderResourceDefinition(resourceDefinition, fullResourceTypeName);
         }
 
-        private void AddResourceDefinition(ResourceDescriptor resourceDescriptor)
+        private ResourceDefinition AddResourceDefinition(ResourceDescriptor resourceDescriptor)
         {
             var resourceDefinition = UpgradeResourceDefinition(resourceDescriptor);
             var resourceTypeName = resourceDefinition.ResourceTypeName;
@@ -55,6 +59,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             }
 
             _resourceDefinitions.Add(resourceTypeName, resourceDefinition);
+            return resourceDefinition;
         }
 
         /// <summary>

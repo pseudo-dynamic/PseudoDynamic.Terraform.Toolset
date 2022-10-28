@@ -7,6 +7,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
 {
     internal class BlockNodeBuilder
     {
+        public virtual BlockNode ResolveDynamic(VisitContext context)
+        {
+            var visitor = new SameDepthCapturingVisitor();
+            visitor.RewriteThenVisitDynamic(context);
+            return visitor.RootNode;
+        }
+
         /// <summary>
         /// Represents the entry point of visiting a complex type.
         /// </summary>
@@ -16,7 +23,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
         public virtual BlockNode BuildNode(Type blockType, Context? context = null)
         {
             var visitor = new SameDepthCapturingVisitor();
-            visitor.VisitComplex(blockType);
+            visitor.RewriteThenVisitComplex(blockType);
             return visitor.RootNode;
         }
 
@@ -60,7 +67,7 @@ actual generic type argument: {genericTypeArgument.FullName}
 indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (indicated by {typeof(TerraformValueTypeAttribute).FullName}");
                     }
 
-                    VisitAfterRewrite(new VisitPropertyGenericSegmentContext(context, terraformValueGenericTypeArgument, terraformValueGenericTypeArgumentIndex) { ContextType = TerraformVisitContextType.TerraformValue });
+                    RewriteThenVisit(new VisitPropertyGenericSegmentContext(context, terraformValueGenericTypeArgument, terraformValueGenericTypeArgumentIndex) { ContextType = TerraformVisitContextType.TerraformValue });
                     return true;
                 }
 
@@ -138,13 +145,13 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
                 return context;
             }
 
-            public override void VisitComplex(Type complexType, Context? context = null)
+            public override void RewriteThenVisitComplex(Type complexType, Context? context = null)
             {
                 if (!complexType.IsComplexAnnotated(out _)) {
                     throw new ArgumentException($"Schema type {complexType.FullName} must be annotated with [{typeof(BlockAttribute).FullName}]");
                 }
 
-                base.VisitComplex(complexType, context);
+                base.RewriteThenVisitComplex(complexType, context);
             }
         }
     }

@@ -19,7 +19,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
                 Add("\"string\"", PrimitiveDefinition.String);
                 Add("\"number\"", PrimitiveDefinition.Number);
                 Add("\"bool\"", PrimitiveDefinition.Bool);
-                Add("\"dynamic\"", PrimitiveDefinition.Dynamic);
+                Add("\"dynamic\"", DynamicDefinition.Uncomputed());
 
                 Add("""["list","string"]""", MonoRangeDefinition.ListUncomputed(PrimitiveDefinition.String));
                 Add("""["list",["list","string"]]""", MonoRangeDefinition.ListUncomputed(MonoRangeDefinition.ListUncomputed(PrimitiveDefinition.String)));

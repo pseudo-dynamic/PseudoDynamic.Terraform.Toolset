@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using PseudoDynamic.Terraform.Plugin.Protocols;
-
-namespace PseudoDynamic.Terraform.Plugin.Sdk
+﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     ///// <summary>
     ///// Represents the entry point for hosting a Terraform plugin.

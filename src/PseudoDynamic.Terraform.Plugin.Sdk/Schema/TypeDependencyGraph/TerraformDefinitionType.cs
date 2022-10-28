@@ -2,6 +2,7 @@
 {
     public enum TerraformDefinitionType
     {
+        Dynamic,
         Primitive,
         MonoRange,
         Map,

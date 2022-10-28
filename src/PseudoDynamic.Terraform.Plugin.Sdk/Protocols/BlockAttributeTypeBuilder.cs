@@ -49,6 +49,9 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
             private IEnumerable<string> PopBlockTypesReversed(int count) =>
                 PopRangeReversed(_jsonBlockTypes, count);
 
+            protected internal override void VisitDynamic(DynamicDefinition definition) =>
+                PushBlockType(definition.TypeConstraint.GetBlockAttributeTypeJsonString());
+
             protected internal override void VisitPrimitive(PrimitiveDefinition definition) =>
                 PushBlockType(definition.TypeConstraint.GetBlockAttributeTypeJsonString());
 

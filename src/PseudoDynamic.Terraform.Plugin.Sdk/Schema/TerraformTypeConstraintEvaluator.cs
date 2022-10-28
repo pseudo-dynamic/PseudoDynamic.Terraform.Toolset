@@ -23,19 +23,50 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
             _ => default
         };
 
-        private TerraformTypeConstraint EvaluateClassType(Type classType) => classType switch {
-            var _ when classType == typeof(object) => TerraformTypeConstraint.Dynamic,
-            // We now say it is a "object" but upper context can change to "block" or "tuple"
-            _ => TerraformTypeConstraint.Object
-        };
+        private TerraformTypeConstraint EvaluateClassType(Type classType)
+        {
+            if (classType == typeof(object)) {
+                return TerraformTypeConstraint.Dynamic;
+            }
 
-        private TerraformTypeConstraint? EvaluateGenericReferenceTypeDefinition(Type genericReferenceTypeDefinition) =>
-            genericReferenceTypeDefinition switch {
-                var _ when genericReferenceTypeDefinition == typeof(IList<>) => TerraformTypeConstraint.List,
-                var _ when genericReferenceTypeDefinition == typeof(ISet<>) => TerraformTypeConstraint.Set,
-                var _ when genericReferenceTypeDefinition == typeof(IDictionary<,>) => TerraformTypeConstraint.Map,
-                _ => default
-            };
+            // We now say it is a "object" but upper context can change to "block" or "tuple"
+            return TerraformTypeConstraint.Object;
+        }
+
+        private TerraformTypeConstraint? EvaluateGenericClassTypeDefinition(Type typeDefinition)
+        {
+            if (typeDefinition == typeof(List<>)) {
+                return TerraformTypeConstraint.List;
+            }
+
+            if (typeDefinition == typeof(HashSet<>)) {
+                return TerraformTypeConstraint.Set;
+            }
+
+            if (typeDefinition == typeof(Dictionary<,>)) {
+                return TerraformTypeConstraint.Map;
+            }
+
+            return default;
+        }
+
+        private TerraformTypeConstraint? EvaluateGenericReferenceTypeDefinition(Type typeDefinition)
+        {
+
+            if (typeDefinition == typeof(IList<>)) {
+                return TerraformTypeConstraint.List;
+            }
+
+            if (typeDefinition == typeof(ISet<>)) {
+                return TerraformTypeConstraint.Set;
+            }
+
+            if (typeDefinition == typeof(IDictionary<,>)) {
+                return TerraformTypeConstraint.Map;
+            }
+
+            return default;
+        }
 
         public IReadOnlySet<TerraformTypeConstraint> Evaluate(Type type)
         {
@@ -56,8 +87,18 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
                 // Generic interfaces
                 AddNonNull(EvaluateGenericReferenceTypeDefinition(type.GetGenericTypeDefinition()));
             } else if (typeCode == TypeCode.Object && type.IsClass) {
-                // Classes except string
-                typeConstraints.Add(EvaluateClassType(type));
+                // If we find predestinated generic classes ..
+                var genericClassTypeDefinitionEvaluation = type.IsGenericType
+                    ? EvaluateGenericClassTypeDefinition(type.GetGenericTypeDefinition())
+                    : default;
+
+                if (genericClassTypeDefinitionEvaluation.HasValue) {
+                    // .. then we add it and skip class type evaluation
+                    typeConstraints.Add(genericClassTypeDefinitionEvaluation.Value);
+                } else {
+                    // Classes except string
+                    typeConstraints.Add(EvaluateClassType(type));
+                }
             }
 
             return typeConstraints;

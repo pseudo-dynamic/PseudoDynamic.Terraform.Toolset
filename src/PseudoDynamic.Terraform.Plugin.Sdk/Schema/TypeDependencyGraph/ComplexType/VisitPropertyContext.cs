@@ -13,25 +13,21 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// <summary>
         /// The nullability info of the walking property.
         /// </summary>
-        public NullabilityInfo NullabilityInfo { get; }
-
-        public int SegmentDepth { get; }
+        public InheritableNullabilityInfo NullabilityInfo { get; }
 
         private ContextualPropertyInfo? _contextualProperty;
 
         internal VisitPropertyContext(IContext context, PropertyInfo property)
             : base(context, property.PropertyType)
         {
-            SegmentDepth = 0;
             ContextType = VisitContextType.Property;
             Property = property;
-            NullabilityInfo = NullabilityInfoContext.Create(property);
+            NullabilityInfo = new OriginalNullabilityInfo(NullabilityInfoContext.Create(property));
         }
 
         internal VisitPropertyContext(IVisitPropertySegmentContext underlyingSegment, Type segmentType)
             : base(underlyingSegment, segmentType)
         {
-            SegmentDepth = underlyingSegment.SegmentDepth;
             ContextType = VisitContextType.PropertySegment;
             Property = underlyingSegment.Property;
             NullabilityInfo = underlyingSegment.NullabilityInfo;
@@ -43,5 +39,18 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         public override T? GetContextualAttribute<T>()
             where T : class =>
             GetContextualProperty().GetContextAttribute<T>();
+
+        private record OriginalNullabilityInfo : InheritableNullabilityInfo
+        {
+            public override NullabilityState ReadState => _nullabilityInfo.ReadState;
+
+            private readonly NullabilityInfo _nullabilityInfo;
+
+            internal OriginalNullabilityInfo(NullabilityInfo nullabilityInfo) : base(nullabilityInfo.Type) =>
+                _nullabilityInfo = nullabilityInfo ?? throw new ArgumentNullException(nameof(nullabilityInfo));
+
+            public override InheritableNullabilityInfo GetGenericTypeArgument(int index) =>
+                new OriginalNullabilityInfo(_nullabilityInfo.GenericTypeArguments[index]);
+        }
     }
 }

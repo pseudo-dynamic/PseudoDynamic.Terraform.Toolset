@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [SkipImplicitTypeConstraintEvaluation]
-    public sealed class TerraformValue<[TerraformValueType] T> : ITerraformValue<T>, IEquatable<TerraformValue<T>>
+    public sealed class TerraformValue<[TerraformValueType] T> : ITerraformValue<T>, IEquatable<TerraformValue<T>>, ITerraformValue
     {
         /// <summary>
         /// Representing a Terraform null.
@@ -50,6 +50,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
                 }
             }
         }
+
+        object? ITerraformValue.Value => Value;
 
         /// <summary>
         /// Specifies that the value is null.

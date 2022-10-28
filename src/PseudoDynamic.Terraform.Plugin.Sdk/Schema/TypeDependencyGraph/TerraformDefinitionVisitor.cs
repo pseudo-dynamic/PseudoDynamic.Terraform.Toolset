@@ -5,6 +5,10 @@
         public virtual void Visit(TerraformDefinition definition) =>
             definition.Visit(this);
 
+        protected internal virtual void VisitDynamic(DynamicDefinition definition)
+        {
+        }
+
         protected internal virtual void VisitPrimitive(PrimitiveDefinition definition)
         {
         }

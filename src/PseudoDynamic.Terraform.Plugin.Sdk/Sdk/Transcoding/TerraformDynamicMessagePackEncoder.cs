@@ -1,6 +1,4 @@
 ﻿using System.Buffers;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using DotNext.Buffers;
@@ -14,40 +12,31 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
     internal class TerraformDynamicMessagePackEncoder
     {
-        internal readonly static TerraformDynamicMessagePackEncoder Default = new TerraformDynamicMessagePackEncoder();
-
-        private readonly static TypeAccessor DynamicValueEncoderAccessor = new TypeAccessor(typeof(TerraformDynamicMessagePackEncoder));
         private readonly static GenericTypeAccessor CollectionEncoderAccessor = new GenericTypeAccessor(typeof(CollectionEncoder<>));
         private readonly static GenericTypeAccessor DictionaryEncoderAccessor = new GenericTypeAccessor(typeof(DictionaryEncoder<,>));
 
-        private readonly static Dictionary<Type, EncodeTerraformValueCompiledMethod> EncodeTerraformValueCompiledMethods = new Dictionary<Type, EncodeTerraformValueCompiledMethod>();
+        private readonly DynamicDefinitionResolver _dynamicDefinitionResolver;
 
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(TerraformDynamicMessagePackEncoder))]
-        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used via reflection")]
-        private static void EncodeTerraformValue<T>(TerraformDynamicMessagePackEncoder encoder, ref MessagePackWriter writer, ValueDefinition value, ITerraformValue<T> terraformValue)
+        public TerraformDynamicMessagePackEncoder(DynamicDefinitionResolver dynamicDefinitionResolver) =>
+            _dynamicDefinitionResolver = dynamicDefinitionResolver ?? throw new ArgumentNullException(nameof(dynamicDefinitionResolver));
+
+        private void EncodeDynamic(ref MessagePackWriter writer, DynamicDefinition definition, object content)
         {
-            if (terraformValue.IsUnknown) {
-                writer.WriteExtensionFormat(new ExtensionResult(0, ReadOnlySequence<byte>.Empty));
+            if (content is TerraformDynamic dynamic) {
+                if (dynamic.Encoding != TerraformDynamicEncoding.MessagePack) {
+                    throw new TerraformDynamicMessagePackEncodingException($"A encoding type other than {TerraformDynamicEncoding.MessagePack} is not supported");
+                }
+
+                writer.WriteRaw(dynamic.Memory.Span);
+            }
+
+            if (content is null) {
+                EncodeValue(ref writer, definition, content);
                 return;
             }
 
-            if (terraformValue.IsNull) {
-                writer.WriteNil();
-                return;
-            }
-
-            encoder.EncodeNonNullValue(ref writer, value, terraformValue.Value);
-        }
-
-        private static EncodeTerraformValueCompiledMethod.EncodeTerraformValueDelegate GetEncodeTerraformValueDelegate(Type terraformValueType, Type valueType)
-        {
-            if (EncodeTerraformValueCompiledMethods.TryGetValue(terraformValueType, out var compiledMethod)) {
-                return compiledMethod.EncodeTerraformValue;
-            }
-
-            compiledMethod = new EncodeTerraformValueCompiledMethod(terraformValueType, valueType);
-            EncodeTerraformValueCompiledMethods[terraformValueType] = compiledMethod;
-            return compiledMethod.EncodeTerraformValue;
+            var resolvedDefinition = _dynamicDefinitionResolver.ResolveDynamic(definition, content.GetType());
+            EncodeValue(ref writer, resolvedDefinition, content);
         }
 
         public void EncodeNumber(ref MessagePackWriter writer, ValueDefinition value, object content)
@@ -147,7 +136,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             switch (value.TypeConstraint) {
                 case TerraformTypeConstraint.Dynamic:
-                    throw new NotImplementedException($"The encoding of Terraform constraint type {TerraformTypeConstraint.Dynamic} is not implemented");
+                    EncodeDynamic(ref writer, (DynamicDefinition)value, content);
+                    break;
                 case TerraformTypeConstraint.String:
                     writer.Write((string)content);
                     break;
@@ -176,6 +166,21 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             }
         }
 
+        private void EncodeTerraformValue(ref MessagePackWriter writer, ValueDefinition value, ITerraformValue terraformValue)
+        {
+            if (terraformValue.IsUnknown) {
+                writer.WriteExtensionFormat(new ExtensionResult(0, ReadOnlySequence<byte>.Empty));
+                return;
+            }
+
+            if (terraformValue.IsNull) {
+                writer.WriteNil();
+                return;
+            }
+
+            EncodeNonNullValue(ref writer, value, terraformValue.Value);
+        }
+
         public void EncodeValue(ref MessagePackWriter writer, ValueDefinition value, object? content)
         {
             if (content is null) {
@@ -184,14 +189,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             }
 
             if (value.IsWrappedByTerraformValue) {
-                GetEncodeTerraformValueDelegate(value.OuterType, value.SourceType).Invoke(this, ref writer, value, content);
+                EncodeTerraformValue(ref writer, value, (ITerraformValue)content);
                 return;
             }
 
             EncodeNonNullValue(ref writer, value, content);
         }
 
-        public void EncodeSchema(ref MessagePackWriter writer, BlockDefinition block, object content)
+        public void Encode(ref MessagePackWriter writer, BlockDefinition block, object content)
         {
             if (content is null) {
                 throw new TerraformDynamicMessagePackEncodingException("The very first encoding schema cannot be null");
@@ -200,11 +205,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             EncodeComplex(ref writer, block, content);
         }
 
-        public ReadOnlyMemory<byte> EncodeSchema(BlockDefinition block, object content)
+        public ReadOnlyMemory<byte> Encode(BlockDefinition block, object content)
         {
             using var bufferWriter = new SparseBufferWriter<byte>(); // TODO: estimate proper defaults
             var writer = new MessagePackWriter(bufferWriter);
-            EncodeSchema(ref writer, block, content);
+            Encode(ref writer, block, content);
             writer.Flush();
             var buffer = new byte[bufferWriter.WrittenCount];
             bufferWriter.CopyTo(buffer);
@@ -269,34 +274,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                     yield return enumerator.Current.Key;
                     yield return enumerator.Current.Value;
                 }
-            }
-        }
-
-        private class EncodeTerraformValueCompiledMethod
-        {
-            internal delegate void EncodeTerraformValueDelegate(TerraformDynamicMessagePackEncoder encoder, ref MessagePackWriter writer, ValueDefinition value, object terraformValue);
-
-            private readonly static MethodAccessor EncodeTerraformValueAccessor = DynamicValueEncoderAccessor.GetMethodAccessor(static x => x.GetPrivateStaticMethod, nameof(EncodeTerraformValue));
-
-            public EncodeTerraformValueDelegate EncodeTerraformValue { get; }
-
-            public EncodeTerraformValueCompiledMethod(Type terraformValueType, Type valueType)
-            {
-                var method = EncodeTerraformValueAccessor.MakeGenericMethod(valueType);
-                ParameterExpression param1 = Expression.Parameter(typeof(TerraformDynamicMessagePackEncoder), "encoder");
-                ParameterExpression param2 = Expression.Parameter(typeof(MessagePackWriter).MakeByRefType(), "writer");
-                ParameterExpression param3 = Expression.Parameter(typeof(ValueDefinition), "value");
-                ParameterExpression param4 = Expression.Parameter(typeof(object), "terraformValue");
-
-                MethodCallExpression body = Expression.Call(
-                    null,
-                    method,
-                    param1,
-                    param2,
-                    param3,
-                    terraformValueType.IsValueType ? Expression.Unbox(param4, terraformValueType) : Expression.Convert(param4, terraformValueType));
-
-                EncodeTerraformValue = Expression.Lambda<EncodeTerraformValueDelegate>(body, param1, param2, param3, param4).Compile();
             }
         }
     }

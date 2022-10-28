@@ -10,9 +10,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         {
             var property = context.Property;
             var valueType = context.VisitType;
-            var valueAttribute = property.GetCustomAttribute<ValueAttribute>(inherit: true);
 
             var implicitTypeConstraints = context.ImplicitTypeConstraints;
+
+            if (implicitTypeConstraints.Contains(TerraformTypeConstraint.Dynamic)) {
+                return TerraformTypeConstraint.Dynamic;
+            }
+
+            var valueAttribute = property.GetCustomAttribute<ValueAttribute>(inherit: true);
             TerraformTypeConstraint typeConstraintResult;
 
             if (valueAttribute is not null) {

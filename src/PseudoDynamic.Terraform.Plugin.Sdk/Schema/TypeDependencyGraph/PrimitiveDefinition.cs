@@ -2,7 +2,6 @@
 {
     internal sealed record class PrimitiveDefinition : ValueDefinition
     {
-        public static readonly PrimitiveDefinition Dynamic = new(typeof(object), TerraformTypeConstraint.Dynamic);
         public static readonly PrimitiveDefinition String = new(typeof(string), TerraformTypeConstraint.String);
         public static readonly PrimitiveDefinition Number = new(typeof(int), TerraformTypeConstraint.Number);
         public static readonly PrimitiveDefinition Bool = new(typeof(bool), TerraformTypeConstraint.Bool);

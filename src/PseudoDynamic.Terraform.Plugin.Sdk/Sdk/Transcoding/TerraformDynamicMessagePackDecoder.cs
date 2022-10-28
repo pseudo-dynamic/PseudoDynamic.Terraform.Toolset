@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
+using DotNext.Buffers;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using PseudoDynamic.Terraform.Plugin.Reflection;
@@ -16,35 +17,47 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         private readonly static GenericTypeAccessor DictionaryAccessor = new GenericTypeAccessor(typeof(Dictionary<,>));
 
         private IServiceProvider _serviceProvider;
+        private readonly DynamicDefinitionResolver _dynamicResolver;
 
-        public TerraformDynamicMessagePackDecoder(IServiceProvider serviceProvider) =>
+        public TerraformDynamicMessagePackDecoder(IServiceProvider serviceProvider, DynamicDefinitionResolver resolver)
+        {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _dynamicResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+        }
+
+        private TerraformDynamic DecodeDynamic(ref MessagePackReader reader, DynamicDefinition definition)
+        {
+            var raw = reader.ReadRaw();
+            var bytes = new byte[raw.Length];
+            raw.CopyTo(bytes, out _);
+            return new TerraformDynamic(definition, bytes, TerraformDynamicEncoding.MessagePack);
+        }
 
         private string DecodeString(ref MessagePackReader reader) => reader.ReadString();
 
-        private object DecodeNumber(ref MessagePackReader reader, ValueDefinition value)
+        private object DecodeNumber(ref MessagePackReader reader, ValueDefinition definition)
         {
             if (TryReadUtf8(ref reader, out var utf8Number)) {
-                if (value.SourceType == typeof(BigInteger)) {
+                if (definition.SourceType == typeof(BigInteger)) {
                     return BigInteger.Parse(utf8Number);
                 } else {
-                    return Convert.ChangeType(utf8Number, value.SourceType);
+                    return Convert.ChangeType(utf8Number, definition.SourceType);
                 }
             }
 
             // We make it dynamic, so the explicit BigInteger user-conversion works.
             dynamic? number = TryReadMessagePackDrivenNumber(ref reader)
-                ?? TryReadSchemaDrivenNumber(ref reader, value);
+                ?? TryReadSchemaDrivenNumber(ref reader, definition);
 
             if (number != null) {
-                if (value.SourceType == typeof(BigInteger)) {
+                if (definition.SourceType == typeof(BigInteger)) {
                     return (BigInteger)number;
                 } else {
-                    return Convert.ChangeType(number, value.SourceType);
+                    return Convert.ChangeType(number, definition.SourceType);
                 }
             }
 
-            throw new TerraformDynamicMessagePackDecodingException($"The Terraform number cannot be converted to {value.SourceType.FullName}");
+            throw new TerraformDynamicMessagePackDecodingException($"The Terraform number cannot be converted to {definition.SourceType.FullName}");
 
             static object? TryReadMessagePackDrivenNumber(ref MessagePackReader reader) => reader.NextCode switch {
                 MessagePackCode.UInt8 => reader.ReadByte(),
@@ -60,7 +73,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 _ => null
             };
 
-            static object? TryReadSchemaDrivenNumber(ref MessagePackReader reader, ValueDefinition value) => Type.GetTypeCode(value.SourceType) switch {
+            static object? TryReadSchemaDrivenNumber(ref MessagePackReader reader, ValueDefinition definition) => Type.GetTypeCode(definition.SourceType) switch {
                 TypeCode.Byte => reader.ReadByte(),
                 TypeCode.SByte => reader.ReadSByte(),
                 TypeCode.UInt16 => reader.ReadUInt16(),
@@ -93,50 +106,50 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private bool DecodeBool(ref MessagePackReader reader) => reader.ReadBoolean();
 
-        private object DecodeList(ref MessagePackReader reader, MonoRangeDefinition list, DecodingOptions options)
+        private object DecodeList(ref MessagePackReader reader, MonoRangeDefinition definition, DecodingOptions options)
         {
             var itemCount = reader.ReadArrayHeader();
 
-            var listAccessor = ListAccessor.MakeGenericTypeAccessor(list.Item.OuterType);
+            var listAccessor = ListAccessor.MakeGenericTypeAccessor(definition.Item.OuterType);
             var items = listAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = listAccessor.GetMethodCaller(nameof(IList<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
-                var item = DecodeValue(ref reader, list.Item, options).Value;
+                var item = DecodeValue(ref reader, definition.Item, options).Value;
                 addItem.Invoke(items, new[] { item });
             }
 
             return items;
         }
 
-        private object DecodeSet(ref MessagePackReader reader, MonoRangeDefinition set, DecodingOptions options)
+        private object DecodeSet(ref MessagePackReader reader, MonoRangeDefinition definition, DecodingOptions options)
         {
             var itemCount = reader.ReadArrayHeader();
 
-            var setAccessor = SetAccessor.MakeGenericTypeAccessor(set.Item.OuterType);
+            var setAccessor = SetAccessor.MakeGenericTypeAccessor(definition.Item.OuterType);
             var items = setAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = setAccessor.GetMethodCaller(nameof(ISet<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
-                var item = DecodeValue(ref reader, set.Item, options).Value;
+                var item = DecodeValue(ref reader, definition.Item, options).Value;
                 addItem.Invoke(items, new[] { item });
             }
 
             return items;
         }
 
-        private object DecodeMap(ref MessagePackReader reader, MapDefinition map, DecodingOptions options)
+        private object DecodeMap(ref MessagePackReader reader, MapDefinition definition, DecodingOptions options)
         {
             var itemCount = reader.ReadMapHeader();
 
-            var mapAccessor = DictionaryAccessor.MakeGenericTypeAccessor(map.Key.OuterType, map.Value.OuterType);
+            var mapAccessor = DictionaryAccessor.MakeGenericTypeAccessor(definition.Key.OuterType, definition.Value.OuterType);
             var items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
             var addItem = mapAccessor.GetMethodCaller(nameof(IDictionary<object, object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
                 // CONSIDER: allow key type other than string
                 var key = reader.ReadString();
-                var value = DecodeValue(ref reader, map.Value, options).Value;
+                var value = DecodeValue(ref reader, definition.Value, options).Value;
                 addItem.Invoke(items, new[] { key, value });
             }
 
@@ -147,12 +160,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         /// Enables deserialization through constructor, where constructor is used to inject just decoded block
         /// attributes as parameters. Other constructor parameters are resolved by service provider.
         /// </summary>
-        /// <param name="complex"></param>
+        /// <param name="definition"></param>
         /// <param name="attributes"></param>
         /// <returns>The instantiated instance.</returns>
-        private object ActivateComplex(ComplexDefinition complex, IReadOnlyDictionary<string, object?> attributes)
+        private object ActivateComplex(ComplexDefinition definition, IReadOnlyDictionary<string, object?> attributes)
         {
-            var reflectionMetadata = complex.ComplexReflectionMetadata;
+            var reflectionMetadata = definition.ComplexReflectionMetadata;
             var constructorParametersCount = reflectionMetadata.ConstructorParameters.Count;
             var constructorArguments = new object?[constructorParametersCount];
             var constructorSupportedPropertiesCount = reflectionMetadata.ConstructorSupportedProperties.Count;
@@ -174,9 +187,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             return reflectionMetadata.PrimaryConstructor.Invoke(constructorArguments);
         }
 
-        private object DecodeComplex(ref MessagePackReader reader, ComplexDefinition complex, DecodingOptions options)
+        private object DecodeComplex(ref MessagePackReader reader, ComplexDefinition definition, DecodingOptions options)
         {
-            if (complex is not IAttributeAccessor abstractAttributeAccessor) {
+            if (definition is not IAttributeAccessor abstractAttributeAccessor) {
                 throw new NotImplementedException($"Complex definition does not implement {typeof(IAttributeAccessor).FullName}");
             }
 
@@ -196,19 +209,20 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 parsedAttributes.Add(attributeName, attributeValueResult.Value);
             }
 
-            return ActivateComplex(complex, parsedAttributes);
+            return ActivateComplex(definition, parsedAttributes);
         }
 
-        private object DecodeNonNullValue(ValueDefinition value, ref MessagePackReader reader, DecodingOptions options) => value.TypeConstraint switch {
+        private object DecodeNonNullValue(ValueDefinition definition, ref MessagePackReader reader, DecodingOptions options) => definition.TypeConstraint switch {
+            TerraformTypeConstraint.Dynamic => DecodeDynamic(ref reader, (DynamicDefinition)definition),
             TerraformTypeConstraint.String => DecodeString(ref reader),
-            TerraformTypeConstraint.Number => DecodeNumber(ref reader, value),
+            TerraformTypeConstraint.Number => DecodeNumber(ref reader, definition),
             TerraformTypeConstraint.Bool => DecodeBool(ref reader),
-            TerraformTypeConstraint.List => DecodeList(ref reader, (MonoRangeDefinition)value, options),
-            TerraformTypeConstraint.Set => DecodeSet(ref reader, (MonoRangeDefinition)value, options),
-            TerraformTypeConstraint.Map => DecodeMap(ref reader, (MapDefinition)value, options),
-            TerraformTypeConstraint.Object => DecodeComplex(ref reader, (ObjectDefinition)value, options),
-            TerraformTypeConstraint.Block => DecodeComplex(ref reader, (BlockDefinition)value, options),
-            _ => throw new NotImplementedException($"The decoding of this Terraform constraint type is not implemented: {value.TypeConstraint}")
+            TerraformTypeConstraint.List => DecodeList(ref reader, (MonoRangeDefinition)definition, options),
+            TerraformTypeConstraint.Set => DecodeSet(ref reader, (MonoRangeDefinition)definition, options),
+            TerraformTypeConstraint.Map => DecodeMap(ref reader, (MapDefinition)definition, options),
+            TerraformTypeConstraint.Object => DecodeComplex(ref reader, (ObjectDefinition)definition, options),
+            TerraformTypeConstraint.Block => DecodeComplex(ref reader, (BlockDefinition)definition, options),
+            _ => throw new NotImplementedException($"The decoding of this Terraform constraint type is not implemented: {definition.TypeConstraint}")
         };
 
         private ValueResult DecodeValue(ref MessagePackReader reader, ValueDefinition value, DecodingOptions options, bool isResultRequired = false)
@@ -239,13 +253,24 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             return new ValueResult(value3, isNull, isUnknown);
         }
 
+        public object? ResolveDynamic(object? unknown, Type knownType, DecodingOptions options)
+        {
+            if (unknown is TerraformDynamic terraformDynamic) {
+                var value = _dynamicResolver.ResolveDynamic(terraformDynamic.Definition, knownType);
+                var reader = new MessagePackReader(terraformDynamic.Memory);
+                return DecodeValue(ref reader, value, options);
+            }
+
+            return unknown;
+        }
+
         /// <summary>
         /// Decodes the schema.
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="block"></param>
         /// <param name="options"></param>
-        public object DecodeSchema(ref MessagePackReader reader, BlockDefinition block, DecodingOptions options)
+        public object Decode(ref MessagePackReader reader, BlockDefinition block, DecodingOptions options)
         {
             if (options is null) {
                 throw new ArgumentNullException(nameof(options));
@@ -254,10 +279,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             return DecodeComplex(ref reader, block, options) ?? throw new InvalidOperationException("The very first decoding block must have a non-nil map header");
         }
 
-        public object DecodeSchema(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)
+        public object Decode(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)
         {
             var reader = new MessagePackReader(memory);
-            return DecodeSchema(ref reader, block, options);
+            return Decode(ref reader, block, options);
         }
 
         public class ValueResult

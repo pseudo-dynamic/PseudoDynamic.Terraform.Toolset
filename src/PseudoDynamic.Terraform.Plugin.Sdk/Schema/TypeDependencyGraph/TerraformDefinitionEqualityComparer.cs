@@ -21,8 +21,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 return false;
             }
 
-            var definitions = TerraformDefinitionCollector.Default.Queue(x);
-            var definitionVisitor = new EqualityComparingVisitor(definitions, _checkEquality);
+            var queueOfX = TerraformDefinitionCollector.Default.Queue(x);
+            var definitionVisitor = new EqualityComparingVisitor(queueOfX, _checkEquality);
             definitionVisitor.Visit(y);
             return definitionVisitor.AreEqual;
         }
@@ -37,15 +37,15 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             private bool _areEqual = true;
             private bool _onceVisited;
 
-            private readonly Queue<TerraformDefinition> _queue;
+            private readonly Queue<TerraformDefinition> _queueOfX;
             private readonly Func<TerraformDefinition?, TerraformDefinition?, bool> _checkEquality;
             private readonly int _queueCount;
 
-            public EqualityComparingVisitor(Queue<TerraformDefinition> queue, Func<TerraformDefinition?, TerraformDefinition?, bool> checkEquality)
+            public EqualityComparingVisitor(Queue<TerraformDefinition> queueOfX, Func<TerraformDefinition?, TerraformDefinition?, bool> checkEquality)
             {
-                _queue = queue ?? throw new ArgumentNullException(nameof(queue));
+                _queueOfX = queueOfX ?? throw new ArgumentNullException(nameof(queueOfX));
                 _checkEquality = checkEquality ?? throw new ArgumentNullException(nameof(checkEquality));
-                _queueCount = queue.Count;
+                _queueCount = queueOfX.Count;
             }
 
             public override void Visit(TerraformDefinition y)
@@ -54,7 +54,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                     throw new InvalidOperationException("This instance is stateful and cannot be used to re-compare another definition");
                 }
 
-                bool dequeueSucceeded = _queue.TryDequeue(out var x);
+                bool dequeueSucceeded = _queueOfX.TryDequeue(out var x);
 
                 if (dequeueSucceeded) {
                     _visitCounter++;

@@ -14,6 +14,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         /// <param name="unknown"></param>
         /// <param name="content">The resulting content.</param>
         /// <returns><see langword="true"/> if the decoding was successful.</returns>
-        bool TryDecode<Schema>(object? unknown, [NotNullWhen(true)] out Schema content);
+        bool TryDecode<Schema>(object? unknown, [NotNullWhen(true)] out Schema? content);
     }
 }

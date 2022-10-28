@@ -26,6 +26,17 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             get {
                 return _visitType ?? throw new InvalidOperationException("There is no type because you are not visiting");
             }
+
+            internal init {
+                var visitType = _visitType;
+                _visitType = value;
+
+                if (visitType != value) {
+                    _implicitTypeConstraints = null;
+                    _complexMetadata = null;
+                    _visitedContextualType = null;
+                }
+            }
         }
 
         public ComplexTypeMetadata? ComplexTypeMetadata {
@@ -68,12 +79,11 @@ Visit type = {VisitType.FullName}");
         private Type? _visitType;
         private ContextualType? _visitedContextualType;
         private ComplexTypeMetadata? _complexMetadata;
-        private bool _computedComplexMetadata;
         private IReadOnlySet<TerraformTypeConstraint>? _implicitTypeConstraints;
 
-        internal VisitContext(IContext context, Type visitedType)
+        internal VisitContext(IContext context, Type visitType)
             : base(context) =>
-            SetVisitType(visitedType);
+            SetVisitType(visitType);
 
         internal VisitContext(Type walkingType) =>
             SetVisitType(walkingType);

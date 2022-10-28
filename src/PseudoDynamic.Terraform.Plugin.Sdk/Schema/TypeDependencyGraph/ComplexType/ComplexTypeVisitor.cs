@@ -10,7 +10,7 @@
             if (context.VisitType.TryGetGenericArguments(out var genericArguments)) {
                 for (int i = 0; i < genericArguments.Length; i++) {
                     var genericArgument = genericArguments[i];
-                    VisitAfterRewrite(new VisitPropertyGenericSegmentContext(context, genericArgument, i));
+                    RewriteThenVisit(new VisitPropertyGenericSegmentContext(context, genericArgument, i));
                 }
             }
         }
@@ -27,7 +27,7 @@
             var complexMetadata = context.ComplexTypeMetadata!;
 
             foreach (var property in complexMetadata.SupportedProperties) {
-                VisitAfterRewrite(new VisitPropertyContext(context, property));
+                RewriteThenVisit(new VisitPropertyContext(context, property));
             }
         }
 
@@ -44,7 +44,21 @@
             }
         }
 
-        protected void VisitAfterRewrite(VisitContext context) => Visit(Rewrite(context));
+        protected void RewriteThenVisit(VisitContext context) =>
+            Visit(Rewrite(context));
+
+        public virtual void RewriteThenVisitDynamic(VisitContext context)
+        {
+            var dynamicType = context.VisitType;
+
+            //if (dynamicType.IsComplexType()) {
+            //    RewriteThenVisit(context with { ContextType = VisitContextType.Complex.Inherits(context.ContextType) });
+            //} else {
+            //    RewriteThenVisit(context);
+            //}
+
+            RewriteThenVisit(context);
+        }
 
         /// <summary>
         /// Represents the entry point of visiting a complex type.
@@ -52,7 +66,7 @@
         /// <param name="complexType"></param>
         /// <param name="context"></param>
         /// <exception cref="ArgumentException"></exception>
-        public virtual void VisitComplex(Type complexType, Context? context = null)
+        public virtual void RewriteThenVisitComplex(Type complexType, Context? context = null)
         {
             if (complexType.IsGenericTypeDefinition) {
                 throw new ArgumentException("The specified type must be a closed generic type");
@@ -62,10 +76,10 @@
                 throw new ArgumentException("The specified type must be either class or struct");
             }
 
-            VisitAfterRewrite(context.ToVisitingContext(complexType, VisitContextType.Complex));
+            RewriteThenVisit(context.ToVisitingContext(complexType, VisitContextType.Complex));
         }
 
-        public void VisitComplexType<T>(Context? context = null) =>
-            VisitComplex(typeof(T), context);
+        public void RewriteThenVisitComplex<T>(Context? context = null) =>
+            RewriteThenVisitComplex(typeof(T), context);
     }
 }

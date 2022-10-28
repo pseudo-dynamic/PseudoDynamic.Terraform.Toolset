@@ -7,17 +7,17 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal class ProviderAdapter : IProviderAdapter
     {
-        public static readonly IResource<object>? ResourceDummy;
-
         private readonly IProvider _provider;
         private readonly IMapper _mapper;
-        private readonly TerraformDynamicMessagePackDecoder _dynamicValueDecoder;
+        private readonly TerraformDynamicMessagePackDecoder _decoder;
+        private readonly ITerraformDynamicDecoder _dynamicDecoder;
 
-        public ProviderAdapter(IProvider provider, IMapper mapper, TerraformDynamicMessagePackDecoder dynamicValueDecoder)
+        public ProviderAdapter(IProvider provider, IMapper mapper, TerraformDynamicMessagePackDecoder decoder, ITerraformDynamicDecoder dynamicDecoder)
         {
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _dynamicValueDecoder = dynamicValueDecoder;
+            _decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+            _dynamicDecoder = dynamicDecoder ?? throw new ArgumentNullException(nameof(dynamicDecoder));
         }
 
         public async Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request)
@@ -45,7 +45,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         #endregion
 
-        #region resources
+        #region Resources
 
         public async Task<ValidateResourceConfig.Response> ValidateResourceConfig(ValidateResourceConfig.Request request)
         {
@@ -54,14 +54,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var reports = new Reports();
 
             var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
-            var config = _dynamicValueDecoder.DecodeSchema(request.Config.Msgpack, resourceDefinition.Schema, decodingOptions);
+            var config = _decoder.Decode(request.Config.Msgpack, resourceDefinition.Schema, decodingOptions);
 
             var context = ValidateConfig.ContextAccessor
                 .MakeGenericTypeAccessor(resourceDefinition.Schema.SourceType)
-                .CreateInstance(x => x.GetPrivateInstanceActivator, config, reports);
+                .CreateInstance(x => x.GetPrivateInstanceActivator, config, reports, _dynamicDecoder);
 
             await (Task)resourceDefinition.ResourceAccessor
-                .GetMethodCaller(nameof(ResourceDummy.ValidateConfig))
+                .GetMethodCaller(nameof(IResource<object>.ValidateConfig))
                 .Invoke(resource, new object?[] { context });
 
             var diagnostics = _mapper.Map<IList<Diagnostic>>(reports);

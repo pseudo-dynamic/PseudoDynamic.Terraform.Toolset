@@ -4,6 +4,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal record VisitPropertyGenericSegmentContext : VisitContext, IVisitPropertySegmentContext
     {
+        internal static VisitPropertyGenericSegmentContext New(IVisitPropertySegmentContext underlyingContext, Type visitType) =>
+            new VisitPropertyGenericSegmentContext(underlyingContext, visitType);
+
         /// <inheritdoc/>
         public override VisitContextType ContextType { get; internal init; } = VisitContextType.PropertyGenericSegment;
 
@@ -17,24 +20,22 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// <summary>
         /// The nullability info of the walking property.
         /// </summary>
-        public NullabilityInfo NullabilityInfo { get; }
-
-        /// <summary>
-        /// The index of generic argument.
-        /// </summary>
-        public int GenericArgumentIndex { get; }
-
-        public int SegmentDepth { get; }
+        public InheritableNullabilityInfo NullabilityInfo { get; }
 
         IVisitPropertySegmentContext _underlyingContext;
+
+        private VisitPropertyGenericSegmentContext(IVisitPropertySegmentContext underlyingContext, Type visitType)
+            : base(underlyingContext, visitType)
+        {
+            _underlyingContext = underlyingContext;
+            NullabilityInfo = new InheritableNullabilityInfo(visitType);
+        }
 
         internal VisitPropertyGenericSegmentContext(IVisitPropertySegmentContext underlyingContext, Type genericArgument, int genericArgumentIndex)
             : base(underlyingContext, genericArgument)
         {
             _underlyingContext = underlyingContext;
-            SegmentDepth = underlyingContext.SegmentDepth + 1;
-            NullabilityInfo = underlyingContext.NullabilityInfo.GenericTypeArguments[genericArgumentIndex];
-            GenericArgumentIndex = genericArgumentIndex;
+            NullabilityInfo = underlyingContext.NullabilityInfo.GetGenericTypeArgument(genericArgumentIndex);
         }
 
         public override T? GetContextualAttribute<T>()

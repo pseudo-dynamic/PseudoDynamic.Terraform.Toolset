@@ -34,6 +34,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             // provider
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
             services.TryAddSingleton<TerraformDynamicMessagePackDecoder>();
+            services.TryAddSingleton<DynamicDefinitionResolver>();
+            services.TryAddSingleton<TerraformDynamicMessagePackEncoder>();
+            services.TryAddSingleton<ITerraformDynamicDecoder, TerraformDynamicDecoder>();
             services.TryAddSingleton<IProviderAdapter, ProviderAdapter>();
             services.TryAddSingleton<ResourceDefinitionFactory>();
             services.TryAddSingleton<IProvider, Provider>();

@@ -17,6 +17,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         public BlockBuilder(IAttributeNameConvention attributeNameConvention) =>
             _attributeNameConvention = attributeNameConvention ?? throw new ArgumentNullException(nameof(attributeNameConvention));
 
+        protected DynamicDefinition BuildDynamic(BlockNode<IVisitPropertySegmentContext> node) =>
+            new DynamicDefinition(node);
+
         protected MonoRangeDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node)
         {
             var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
@@ -186,6 +189,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             TerraformTypeConstraint.Set => BuildSet(node),
             TerraformTypeConstraint.Map => BuildMap(node),
             TerraformTypeConstraint.Tuple => throw new NotImplementedException("A tuple schema API has not been implemented yet"),
+            TerraformTypeConstraint.Dynamic => BuildDynamic(node),
             _ => new PrimitiveDefinition(node.Context.VisitType, valueTypeConstraint)
         };
 
@@ -195,28 +199,28 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint();
             bool isNestedBlock;
             ValueDefinition builtValue;
+            var implicitValueTypeConstraints = unwrappedNode.Context.ImplicitTypeConstraints;
 
+            // We can now allow to treat dynamic as block
             if (explicitTypeConstraint == TerraformTypeConstraint.Block) {
-                var implicitValueTypeConstraints = unwrappedNode.Context.ImplicitTypeConstraints;
-
-                TerraformTypeConstraint? singleImplicitValueTypeConstraints = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
+                TerraformTypeConstraint? singleImplicitValueTypeConstraint = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
                     ?? (implicitValueTypeConstraints.Count == 1
                         ? implicitValueTypeConstraints.Single()
                         : default);
 
-                if (!singleImplicitValueTypeConstraints.HasValue) {
+                if (!singleImplicitValueTypeConstraint.HasValue) {
                     throw new NestedBlockException();
                 }
 
                 var unwrappedContext = unwrappedNode.Context;
 
-                if (singleImplicitValueTypeConstraints.Value.IsComplex()) {
+                if (singleImplicitValueTypeConstraint.Value.IsComplex()) {
                     builtValue = BuildBlock(unwrappedNode);
                 } else if (isTerraformValue) {
                     throw new NestedBlockException($"The {unwrappedContext.Property.GetPath()} property wants to be a nested block but can only be wrapped by " +
                         $"{typeof(ITerraformValue<>).FullName} if the implicit type constraint is object, tuple or block");
-                } else if (singleImplicitValueTypeConstraints.Value.IsRange()) {
-                    builtValue = BuildValue(unwrappedNode, singleImplicitValueTypeConstraints.Value);
+                } else if (singleImplicitValueTypeConstraint.Value.IsRange()) {
+                    builtValue = BuildValue(unwrappedNode, singleImplicitValueTypeConstraint.Value);
                 } else {
                     throw new NestedBlockException($"The {unwrappedContext.Property.GetPath()} property wants to be a nested block but the property type represents " +
                         $@"either none, unknown or to many implicit Terraform constraint types: {string.Join(", ", implicitValueTypeConstraints)}
@@ -239,6 +243,13 @@ Property type = {unwrappedNode.Context.VisitType}");
             return new ValueResult(updatedValue, unwrappedNode) {
                 IsNestedBlock = isNestedBlock
             };
+        }
+
+        public ValueDefinition ResolveDynamic(DynamicDefinition definition, Type knownType)
+        {
+            var newContext = VisitPropertyGenericSegmentContext.New(definition.DynamicNode.Context, knownType);
+            var newNode = nodeBuilder.ResolveDynamic(newContext).AsContext<IVisitPropertySegmentContext>();
+            return BuildValue(newNode).Value;
         }
 
         public BlockDefinition BuildBlock(Type blockType)

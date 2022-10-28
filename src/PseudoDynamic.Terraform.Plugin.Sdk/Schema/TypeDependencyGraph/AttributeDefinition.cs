@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿using System.Text;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal abstract record class AttributeDefinition : TerraformDefinition
     {
@@ -82,5 +84,13 @@
             IsRequired,
             IsOptional,
             ValueWrapping);
+
+        protected override bool PrintMembers(StringBuilder builder) =>
+            base.PrintMembers(builder.Append($"{new {
+                Name,
+                IsRequired,
+                IsOptional,
+                ValueWrapping
+            }.ToString()?.Trim('{', '}')}, "));
     }
 }

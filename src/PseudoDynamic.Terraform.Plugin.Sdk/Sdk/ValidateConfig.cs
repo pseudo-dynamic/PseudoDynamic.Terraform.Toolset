@@ -1,5 +1,6 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Reflection;
 using PseudoDynamic.Terraform.Plugin.Schema;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -7,7 +8,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     {
         internal static readonly GenericTypeAccessor ContextAccessor = new(typeof(Context<>));
 
-        public class Context<Schema> : ResourceContext
+        public class Context<Schema> : Context.Shaping
         {
             /// <summary>
             /// Represents the transmitted configuration made by you in the Terraform project. May
@@ -16,13 +17,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             /// in your schema.
             /// </summary>
             public Schema Config { get; }
-            public Reports Reports { get; }
 
-            internal Context(Schema config, Reports reports)
-            {
+            internal Context(Schema config, Reports reports, ITerraformDynamicDecoder dynamicDecoder)
+                : base(reports, dynamicDecoder) =>
                 Config = config;
-                Reports = reports;
-            }
         }
     }
 }

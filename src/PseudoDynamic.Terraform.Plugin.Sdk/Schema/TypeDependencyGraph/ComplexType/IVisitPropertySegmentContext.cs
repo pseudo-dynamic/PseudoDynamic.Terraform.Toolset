@@ -6,11 +6,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
     {
         PropertyInfo Property { get; }
 
-        NullabilityInfo NullabilityInfo { get; }
-
-        /// <summary>
-        /// The property segment depth starting with zero.
-        /// </summary>
-        int SegmentDepth { get; }
+        InheritableNullabilityInfo NullabilityInfo { get; }
     }
 }
