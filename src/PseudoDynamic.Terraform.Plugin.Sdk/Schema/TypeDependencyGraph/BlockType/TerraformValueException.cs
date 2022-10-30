@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
     [Serializable]
     internal class TerraformValueException : Exception

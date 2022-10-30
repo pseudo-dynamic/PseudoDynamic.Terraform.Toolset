@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
     public class BlockNodeErrorTests
     {

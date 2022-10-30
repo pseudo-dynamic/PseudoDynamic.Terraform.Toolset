@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.NullabilityAnalysis;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
@@ -26,7 +27,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// Breaks the nullability chain of this and next property generic segments. They are treated as they would be annotated by <see cref="MaybeNullAttribute"/>.
         /// </remarks>
         internal static VisitPropertyGenericSegmentContext Custom(IVisitPropertySegmentContext underlyingContext, Type visitType, params Type[]? visitTypeGenericArguments) =>
-            new VisitPropertyGenericSegmentContext(underlyingContext, new CustomNullabilityInfo(visitType) { NativeGenericTypeArguments = visitTypeGenericArguments });
+            new VisitPropertyGenericSegmentContext(underlyingContext, new NullableInfo(visitType) { NativeGenericTypeArguments = visitTypeGenericArguments });
 
         /// <inheritdoc/>
         public override VisitContextType ContextType { get; internal init; } = VisitContextType.PropertyGenericSegment;
@@ -41,11 +42,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// <summary>
         /// The nullability info of the walking property.
         /// </summary>
-        public CustomNullabilityInfo NullabilityInfo { get; }
+        public AbstractNullablityInfo NullabilityInfo { get; }
 
         IVisitPropertySegmentContext _underlyingContext;
 
-        private VisitPropertyGenericSegmentContext(IVisitPropertySegmentContext underlyingContext, CustomNullabilityInfo visitTypeNullabilityInfo)
+        private VisitPropertyGenericSegmentContext(IVisitPropertySegmentContext underlyingContext, AbstractNullablityInfo visitTypeNullabilityInfo)
             : base(underlyingContext, visitTypeNullabilityInfo.Type)
         {
             _underlyingContext = underlyingContext;
@@ -56,7 +57,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             : base(underlyingContext, visitType)
         {
             _underlyingContext = underlyingContext;
-            NullabilityInfo = new CustomNullabilityInfo(visitType);
+            NullabilityInfo = new NullableInfo(visitType);
         }
 
         internal VisitPropertyGenericSegmentContext(IVisitPropertySegmentContext underlyingContext, Type genericArgument, int genericArgumentIndex)

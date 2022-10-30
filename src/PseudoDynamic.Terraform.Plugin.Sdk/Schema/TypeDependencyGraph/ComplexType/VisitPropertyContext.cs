@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Namotion.Reflection;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.NullabilityAnalysis;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
@@ -13,7 +14,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// <summary>
         /// The nullability info of the walking property.
         /// </summary>
-        public CustomNullabilityInfo NullabilityInfo { get; }
+        public AbstractNullablityInfo NullabilityInfo { get; }
 
         private ContextualPropertyInfo? _contextualProperty;
 
@@ -22,7 +23,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         {
             ContextType = VisitContextType.Property;
             Property = property;
-            NullabilityInfo = new OriginalNullabilityInfo(NullabilityInfoContext.Create(property));
+            NullabilityInfo = new NullabilityInfoWrapper(NullabilityInfoContext.Create(property));
         }
 
         internal VisitPropertyContext(IVisitPropertySegmentContext underlyingSegment, Type segmentType)
@@ -39,18 +40,5 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         public override T? GetContextualAttribute<T>()
             where T : class =>
             GetContextualProperty().GetContextAttribute<T>();
-
-        private record OriginalNullabilityInfo : CustomNullabilityInfo
-        {
-            public override NullabilityState ReadState => _nullabilityInfo.ReadState;
-
-            private readonly NullabilityInfo _nullabilityInfo;
-
-            internal OriginalNullabilityInfo(NullabilityInfo nullabilityInfo) : base(nullabilityInfo.Type) =>
-                _nullabilityInfo = nullabilityInfo ?? throw new ArgumentNullException(nameof(nullabilityInfo));
-
-            public override CustomNullabilityInfo GetGenericTypeArgument(int index) =>
-                new OriginalNullabilityInfo(_nullabilityInfo.GenericTypeArguments[index]);
-        }
     }
 }

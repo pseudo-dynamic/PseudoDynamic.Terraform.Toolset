@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.NullabilityAnalysis
 {
-    internal record CustomNullabilityInfo
+    internal abstract record AbstractNullablityInfo
     {
         public Type Type { get; internal init; }
 
@@ -13,14 +13,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             init => _typeArguments = value;
         }
 
-        public virtual NullabilityState ReadState => NullabilityState.Nullable;
+        public abstract NullabilityState ReadState { get; }
 
-        public virtual CustomNullabilityInfo GetGenericTypeArgument(int index) =>
-            new CustomNullabilityInfo(NativeGenericTypeArguments[index]);
+        public virtual AbstractNullablityInfo GetGenericTypeArgument(int index) =>
+            new NullableInfo(NativeGenericTypeArguments[index]);
 
         private Type[]? _typeArguments;
 
-        internal CustomNullabilityInfo(Type type) =>
+        internal AbstractNullablityInfo(Type type) =>
             Type = type ?? throw new ArgumentNullException(nameof(type));
     }
 }

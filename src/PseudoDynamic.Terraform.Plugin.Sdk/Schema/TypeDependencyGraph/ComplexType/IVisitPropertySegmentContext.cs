@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.NullabilityAnalysis;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
@@ -6,6 +7,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
     {
         PropertyInfo Property { get; }
 
-        CustomNullabilityInfo NullabilityInfo { get; }
+        AbstractNullablityInfo NullabilityInfo { get; }
     }
 }

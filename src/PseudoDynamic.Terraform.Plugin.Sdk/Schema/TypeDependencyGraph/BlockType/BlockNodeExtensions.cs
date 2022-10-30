@@ -1,4 +1,4 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
     internal static class BlockNodeExtensions
     {

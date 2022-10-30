@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
     [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
     internal record class BlockNode : IEnumerable<BlockNode>

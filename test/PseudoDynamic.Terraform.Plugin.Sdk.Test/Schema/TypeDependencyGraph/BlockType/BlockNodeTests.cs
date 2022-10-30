@@ -1,6 +1,6 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
 
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
     public class BlockSchemaTests
     {

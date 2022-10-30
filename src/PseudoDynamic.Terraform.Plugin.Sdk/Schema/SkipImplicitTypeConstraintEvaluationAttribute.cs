@@ -1,5 +1,5 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema
 {

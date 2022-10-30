@@ -1,4 +1,4 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
     /// <summary>
     /// A specialized class for capturing children of one visitation.
