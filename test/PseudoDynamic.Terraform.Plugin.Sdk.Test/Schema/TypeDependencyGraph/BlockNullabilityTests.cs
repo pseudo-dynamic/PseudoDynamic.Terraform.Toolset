@@ -47,7 +47,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             {
                 Attributes = new[] {
                     new BlockAttributeDefinition(typeof(string),"nullable_string", PrimitiveDefinition.String with {
-                        OuterType = typeof(ITerraformValue<string>),
+                        OuterType = typeof(TerraformValue<string>),
                         IsWrappedByTerraformValue = true
                     }) {
                         IsOptional = true
@@ -67,7 +67,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             {
                 Attributes = new[] {
                     new BlockAttributeDefinition(typeof(string), "string", PrimitiveDefinition.String with {
-                        OuterType = typeof(ITerraformValue<string>),
+                        OuterType = typeof(TerraformValue<string>),
                         IsWrappedByTerraformValue = true
                     }) {
                         IsRequired = true
@@ -98,13 +98,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             [Block]
             public class Optional
             {
-                public ITerraformValue<string?> NullableString { get; set; }
+                public TerraformValue<string?> NullableString { get; set; }
             }
 
             [Block]
             public class Required
             {
-                public ITerraformValue<string> String { get; set; }
+                public TerraformValue<string> String { get; set; }
             }
         }
     }

@@ -41,7 +41,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                                 Attributes = new []{
                                     new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 },
-                                OuterType = typeof(ITerraformValue<Blocks.HavingString>),
+                                OuterType = typeof(TerraformValue<Blocks.HavingString>),
                                 IsWrappedByTerraformValue = true
                             })
                     }
@@ -49,14 +49,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             };
 
             yield return new object[] {
-                typeof(Blocks.ListTerraformValueNestedBlock),
-                new BlockDefinition(typeof(Blocks.ListTerraformValueNestedBlock)) {
+                typeof(Blocks.ListOfTerraformValueWrappedNestedBlocks),
+                new BlockDefinition(typeof(Blocks.ListOfTerraformValueWrappedNestedBlocks)) {
                     Blocks = new []{
-                        new NestedBlockAttributeDefinition(typeof(IList<ITerraformValue<Blocks.HavingString>>), "block", MonoRangeDefinition.List<IList<ITerraformValue<Blocks.HavingString>>>(new BlockDefinition(typeof(Blocks.HavingString)) {
+                        new NestedBlockAttributeDefinition(typeof(IList<TerraformValue<Blocks.HavingString>>), "block", MonoRangeDefinition.List<IList<TerraformValue<Blocks.HavingString>>>(new BlockDefinition(typeof(Blocks.HavingString)) {
                                 Attributes = new []{
                                     new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 },
-                                OuterType = typeof(ITerraformValue<Blocks.HavingString>),
+                                OuterType = typeof(TerraformValue<Blocks.HavingString>),
                                 IsWrappedByTerraformValue = true
                             }))
                     }
@@ -64,10 +64,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             };
 
             yield return new object[] {
-                typeof(Blocks.HavingBlockList),
-                new BlockDefinition(typeof(Blocks.HavingBlockList)) {
+                typeof(Blocks.ListOfBlocks),
+                new BlockDefinition(typeof(Blocks.ListOfBlocks)) {
                     Blocks = new []{
-                        new NestedBlockAttributeDefinition(typeof(IList<Blocks.HavingString>),"list_of_blocks", MonoRangeDefinition.List<IList<Blocks.HavingString>>(new BlockDefinition(typeof(Blocks.HavingString)) {
+                        new NestedBlockAttributeDefinition(typeof(IList<Blocks.HavingString>),"list", MonoRangeDefinition.List<IList<Blocks.HavingString>>(new BlockDefinition(typeof(Blocks.HavingString)) {
                                 Attributes = new []{
                                     new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 }
@@ -86,6 +86,19 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             };
 
             yield return new object[] {
+                typeof(Blocks.ListOfObjects),
+                new BlockDefinition(typeof(Blocks.ListOfObjects)) {
+                    Attributes = new []{
+                        new BlockAttributeDefinition(typeof(IList<Blocks.HavingString>),"list", MonoRangeDefinition.List<IList<Blocks.HavingString>>(new ObjectDefinition(typeof(Blocks.HavingString)) {
+                                Attributes = new []{
+                                    new ObjectAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
+                                }
+                            }))
+                    }
+                }
+            };
+
+            yield return new object[] {
                 typeof(Blocks.MapOfObjects),
                 new BlockDefinition(typeof(Blocks.MapOfObjects)) {
                     Attributes = new []{
@@ -94,6 +107,15 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                                 new ObjectAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                             }
                         }))
+                    }
+                }
+            };
+
+            yield return new object[] {
+                typeof(Blocks.InheritedString),
+                new BlockDefinition(typeof(Blocks.InheritedString)) {
+                    Attributes = new []{
+                        new BlockAttributeDefinition(typeof(string), "string", PrimitiveDefinition.String)
                     }
                 }
             };
@@ -107,55 +129,77 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             Assert.Equal(expectedDefinition, actualDefinition, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
-        public class Blocks
+        class Blocks
         {
             [Block]
-            public class ZeroDepth { }
+            internal class ZeroDepth { }
 
             [Block]
-            public class HavingString
+            internal class HavingString
             {
                 public string String { get; set; }
             }
 
             [Block]
-            public class NestedBlock
+            internal class NestedBlock
             {
                 [NestedBlock]
                 public HavingString Block { get; set; }
             }
 
             [Block]
-            public class TerraformValueNestedBlock
+            internal class TerraformValueNestedBlock
             {
                 [NestedBlock]
-                public ITerraformValue<HavingString> Block { get; set; }
+                public TerraformValue<HavingString> Block { get; set; }
             }
 
             [Block]
-            public class ListTerraformValueNestedBlock
+            internal class ListOfTerraformValueWrappedNestedBlocks
             {
                 [NestedBlock]
-                public IList<ITerraformValue<HavingString>> Block { get; set; }
+                public IList<TerraformValue<HavingString>> Block { get; set; }
             }
 
             [Block]
-            public class HavingBlockList
+            internal class ListOfBlocks
             {
                 [NestedBlock]
-                public IList<HavingString> ListOfBlocks { get; set; }
+                public IList<HavingString> List { get; set; }
             }
 
             [Block]
-            public class ListOfStrings
+            internal class ListOfStrings
             {
                 public IList<string> List { get; set; }
             }
 
             [Block]
-            public class MapOfObjects
+            internal class ListOfObjects
+            {
+                public IList<HavingString> List { get; set; }
+            }
+
+            [Block]
+            internal class MapOfObjects
             {
                 public IDictionary<string, HavingString> Dictionary { get; set; }
+            }
+
+
+            internal class InheritableStringFloorZero
+            {
+                public string String { get; set; }
+
+                internal class FloorOne : InheritableStringFloorZero
+                {
+                }
+            }
+
+            [Block]
+            internal class InheritedString : InheritableStringFloorZero.FloorOne
+            {
+
             }
         }
     }

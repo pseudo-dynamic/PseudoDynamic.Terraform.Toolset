@@ -218,7 +218,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                     builtValue = BuildBlock(unwrappedNode);
                 } else if (isTerraformValue) {
                     throw new NestedBlockException($"The {unwrappedContext.Property.GetPath()} property wants to be a nested block but can only be wrapped by " +
-                        $"{typeof(ITerraformValue<>).FullName} if the implicit type constraint is object, tuple or block");
+                        $"{TerraformValue.InterfaceGenericTypeDefinition.FullName} if the implicit type constraint is object, tuple or block");
                 } else if (singleImplicitValueTypeConstraint.Value.IsRange()) {
                     builtValue = BuildValue(unwrappedNode, singleImplicitValueTypeConstraint.Value);
                 } else {
@@ -247,7 +247,7 @@ Property type = {unwrappedNode.Context.VisitType}");
 
         public ValueDefinition ResolveDynamic(DynamicDefinition definition, Type knownType)
         {
-            var newContext = VisitPropertyGenericSegmentContext.New(definition.DynamicNode.Context, knownType);
+            var newContext = VisitPropertyGenericSegmentContext.Custom(definition.DynamicNode.Context, knownType);
             var newNode = nodeBuilder.ResolveDynamic(newContext).AsContext<IVisitPropertySegmentContext>();
             return BuildValue(newNode).Value;
         }

@@ -17,16 +17,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             internal IProviderFeature ProviderFeature { get; }
         }
 
-        internal readonly struct ResourceFeature : IResourceFeature
-        {
-            internal IProviderFeature ProviderFeature { get; }
-
-            IProviderFeature IResourceFeature.ProviderFeature => ProviderFeature;
-
-            internal ResourceFeature(IProviderFeature providerFeature) =>
-                ProviderFeature = providerFeature;
-        }
-
         public interface IDataSourceFeature
         {
             internal IProviderFeature ProviderFeature { get; }

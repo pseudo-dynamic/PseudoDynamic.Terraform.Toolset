@@ -5,20 +5,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal static class TypeExtensions
     {
-        public static bool IsCustomStruct(this Type? type)
-        {
-            if (type is null || !type.IsValueType || type.IsPrimitive || type.IsEnum || type.IsEquivalentTo(typeof(decimal))) {
-                return false;
-            }
-
-            return true;
-        }
-
         /// <summary>
         /// Determines whether type is class or user-defined struct.
         /// </summary>
         /// <param name="type"></param>
-        public static bool IsComplexType(this Type type) => type.IsClass || type.IsCustomStruct();
+        public static bool IsComplexType(this Type type) => type.IsClass;
 
         /// <summary>
         /// Determines if type is a annotated by <see cref="BlockAttribute"/>.

@@ -12,7 +12,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         public bool IsDebuggable => true;
         public IWebHost Host { get; private set; } = null!;
 
-        internal IProvider Provider { get; private set; } = null!;
+        internal IProviderContext Provider { get; private set; } = null!;
 
         /// <summary>
         /// 
@@ -50,7 +50,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 .UseTerraformPluginServerCore(this)
                 .ConfigureServices(services =>
                 {
-                    services.AddOptions<ProviderOptions>().Configure(options =>
+                    services.AddOptions<ProviderContextOptions>().Configure(options =>
                     {
                         options.FullyQualifiedProviderName = ProviderName;
                     });
@@ -67,7 +67,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
             Host = host;
             await host.StartAsync();
-            Provider = host.Services.GetRequiredService<IProvider>();
+            Provider = host.Services.GetRequiredService<IProviderContext>();
         }
 
         public Task DisposeAsync() => Host.StopAsync();

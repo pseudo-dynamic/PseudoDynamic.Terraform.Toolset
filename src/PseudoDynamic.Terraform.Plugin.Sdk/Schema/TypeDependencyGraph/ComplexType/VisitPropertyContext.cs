@@ -13,7 +13,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// <summary>
         /// The nullability info of the walking property.
         /// </summary>
-        public InheritableNullabilityInfo NullabilityInfo { get; }
+        public CustomNullabilityInfo NullabilityInfo { get; }
 
         private ContextualPropertyInfo? _contextualProperty;
 
@@ -40,7 +40,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             where T : class =>
             GetContextualProperty().GetContextAttribute<T>();
 
-        private record OriginalNullabilityInfo : InheritableNullabilityInfo
+        private record OriginalNullabilityInfo : CustomNullabilityInfo
         {
             public override NullabilityState ReadState => _nullabilityInfo.ReadState;
 
@@ -49,7 +49,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             internal OriginalNullabilityInfo(NullabilityInfo nullabilityInfo) : base(nullabilityInfo.Type) =>
                 _nullabilityInfo = nullabilityInfo ?? throw new ArgumentNullException(nameof(nullabilityInfo));
 
-            public override InheritableNullabilityInfo GetGenericTypeArgument(int index) =>
+            public override CustomNullabilityInfo GetGenericTypeArgument(int index) =>
                 new OriginalNullabilityInfo(_nullabilityInfo.GenericTypeArguments[index]);
         }
     }

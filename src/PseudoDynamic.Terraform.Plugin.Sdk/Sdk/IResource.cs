@@ -53,8 +53,21 @@
     /// <br/>2. <see cref="ReviseState"/>
     /// </summary>
     /// <typeparam name="Schema"></typeparam>
-    public interface IResource<Schema> : IResourceInfo
+    public interface IResource<Schema> : INameProvider where Schema : class
     {
+        /// <summary>
+        /// <para>
+        /// This type name that is going to be appended to the provider name to comply with the resource name
+        /// convention of Terraform. (e.g. <![CDATA["<provider-name>_<type-name>"]]>
+        /// </para>
+        /// <para>
+        /// Do not prepend the provider name by yourself! The name remain unformatted, so please ensure snake_case!
+        /// </para>
+        /// </summary>
+        string TypeName { get; }
+
+        string INameProvider.Name => TypeName;
+
         /// <summary>
         /// Allows to migrate the pre-existing state of the resource, that is
         /// stored by Terraform, to a possible new schema version.
@@ -84,7 +97,7 @@
         /// <summary>
         /// Validates the user-defined resource inputs that has been made in Terraform.
         /// </summary>
-        Task ValidateConfig(ValidateConfig.Context<Schema> context);
+        Task ValidateConfig(Resource.ValidateContext<Schema> context);
 
         /// <summary>
         /// Plans the possible result of the resource. It is called twice, once during
@@ -94,7 +107,7 @@
         /// is only dependent on <see cref="MigrateState"/> and <see cref="ValidateConfig"/>.
         /// <see cref="ValidateConfig"/>, in this order.
         /// </summary>
-        Task Plan();
+        Task Plan(Resource.PlanContext<Schema> context);
 
         /// <summary>
         /// Creates the resource. During apply stage <see cref="Create"/> is dependent

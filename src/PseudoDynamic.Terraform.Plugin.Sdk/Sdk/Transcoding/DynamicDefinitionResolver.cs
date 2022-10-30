@@ -27,7 +27,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             _preloadableDefinitions.Add(resource);
         }
 
-        private void Preprocess()
+        private void PreloadOnce()
         {
             if (Interlocked.CompareExchange(ref _alreadyPreloaded, 1, 0) == 0) {
                 var unprocessedDefinitions = Interlocked.Exchange(ref _preloadableDefinitions, null);
@@ -36,6 +36,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                     unprocessedDefinitions.AsParallel().ForAll(ComputeDynamicDefinitions);
                 }
             }
+        }
+
+        private void Preload()
+        {
+            PreloadOnce();
 
             var unprocessedDefinition = Interlocked.Exchange(ref _loadableDefinition, null);
 
@@ -61,7 +66,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         internal ValueDefinition ResolveDynamic(DynamicDefinition dynamic, Type knownType)
         {
-            Preprocess();
+            Preload();
 
             if (ResolveCache(knownType, out var cache)) {
                 return cache;

@@ -12,6 +12,19 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
     internal class TerraformDynamicMessagePackEncoder
     {
+        internal delegate void EncodeDelegate<TDefinition, TContent>(ref MessagePackWriter writer, TDefinition value, TContent content);
+
+        private ReadOnlyMemory<byte> Encode<TDefinition, TContent>(TDefinition value, TContent content, EncodeDelegate<TDefinition, TContent> encode)
+        {
+            using var bufferWriter = new SparseBufferWriter<byte>(); // TODO: estimate proper defaults
+            var writer = new MessagePackWriter(bufferWriter);
+            encode(ref writer, value, content);
+            writer.Flush();
+            var buffer = new byte[bufferWriter.WrittenCount];
+            bufferWriter.CopyTo(buffer);
+            return buffer;
+        }
+
         private readonly static GenericTypeAccessor CollectionEncoderAccessor = new GenericTypeAccessor(typeof(CollectionEncoder<>));
         private readonly static GenericTypeAccessor DictionaryEncoderAccessor = new GenericTypeAccessor(typeof(DictionaryEncoder<,>));
 
@@ -39,7 +52,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             EncodeValue(ref writer, resolvedDefinition, content);
         }
 
-        public void EncodeNumber(ref MessagePackWriter writer, ValueDefinition value, object content)
+        private void EncodeNumber(ref MessagePackWriter writer, ValueDefinition value, object content)
         {
             var sourceType = value.SourceType;
 
@@ -132,7 +145,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             }
         }
 
-        public void EncodeNonNullValue(ref MessagePackWriter writer, ValueDefinition value, object content)
+        private void EncodeNonNullValue(ref MessagePackWriter writer, ValueDefinition value, object content)
         {
             switch (value.TypeConstraint) {
                 case TerraformTypeConstraint.Dynamic:
@@ -181,7 +194,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             EncodeNonNullValue(ref writer, value, terraformValue.Value);
         }
 
-        public void EncodeValue(ref MessagePackWriter writer, ValueDefinition value, object? content)
+        private void EncodeValue(ref MessagePackWriter writer, ValueDefinition value, object? content)
         {
             if (content is null) {
                 writer.WriteNil();
@@ -196,7 +209,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             EncodeNonNullValue(ref writer, value, content);
         }
 
-        public void Encode(ref MessagePackWriter writer, BlockDefinition block, object content)
+        public ReadOnlyMemory<byte> EncodeValue(ValueDefinition value, object? content) =>
+            Encode(value, content, EncodeValue);
+
+        private void EncodeBlock(ref MessagePackWriter writer, BlockDefinition block, object content)
         {
             if (content is null) {
                 throw new TerraformDynamicMessagePackEncodingException("The very first encoding schema cannot be null");
@@ -205,16 +221,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             EncodeComplex(ref writer, block, content);
         }
 
-        public ReadOnlyMemory<byte> Encode(BlockDefinition block, object content)
-        {
-            using var bufferWriter = new SparseBufferWriter<byte>(); // TODO: estimate proper defaults
-            var writer = new MessagePackWriter(bufferWriter);
-            Encode(ref writer, block, content);
-            writer.Flush();
-            var buffer = new byte[bufferWriter.WrittenCount];
-            bufferWriter.CopyTo(buffer);
-            return buffer;
-        }
+        public ReadOnlyMemory<byte> EncodeBlock(BlockDefinition block, object content) =>
+            Encode(block, content, EncodeBlock);
 
         private interface ICollectionEncoder
         {

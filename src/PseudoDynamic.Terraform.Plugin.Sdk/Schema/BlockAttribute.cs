@@ -3,7 +3,7 @@
     /// <summary>
     /// Annotates a class for being used as Terraform block.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class BlockAttribute : ComplexAttribute
     {
         private int _version = -1;

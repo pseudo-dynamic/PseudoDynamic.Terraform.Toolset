@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             Action<TerraformCommand.WorkingDirectoryCloning.WorkingDirectoryCloningOptions>? configureOptions = null)
         {
             var pluginServer = serviceProvider.GetRequiredService<IPluginServer>();
-            var provider = serviceProvider.GetRequiredService<IProvider>();
+            var provider = serviceProvider.GetRequiredService<IProviderContext>();
 
             var pluginProtocol = pluginServer.PluginProtocol;
             var pluginServerHostPort = $"{pluginServer.ServerAddress.Host}:{pluginServer.ServerAddress.Port}";

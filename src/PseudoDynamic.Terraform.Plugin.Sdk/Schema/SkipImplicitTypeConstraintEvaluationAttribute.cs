@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
     /// This mechanic is used for example in <see cref="BlockNodeBuilder"/> when rewriting property segments that depend on these
     /// implicit evaluated type constraints.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
     internal class SkipImplicitTypeConstraintEvaluationAttribute : Attribute
     {
     }

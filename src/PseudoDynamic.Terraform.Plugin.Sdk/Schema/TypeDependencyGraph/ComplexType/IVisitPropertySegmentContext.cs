@@ -6,6 +6,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
     {
         PropertyInfo Property { get; }
 
-        InheritableNullabilityInfo NullabilityInfo { get; }
+        CustomNullabilityInfo NullabilityInfo { get; }
     }
 }

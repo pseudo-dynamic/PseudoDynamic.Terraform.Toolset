@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
+﻿using System.Runtime.CompilerServices;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal class ComplexTypeVisitor
     {
@@ -7,11 +9,15 @@
 
         private void VisitPropertySegment(IVisitPropertySegmentContext context)
         {
-            if (context.VisitType.TryGetGenericArguments(out var genericArguments)) {
-                for (int i = 0; i < genericArguments.Length; i++) {
-                    var genericArgument = genericArguments[i];
-                    RewriteThenVisit(new VisitPropertyGenericSegmentContext(context, genericArgument, i));
-                }
+            var visitTypeGenericArguments = context.NullabilityInfo.NativeGenericTypeArguments;
+
+            if (visitTypeGenericArguments is null || visitTypeGenericArguments.Length == 0) {
+                return;
+            }
+
+            for (int i = 0; i < visitTypeGenericArguments.Length; i++) {
+                var genericArgument = visitTypeGenericArguments[i];
+                RewriteThenVisit(new VisitPropertyGenericSegmentContext(context, genericArgument, i));
             }
         }
 
@@ -44,21 +50,12 @@
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void RewriteThenVisit(VisitContext context) =>
             Visit(Rewrite(context));
 
-        public virtual void RewriteThenVisitDynamic(VisitContext context)
-        {
-            var dynamicType = context.VisitType;
-
-            //if (dynamicType.IsComplexType()) {
-            //    RewriteThenVisit(context with { ContextType = VisitContextType.Complex.Inherits(context.ContextType) });
-            //} else {
-            //    RewriteThenVisit(context);
-            //}
-
+        public virtual void RewriteThenVisitDynamic(VisitContext context) =>
             RewriteThenVisit(context);
-        }
 
         /// <summary>
         /// Represents the entry point of visiting a complex type.
@@ -73,7 +70,7 @@
             }
 
             if (!complexType.IsComplexType()) {
-                throw new ArgumentException("The specified type must be either class or struct");
+                throw new ArgumentException("The specified type must be a class type");
             }
 
             RewriteThenVisit(context.ToVisitingContext(complexType, VisitContextType.Complex));

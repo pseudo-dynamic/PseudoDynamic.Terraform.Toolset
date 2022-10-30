@@ -12,7 +12,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// <param name="services"></param>
         /// <remarks>
         /// <para>
-        /// A call to <see cref="ProviderFeatureDependencyInjectionExtensions.AddTerraformProvider(IServiceCollection, string)"/> is required.
+        /// A call to <see cref="ProviderFeatureServiceCollectionExtensions.AddTerraformProvider(IServiceCollection, string)"/> is required.
         /// </para>
         /// <para>
         /// Calls of <see cref="KestrelServerOptions.Listen(System.Net.EndPoint)"/> and similiar must occur AFTER <see cref="AddTerraformPluginServer"/>
@@ -22,7 +22,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </remarks>
         internal static IServiceCollection AddTerraformPluginServer(this IServiceCollection services)
         {
-            services.AddGrpc();
+            services.AddGrpc(x => x.IgnoreUnknownServices = true);
             services.TryAddSingleton<IPluginServer, PluginServer>();
             return services;
         }

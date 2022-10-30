@@ -51,8 +51,19 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
             yield return new object[] {
                 typeof(TerraformValueNestedBlock),
                 new BlockNode(new VisitContext(typeof(TerraformValueNestedBlock)) { ContextType = VisitContextType.Complex }) {
-                    new BlockNode(new VisitContext(typeof(ITerraformValue<TerraformValueNestedBlock.HavingString>)) { ContextType = VisitContextType.Property }) {
+                    new BlockNode(new VisitContext(typeof(TerraformValue<TerraformValueNestedBlock.HavingString>)) { ContextType = VisitContextType.Property }) {
                         new BlockNode(new VisitContext(typeof(TerraformValueNestedBlock.HavingString)) { ContextType = VisitContextType.Complex }) {
+                            new BlockNode(new VisitContext(typeof(string)) { ContextType = VisitContextType.Property })
+                        }
+                    }
+                }
+            };
+
+            yield return new object[] {
+                typeof(ListOfObjects),
+                  new BlockNode(new VisitContext(typeof(ListOfObjects)) { ContextType = VisitContextType.Complex }) {
+                    new BlockNode(new VisitContext(typeof(IList<ListOfObjects.Object>)) { ContextType = VisitContextType.Property }) {
+                        new BlockNode(new VisitContext(typeof(ListOfObjects.Object)) { ContextType = VisitContextType.Complex }) {
                             new BlockNode(new VisitContext(typeof(string)) { ContextType = VisitContextType.Property })
                         }
                     }
@@ -99,10 +110,22 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGroupin
         public class TerraformValueNestedBlock
         {
             [NestedBlock]
-            public ITerraformValue<HavingString> Block { get; set; }
+            public TerraformValue<HavingString> Block { get; set; }
 
             [Block]
             public class HavingString
+            {
+                public string String { get; set; }
+            }
+        }
+
+        [Block]
+        public class ListOfObjects
+        {
+            public IList<Object> List { get; set; }
+
+            [Object]
+            public class Object
             {
                 public string String { get; set; }
             }

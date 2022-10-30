@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
@@ -52,5 +53,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         public virtual bool Equals(ComplexDefinition? other) => base.Equals(other);
 
         public override int GetHashCode() => PreventRCS1036(base.GetHashCode());
+
+        protected override bool PrintMembers(StringBuilder builder) => base.PrintMembers(PrintMembersFix(builder, new { }));
     }
 }

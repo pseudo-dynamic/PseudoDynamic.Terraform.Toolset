@@ -14,6 +14,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public Uri ServerAddress => _serverAddress.Value;
         public PluginProtocol PluginProtocol { get; }
+        public bool IsDebuggable { get; }
 
         private X509Certificate2? _clientCertificate;
         private Lazy<Uri> _serverAddress;
@@ -23,8 +24,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
             PluginProtocol = unwrappedOptions.Protocol ?? throw new InvalidOperationException($"The plugin protocol has not been configured inside an instance of {typeof(PluginServerOptions).FullName}");
+            IsDebuggable = unwrappedOptions.IsDebuggable;
 
-            if (!unwrappedOptions.IsDebuggable) {
+            if (!IsDebuggable) {
                 _clientCertificate = unwrappedOptions.ClientCertificate ?? throw new InvalidOperationException($"The plugin client certificate has not been configured inside an instance of {typeof(PluginServerOptions).FullName}");
             }
 
@@ -71,9 +73,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 }
             });
 
-            if (!unwrappedOptions.IsDebuggable) {
-                applicationLifetime.ApplicationStarted.Register(WriteTerraformHandshake);
-            }
+            applicationLifetime.ApplicationStarted.Register(OnServerStarted);
+            applicationLifetime.ApplicationStopping.Register(OnServerStopping);
+            applicationLifetime.ApplicationStopped.Register(OnServerStopped);
             _logger = logger;
         }
 
@@ -87,5 +89,18 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             // Terraform reads until newline and stucks if non is present
             Console.WriteLine(terraformHandshake);
         }
+
+        private void OnServerStarted()
+        {
+            _logger.LogInformation("Started plugin server");
+
+            if (!IsDebuggable) {
+                WriteTerraformHandshake();
+            }
+        }
+
+        private void OnServerStopping() => _logger.LogInformation("Stopping plugin server");
+
+        private void OnServerStopped() => _logger.LogInformation("Stopped plugin server");
     }
 }

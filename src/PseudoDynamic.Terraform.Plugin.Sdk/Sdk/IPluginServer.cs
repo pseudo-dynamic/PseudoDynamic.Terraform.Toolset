@@ -9,5 +9,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     {
         Uri ServerAddress { get; }
         PluginProtocol PluginProtocol { get; }
+        bool IsDebuggable { get; }
     }
 }

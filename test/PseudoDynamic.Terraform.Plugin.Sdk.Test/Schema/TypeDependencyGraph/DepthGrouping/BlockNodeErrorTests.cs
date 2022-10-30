@@ -1,0 +1,29 @@
+﻿using FluentAssertions;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.DepthGrouping
+{
+    public class BlockNodeErrorTests
+    {
+        [Fact]
+        internal void Node_builder_throws_because_of_missing_complex_attribute_annotation()
+        {
+            var error = BlockNodeBuilder.Default.Invoking(x => x.BuildNode<ListOfObjects>())
+                .Should().Throw<MissingAttributeAnnotationException>()
+                .And;
+
+            error.ReceiverType.Should().Be(typeof(ListOfObjects.MissingObjectAnnotatedObject));
+            error.MissingAttributeType.Should().Be(typeof(ComplexAttribute));
+        }
+
+        [Block]
+        public class ListOfObjects
+        {
+            public IList<MissingObjectAnnotatedObject> List { get; set; }
+
+            public class MissingObjectAnnotatedObject
+            {
+                public string String { get; set; }
+            }
+        }
+    }
+}

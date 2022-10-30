@@ -85,12 +85,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             IsOptional,
             ValueWrapping);
 
-        protected override bool PrintMembers(StringBuilder builder) =>
-            base.PrintMembers(builder.Append($"{new {
-                Name,
-                IsRequired,
-                IsOptional,
-                ValueWrapping
-            }.ToString()?.Trim('{', '}')}, "));
+        protected override bool PrintMembers(StringBuilder builder) => base.PrintMembers(PrintMembersFix(builder, new {
+            Name,
+            IsRequired,
+            IsOptional,
+            ValueWrapping
+        }));
     }
 }

@@ -1,5 +1,4 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
-using PseudoDynamic.Terraform.Plugin.Schema;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 using System.Numerics;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.CollectionFactories;
@@ -19,10 +18,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             var encoder = new TerraformDynamicMessagePackEncoder(new());
 
             var dynamicBlock = BlockBuilder.Default.BuildBlock(dynamicType);
-            var encoded = encoder.Encode(dynamicBlock, content);
+            var encoded = encoder.EncodeBlock(dynamicBlock, content);
 
             var block = BlockBuilder.Default.BuildBlock(contentType);
-            var decoded = Decoder.Decode(encoded, block, new());
+            var decoded = Decoder.DecodeBlock(encoded, block, new());
 
             Assert.Equal(content, decoded);
         }
@@ -32,8 +31,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         internal void Encoder_should_encode_then_decode_schemas(object content, Type contentType)
         {
             var block = BlockBuilder.Default.BuildBlock(contentType);
-            var bytes = Encoder.Encode(block, content);
-            var result = Decoder.Decode(bytes, block, new());
+            var bytes = Encoder.EncodeBlock(block, content);
+            var result = Decoder.DecodeBlock(bytes, block, new());
             Assert.Equal(content, result);
         }
 
@@ -43,6 +42,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
             public SchemasGeneratorBase()
             {
+                // dynamic
+                Add<object>(default(string));
+                Add<ITerraformValue>(TerraformValue.OfUnknown<object>(), notWrappable: true);
+
                 // number
                 Add(byte.MaxValue);
                 Add(sbyte.MaxValue);
@@ -91,7 +94,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
             protected virtual void Add(params object[] row) => AddRow(row);
 
-            private void Add<T>(T value, bool isNested = false, bool notWrappable = false)
+            protected void Add<T>(T value, bool isNested = false, bool notWrappable = false)
                 where T : notnull
             {
                 {

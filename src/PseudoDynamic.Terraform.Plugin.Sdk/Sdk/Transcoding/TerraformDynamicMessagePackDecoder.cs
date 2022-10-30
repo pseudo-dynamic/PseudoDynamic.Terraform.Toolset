@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Text;
 using DotNext.Buffers;
+using FastMember;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using PseudoDynamic.Terraform.Plugin.Reflection;
@@ -184,7 +185,19 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 constructorArguments[missingConstructorArgumentIndex] = _serviceProvider.GetRequiredService(constructorParameter.ParameterType);
             }
 
-            return reflectionMetadata.PrimaryConstructor.Invoke(constructorArguments);
+            var instance = reflectionMetadata.PrimaryConstructor.Invoke(constructorArguments);
+
+            if (reflectionMetadata.NonConstructorSupportedProperties.Count > 0) {
+                var instanceAccessor = ObjectAccessor.Create(instance);
+
+                foreach (var nonConstructorSupportedProperty in reflectionMetadata.NonConstructorSupportedProperties) {
+                    var propertyName = nonConstructorSupportedProperty.Name;
+                    var attributeName = reflectionMetadata.PropertyNameAttributeNameMapping[propertyName];
+                    instanceAccessor[propertyName] = attributes[attributeName];
+                }
+            }
+
+            return instance;
         }
 
         private object DecodeComplex(ref MessagePackReader reader, ComplexDefinition definition, DecodingOptions options)
@@ -270,7 +283,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         /// <param name="reader"></param>
         /// <param name="block"></param>
         /// <param name="options"></param>
-        public object Decode(ref MessagePackReader reader, BlockDefinition block, DecodingOptions options)
+        public object DecodeBlock(ref MessagePackReader reader, BlockDefinition block, DecodingOptions options)
         {
             if (options is null) {
                 throw new ArgumentNullException(nameof(options));
@@ -279,10 +292,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             return DecodeComplex(ref reader, block, options) ?? throw new InvalidOperationException("The very first decoding block must have a non-nil map header");
         }
 
-        public object Decode(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)
+        public object DecodeBlock(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)
         {
             var reader = new MessagePackReader(memory);
-            return Decode(ref reader, block, options);
+            return DecodeBlock(ref reader, block, options);
         }
 
         public class ValueResult

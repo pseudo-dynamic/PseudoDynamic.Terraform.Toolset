@@ -6,56 +6,56 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
     {
         public ProviderMappingProfile()
         {
-            CreateMap<DynamicValue, Consolidation.DynamicValue>()
+            CreateMap<DynamicValue, Consolidated.DynamicValue>()
                 .ReverseMap();
 
-            CreateMap<Consolidation.AttributePath, AttributePath>();
-            CreateMap<Consolidation.AttributePath.Step, AttributePath.Types.Step>();
-            CreateMap<Consolidation.AttributePath.Step.SelectorOneOfCase, AttributePath.Types.Step.SelectorOneofCase>();
+            CreateMap<Consolidated.AttributePath, AttributePath>();
+            CreateMap<Consolidated.AttributePath.Step, AttributePath.Types.Step>();
+            CreateMap<Consolidated.AttributePath.Step.SelectorOneOfCase, AttributePath.Types.Step.SelectorOneofCase>();
 
-            CreateMap<RawState, Consolidation.RawState>()
+            CreateMap<RawState, Consolidated.RawState>()
                 .ReverseMap();
 
-            CreateMap<Consolidation.Diagnostic, Diagnostic>();
-            CreateMap<Consolidation.Diagnostic.DiagnosticSeverity, Diagnostic.Types.Severity>();
+            CreateMap<Consolidated.Diagnostic, Diagnostic>();
+            CreateMap<Consolidated.Diagnostic.DiagnosticSeverity, Diagnostic.Types.Severity>();
 
-            CreateMap<GetProviderSchema.Types.Request, Consolidation.GetProviderSchema.Request>();
-            CreateMap<Consolidation.GetProviderSchema.ServerCapabilities, GetProviderSchema.Types.ServerCapabilities>();
-            CreateMap<Consolidation.GetProviderSchema.Response, GetProviderSchema.Types.Response>();
+            CreateMap<GetProviderSchema.Types.Request, Consolidated.GetProviderSchema.Request>();
+            CreateMap<Consolidated.GetProviderSchema.ServerCapabilities, GetProviderSchema.Types.ServerCapabilities>();
+            CreateMap<Consolidated.GetProviderSchema.Response, GetProviderSchema.Types.Response>();
 
-            CreateMap<PrepareProviderConfig.Types.Request, Consolidation.ValidateProviderConfig.Request>();
-            CreateMap<Consolidation.ValidateProviderConfig.Response, PrepareProviderConfig.Types.Response>();
+            CreateMap<PrepareProviderConfig.Types.Request, Consolidated.ValidateProviderConfig.Request>();
+            CreateMap<Consolidated.ValidateProviderConfig.Response, PrepareProviderConfig.Types.Response>();
 
-            CreateMap<ValidateResourceTypeConfig.Types.Request, Consolidation.ValidateResourceConfig.Request>();
-            CreateMap<Consolidation.ValidateResourceConfig.Response, ValidateResourceTypeConfig.Types.Response>();
+            CreateMap<ValidateResourceTypeConfig.Types.Request, Consolidated.ValidateResourceConfig.Request>();
+            CreateMap<Consolidated.ValidateResourceConfig.Response, ValidateResourceTypeConfig.Types.Response>();
 
-            CreateMap<ValidateDataSourceConfig.Types.Request, Consolidation.ValidateDataResourceConfig.Request>();
-            CreateMap<Consolidation.ValidateDataResourceConfig.Response, ValidateDataSourceConfig.Types.Response>();
+            CreateMap<ValidateDataSourceConfig.Types.Request, Consolidated.ValidateDataResourceConfig.Request>();
+            CreateMap<Consolidated.ValidateDataResourceConfig.Response, ValidateDataSourceConfig.Types.Response>();
 
-            CreateMap<UpgradeResourceState.Types.Request, Consolidation.UpgradeResourceState.Request>();
-            CreateMap<Consolidation.UpgradeResourceState.Response, UpgradeResourceState.Types.Response>();
+            CreateMap<UpgradeResourceState.Types.Request, Consolidated.UpgradeResourceState.Request>();
+            CreateMap<Consolidated.UpgradeResourceState.Response, UpgradeResourceState.Types.Response>();
 
-            CreateMap<Configure.Types.Request, Consolidation.ConfigureProvider.Request>();
-            CreateMap<Consolidation.ConfigureProvider.Response, Configure.Types.Response>();
+            CreateMap<Configure.Types.Request, Consolidated.ConfigureProvider.Request>();
+            CreateMap<Consolidated.ConfigureProvider.Response, Configure.Types.Response>();
 
-            CreateMap<ReadResource.Types.Request, Consolidation.ReadResource.Request>();
-            CreateMap<Consolidation.ReadResource.Response, ReadResource.Types.Response>();
+            CreateMap<ReadResource.Types.Request, Consolidated.ReadResource.Request>();
+            CreateMap<Consolidated.ReadResource.Response, ReadResource.Types.Response>();
 
-            CreateMap<PlanResourceChange.Types.Request, Consolidation.PlanResourceChange.Request>();
-            CreateMap<Consolidation.PlanResourceChange.Response, PlanResourceChange.Types.Response>();
+            CreateMap<PlanResourceChange.Types.Request, Consolidated.PlanResourceChange.Request>();
+            CreateMap<Consolidated.PlanResourceChange.Response, PlanResourceChange.Types.Response>();
 
-            CreateMap<ApplyResourceChange.Types.Request, Consolidation.ApplyResourceChange.Request>();
-            CreateMap<Consolidation.ApplyResourceChange.Response, ApplyResourceChange.Types.Response>();
+            CreateMap<ApplyResourceChange.Types.Request, Consolidated.ApplyResourceChange.Request>();
+            CreateMap<Consolidated.ApplyResourceChange.Response, ApplyResourceChange.Types.Response>();
 
-            CreateMap<ImportResourceState.Types.Request, Consolidation.ImportResourceState.Request>();
-            CreateMap<Consolidation.ImportResourceState.ImportedResource, ImportResourceState.Types.ImportedResource>();
-            CreateMap<Consolidation.ImportResourceState.Response, ImportResourceState.Types.Response>();
+            CreateMap<ImportResourceState.Types.Request, Consolidated.ImportResourceState.Request>();
+            CreateMap<Consolidated.ImportResourceState.ImportedResource, ImportResourceState.Types.ImportedResource>();
+            CreateMap<Consolidated.ImportResourceState.Response, ImportResourceState.Types.Response>();
 
-            CreateMap<ReadDataSource.Types.Request, Consolidation.ReadDataSource.Request>();
-            CreateMap<Consolidation.ReadDataSource.Response, ReadDataSource.Types.Response>();
+            CreateMap<ReadDataSource.Types.Request, Consolidated.ReadDataSource.Request>();
+            CreateMap<Consolidated.ReadDataSource.Response, ReadDataSource.Types.Response>();
 
-            CreateMap<Stop.Types.Request, Consolidation.StopProvider.Request>();
-            CreateMap<Consolidation.StopProvider.Response, Stop.Types.Response>();
+            CreateMap<Stop.Types.Request, Consolidated.StopProvider.Request>();
+            CreateMap<Consolidated.StopProvider.Response, Stop.Types.Response>();
         }
     }
 }

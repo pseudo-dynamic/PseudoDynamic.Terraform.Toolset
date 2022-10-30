@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using PseudoDynamic.Terraform.Plugin.Protocols.Consolidation;
+using PseudoDynamic.Terraform.Plugin.Protocols.Consolidated;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {

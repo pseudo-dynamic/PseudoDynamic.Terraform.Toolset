@@ -71,25 +71,24 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             Arguments = args
         };
 
-        private string RunCommandThenReadOutput(string? args) => SimpleProcess.StartThenWaitForExitThenReadOutput(
-            UpgradeStartInfo(args),
-            shouldThrowOnNonZeroCode: true,
-            shouldStreamError: true);
+        //private string RunCommandThenReadOutput(string? args) => SimpleProcess.StartThenWaitForExitThenReadOutput(
+        //    UpgradeStartInfo(args),
+        //    shouldThrowOnNonZeroCode: true,
+        //    shouldStreamError: true);
 
         private Task<string> RunCommandThenReadOutputAsync(string? args, CancellationToken cancellationToken) => SimpleProcess.StartThenWaitForExitThenReadOutputAsync(
             UpgradeStartInfo(args),
-            shouldThrowOnNonZeroCode: true,
             cancellationToken: cancellationToken);
 
-        public string Init() => RunCommandThenReadOutput("init");
+        public Task<string> Init(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("init -no-color", cancellationToken);
 
-        public string Validate() => RunCommandThenReadOutput("validate");
+        public Task<string> Validate(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("validate -no-color", cancellationToken);
 
         //public Task<string> ValidateAsync(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("validate", cancellationToken);
 
-        public string Plan() => RunCommandThenReadOutput("plan -input=false");
+        public Task<string> Plan(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("plan -no-color -input=false -lock=false -out=terraform.plan", cancellationToken);
 
-        public string Apply() => RunCommandThenReadOutput("apply -input=false -auto-approve");
+        public Task<string> Apply(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("apply -no-color -input=false -lock=false -auto-approve", cancellationToken);
 
         internal interface ITerraformCommandOptionsOptions
         {

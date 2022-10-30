@@ -39,9 +39,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// should customize Kestrel in such a way, that it accepts this client certificate.
         /// </summary>
         /// <remarks>
-        /// Do not set it, if you are using <see cref="PluginHostBuilderExtensions.ConfigureTerraformProviderDefaults(IPluginHostBuilder, string, Action{IProviderFeature}?)"/>,
-        /// otherwsie an exception is thrown. This is because this method sets up a default listener
-        /// for Kestrel with HTTPS enabled and a self-signed certificate.
+        /// Do not set it, if you are using <see cref="PluginServerWebHostBuilderExtensions.UseTerraformPluginServer{THostBuilder}(THostBuilder, IPluginServerSpecification.ProtocolV5)"/>
+        /// or similiar, otherwsie an exception is thrown. This is because this method sets up a default
+        /// listener for Kestrel with HTTPS enabled and a self-signed certificate.
         /// </remarks>
         public X509Certificate2? ClientCertificate { get; set; }
     }
