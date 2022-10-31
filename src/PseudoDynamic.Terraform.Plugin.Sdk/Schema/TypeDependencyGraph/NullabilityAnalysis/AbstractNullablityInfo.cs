@@ -8,7 +8,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.NullabilityA
         public Type Type { get; internal init; }
 
         [AllowNull]
-        public Type[] NativeGenericTypeArguments {
+        public Type[] GenericTypeArguments {
             get => _typeArguments ?? Type.GenericTypeArguments;
             init => _typeArguments = value;
         }
@@ -16,7 +16,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.NullabilityA
         public abstract NullabilityState ReadState { get; }
 
         public virtual AbstractNullablityInfo GetGenericTypeArgument(int index) =>
-            new NullableInfo(NativeGenericTypeArguments[index]);
+            new NullableInfo(GenericTypeArguments[index]);
 
         private Type[]? _typeArguments;
 

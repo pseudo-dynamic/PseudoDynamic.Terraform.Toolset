@@ -18,8 +18,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 
         private ContextualPropertyInfo? _contextualProperty;
 
-        internal VisitPropertyContext(IContext context, PropertyInfo property)
-            : base(context, property.PropertyType)
+        internal VisitPropertyContext(IContext underlyingContext, PropertyInfo property)
+            : base(underlyingContext, property.PropertyType)
         {
             ContextType = VisitContextType.Property;
             Property = property;

@@ -1,15 +1,35 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal static class TypeExtensions
     {
         /// <summary>
-        /// Determines whether type is class or user-defined struct.
+        /// Determines whether type is a class type.
         /// </summary>
         /// <param name="type"></param>
-        public static bool IsComplexType(this Type type) => type.IsClass;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsClassType(this Type type) => type.IsClass;
+
+        /// <summary>
+        /// Determines whether type is a class type.
+        /// </summary>
+        /// <param name="type"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsUserDefinedStruct(this Type type) =>
+            type.IsValueType && !type.IsEnum
+            && !type.IsEquivalentTo(typeof(decimal))
+            && !type.IsPrimitive;
+
+        /// <summary>
+        /// Determines whether type is a class type or a user-defined struct.
+        /// </summary>
+        /// <param name="type"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsComplexType(this Type type) =>
+            type.IsClass || type.IsUserDefinedStruct();
 
         /// <summary>
         /// Determines if type is a annotated by <see cref="BlockAttribute"/>.

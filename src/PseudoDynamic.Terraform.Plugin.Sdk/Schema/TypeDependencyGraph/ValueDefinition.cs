@@ -14,12 +14,7 @@
             init => _outerType = value;
         }
 
-        /// <summary>
-        /// If true, then <see cref="TerraformDefinition.SourceType"/> is
-        /// wrapped by <see cref="ITerraformValue{T}"/> or of one of its
-        /// derivative.
-        /// </summary>
-        public bool IsWrappedByTerraformValue { get; init; }
+        public TypeWrapping? SourceTypeWrapping { get; init; }
 
         public abstract TerraformTypeConstraint TypeConstraint { get; }
 
@@ -33,12 +28,12 @@
             other is not null
             && base.Equals(other)
             && OuterType == other.OuterType
-            && IsWrappedByTerraformValue == other.IsWrappedByTerraformValue
+            && SourceTypeWrapping == other.SourceTypeWrapping
             && TypeConstraint == other.TypeConstraint;
 
         public override int GetHashCode() => HashCode.Combine(
             OuterType,
-            IsWrappedByTerraformValue,
+            SourceTypeWrapping,
             TypeConstraint);
     }
 }

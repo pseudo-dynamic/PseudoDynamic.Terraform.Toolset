@@ -16,6 +16,17 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             return false;
         }
 
+        private static void EnsureNodesNotHavingNestedTerraformValue(this BlockNode node)
+        {
+            if (node.Any(childNode => childNode.Context.ContextType == TerraformVisitContextType.TerraformValue)) {
+                var errorMessage = node.Context.ContextType == TerraformVisitContextType.TerraformValue
+                    ? $"In the dependency graph of {node.Context.VisitType.FullName} is another nested terraform value not allowed"
+                    : $"In the dependency graph of {node.Context.VisitType.FullName} is a nested terraform value not allowed";
+
+                throw new NestedTerraformValueException(errorMessage);
+            }
+        }
+
         public static bool TryUnwrapTerraformValue(this BlockNode node, out BlockNode<IVisitPropertySegmentContext> unwrappedNode)
         {
             if (node.SingleOrDefault(childNode => childNode.Context.ContextType == TerraformVisitContextType.TerraformValue) is BlockNode childNode) {
@@ -26,17 +37,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
             unwrappedNode = node.AsContext<IVisitPropertySegmentContext>();
             return false;
-        }
-
-        public static void EnsureNodesNotHavingNestedTerraformValue(this BlockNode node)
-        {
-            if (node.Any(childNode => childNode.Context.ContextType == TerraformVisitContextType.TerraformValue)) {
-                var errorMessage = node.Context.ContextType == TerraformVisitContextType.TerraformValue
-                    ? $"In the dependency graph of {node.Context.VisitType.FullName} is another nested terraform value not allowed"
-                    : $"In the dependency graph of {node.Context.VisitType.FullName} is a nested terraform value not allowed";
-
-                throw new NestedTerraformValueException(errorMessage);
-            }
         }
     }
 }

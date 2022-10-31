@@ -43,7 +43,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
         }
 
-        public ValueWrapping? ValueWrapping { get; private set; }
+        public ValueDefinitionWrapping? ValueWrapping { get; private set; }
 
         public AttributeReflectionMetadata AttributeReflectionMetadata {
             get => _attributeReflectionMetadata ?? throw new InvalidOperationException("Attribute reflection metadata has not been set");

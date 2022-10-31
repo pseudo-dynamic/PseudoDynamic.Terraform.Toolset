@@ -201,7 +201,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 return;
             }
 
-            if (value.IsWrappedByTerraformValue) {
+            if (value.SourceTypeWrapping == TypeWrapping.TerraformValue) {
                 EncodeTerraformValue(ref writer, value, (ITerraformValue)content);
                 return;
             }

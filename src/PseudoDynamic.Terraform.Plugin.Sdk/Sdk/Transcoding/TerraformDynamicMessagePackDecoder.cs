@@ -259,7 +259,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 isUnknown = false;
             }
 
-            object? value3 = value.IsWrappedByTerraformValue
+            object? value3 = value.SourceTypeWrapping == TypeWrapping.TerraformValue
                 ? TerraformValue.CreateInstance(value.SourceType, !isResultRequired, value2, isNull, isUnknown)
                 : value2;
 

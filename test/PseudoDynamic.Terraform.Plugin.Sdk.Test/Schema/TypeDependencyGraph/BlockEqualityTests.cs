@@ -42,7 +42,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                                     new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 },
                                 OuterType = typeof(TerraformValue<Blocks.HavingString>),
-                                IsWrappedByTerraformValue = true
+                                SourceTypeWrapping = TypeWrapping.TerraformValue
                             })
                     }
                 }
@@ -57,7 +57,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                                     new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 },
                                 OuterType = typeof(TerraformValue<Blocks.HavingString>),
-                                IsWrappedByTerraformValue = true
+                                SourceTypeWrapping = TypeWrapping.TerraformValue
                             }))
                     }
                 }

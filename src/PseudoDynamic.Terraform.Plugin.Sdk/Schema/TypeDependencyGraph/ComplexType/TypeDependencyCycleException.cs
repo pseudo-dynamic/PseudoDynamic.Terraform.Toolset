@@ -5,6 +5,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
     [Serializable]
     internal class TypeDependencyCycleException : Exception
     {
+        public Type? Type { get; init; }
+
+        public override string Message => (base.Message == string.Empty ? $"A type dependency cycle has been detected" : base.Message)
+            + (Type != null ? $"{Environment.NewLine}Type = {Type.FullName}" : string.Empty);
+
         public TypeDependencyCycleException()
         {
         }

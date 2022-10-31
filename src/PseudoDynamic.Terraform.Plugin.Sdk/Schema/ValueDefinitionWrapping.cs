@@ -3,10 +3,10 @@
 namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     /// <summary>
-    /// This describes how <see cref="AttributeDefinition.Value"/> is wrapped.
+    /// This describes how <see cref="AttributeDefinition.Value"/> is wrapped by another <see cref="ValueDefinition"/>.
     /// Only used in <see cref="NestedBlockAttributeDefinition"/>.
     /// </summary>
-    public enum ValueWrapping
+    public enum ValueDefinitionWrapping
     {
         /// <summary>
         /// Block is wrapped by list.

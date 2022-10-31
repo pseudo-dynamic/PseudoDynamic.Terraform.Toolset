@@ -196,6 +196,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         protected ValueResult BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {
             var isTerraformValue = node.TryUnwrapTerraformValue(out var unwrappedNode);
+
             var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint();
             bool isNestedBlock;
             ValueDefinition builtValue;
@@ -203,10 +204,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
             // We can now allow to treat dynamic as block
             if (explicitTypeConstraint == TerraformTypeConstraint.Block) {
-                TerraformTypeConstraint? singleImplicitValueTypeConstraint = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
+                var singleImplicitValueTypeConstraint = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
                     ?? (implicitValueTypeConstraints.Count == 1
                         ? implicitValueTypeConstraints.Single()
-                        : default);
+                        : default(TerraformTypeConstraint?));
 
                 if (!singleImplicitValueTypeConstraint.HasValue) {
                     throw new NestedBlockException();
@@ -235,9 +236,11 @@ Property type = {unwrappedNode.Context.VisitType}");
                 isNestedBlock = false;
             }
 
+            var sourceTypeWrapping = isTerraformValue ? TypeWrapping.TerraformValue : default(TypeWrapping?);
+
             var updatedValue = builtValue with {
                 OuterType = node.Context.VisitType,
-                IsWrappedByTerraformValue = isTerraformValue
+                SourceTypeWrapping = sourceTypeWrapping
             };
 
             return new ValueResult(updatedValue, unwrappedNode) {

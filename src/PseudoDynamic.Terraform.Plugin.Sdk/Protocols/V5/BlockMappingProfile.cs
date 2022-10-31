@@ -44,10 +44,10 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
             nestedBlockAttribute.ForMember(x => x.Nesting, o => o.MapFrom(x => ToNestedBlockNesting(x.ValueWrapping)));
         }
 
-        Schema.Types.NestedBlock.Types.NestingMode ToNestedBlockNesting(ValueWrapping? valueWrapping) => valueWrapping switch {
-            ValueWrapping.List => Schema.Types.NestedBlock.Types.NestingMode.List,
-            ValueWrapping.Set => Schema.Types.NestedBlock.Types.NestingMode.Set,
-            ValueWrapping.Map => Schema.Types.NestedBlock.Types.NestingMode.Map,
+        Schema.Types.NestedBlock.Types.NestingMode ToNestedBlockNesting(ValueDefinitionWrapping? valueWrapping) => valueWrapping switch {
+            ValueDefinitionWrapping.List => Schema.Types.NestedBlock.Types.NestingMode.List,
+            ValueDefinitionWrapping.Set => Schema.Types.NestedBlock.Types.NestingMode.Set,
+            ValueDefinitionWrapping.Map => Schema.Types.NestedBlock.Types.NestingMode.Map,
             _ => Schema.Types.NestedBlock.Types.NestingMode.Single
         };
     }

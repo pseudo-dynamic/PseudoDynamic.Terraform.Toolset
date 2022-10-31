@@ -11,7 +11,7 @@
         public static bool IsRange(this TerraformTypeConstraint terraformType) =>
             terraformType.IsMonoRange() || terraformType == TerraformTypeConstraint.Map;
 
-        public static ValueWrapping? ToValueWrapping(this TerraformTypeConstraint typeConstraint) => typeConstraint switch {
+        public static ValueDefinitionWrapping? ToValueWrapping(this TerraformTypeConstraint typeConstraint) => typeConstraint switch {
             TerraformTypeConstraint.Dynamic
             or TerraformTypeConstraint.Number
             or TerraformTypeConstraint.String
@@ -19,10 +19,10 @@
             or TerraformTypeConstraint.Object
             or TerraformTypeConstraint.Tuple
             or TerraformTypeConstraint.Block => null,
-            TerraformTypeConstraint.List => ValueWrapping.List,
-            TerraformTypeConstraint.Set => ValueWrapping.Set,
-            TerraformTypeConstraint.Map => ValueWrapping.Map,
-            _ => throw new InvalidOperationException($"Type constraint \"{typeConstraint}\" cannot be translated to a value of {typeof(ValueWrapping).FullName}")
+            TerraformTypeConstraint.List => ValueDefinitionWrapping.List,
+            TerraformTypeConstraint.Set => ValueDefinitionWrapping.Set,
+            TerraformTypeConstraint.Map => ValueDefinitionWrapping.Map,
+            _ => throw new InvalidOperationException($"Type constraint \"{typeConstraint}\" cannot be translated to a value of {typeof(ValueDefinitionWrapping).FullName}")
         };
     }
 }

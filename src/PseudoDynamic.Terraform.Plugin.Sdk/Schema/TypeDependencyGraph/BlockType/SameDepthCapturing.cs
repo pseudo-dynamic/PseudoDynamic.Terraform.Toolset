@@ -3,9 +3,9 @@
     /// <summary>
     /// A specialized class for capturing children of one visitation.
     /// This technique can be used to transform a recursive visitors
-    /// into a declarative visitorby by capturing children of a
-    /// visitation and then process these children declarative. Used
-    /// mainly for grouping children and adding them to a parent
+    /// into a declarative visitor by capturing children of a
+    /// visitation and then process these children declarative.
+    /// Used mainly for grouping children and adding them to a parent
     /// node before proceeding with their children.
     /// </summary>
     /// <typeparam name="T"></typeparam>

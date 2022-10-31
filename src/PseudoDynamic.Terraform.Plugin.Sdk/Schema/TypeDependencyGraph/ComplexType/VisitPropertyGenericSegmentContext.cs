@@ -27,7 +27,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// Breaks the nullability chain of this and next property generic segments. They are treated as they would be annotated by <see cref="MaybeNullAttribute"/>.
         /// </remarks>
         internal static VisitPropertyGenericSegmentContext Custom(IVisitPropertySegmentContext underlyingContext, Type visitType, params Type[]? visitTypeGenericArguments) =>
-            new VisitPropertyGenericSegmentContext(underlyingContext, new NullableInfo(visitType) { NativeGenericTypeArguments = visitTypeGenericArguments });
+            new VisitPropertyGenericSegmentContext(underlyingContext, new NullableInfo(visitType) { GenericTypeArguments = visitTypeGenericArguments });
 
         /// <inheritdoc/>
         public override VisitContextType ContextType { get; internal init; } = VisitContextType.PropertyGenericSegment;

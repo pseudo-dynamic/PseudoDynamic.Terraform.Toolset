@@ -1,6 +1,6 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
-    internal interface IVisitContext : IContext
+    internal interface IVisitContext : IContext, IMaybeComplexType
     {
         VisitContextType ContextType { get; }
         Type VisitType { get; }

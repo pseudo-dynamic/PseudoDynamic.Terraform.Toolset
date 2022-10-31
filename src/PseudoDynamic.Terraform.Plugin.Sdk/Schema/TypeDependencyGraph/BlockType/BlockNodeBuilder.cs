@@ -80,7 +80,7 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
 
                 return true;
 
-                // Produces a Terraform dynamic.
+                // Produces a Terraform dynamic
                 void RewriteThenVisitTerraformDynamic() => RewriteThenVisit(VisitPropertyGenericSegmentContext.Custom(context, typeof(object)) with { ContextType = TerraformVisitContextType.TerraformValue });
             }
 
@@ -135,13 +135,14 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
                 }
             }
 
-            private bool TryRewritePropertySegment(IVisitPropertySegmentContext context, [NotNullWhen(true)] out VisitContext? rewrittenContext)
+            private bool TryRewritePropertySegment<T>(T context, [NotNullWhen(true)] out T? rewrittenContext)
+                where T : VisitContext, IVisitPropertySegmentContext
             {
                 var visitedType = context.VisitType;
 
                 if ((context.ImplicitTypeConstraints.Count == 1 && context.ImplicitTypeConstraints.Single().IsComplex())
                     || visitedType.IsComplexAnnotated(out _)) {
-                    rewrittenContext = new VisitPropertyContext(context, context.VisitType) { ContextType = VisitContextType.Complex.Inherits(context.ContextType) };
+                    rewrittenContext = context with { ContextType = VisitContextType.Complex.Inherits(context.ContextType) };
                     return true;
                 }
 
@@ -149,14 +150,26 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
                 return false;
             }
 
-            protected override VisitContext Rewrite(VisitContext context)
+            protected override VisitPropertyContext RewriteProperty(VisitPropertyContext context)
             {
-                if (context is IVisitPropertySegmentContext propertySegmentContext && TryRewritePropertySegment(propertySegmentContext, out var rewrittenContext)) {
+                if (TryRewritePropertySegment(context, out var rewrittenContext)) {
                     return rewrittenContext;
                 }
 
                 return context;
             }
+
+            protected override VisitPropertyGenericSegmentContext RewritePropertyGenericArgument(VisitPropertyGenericSegmentContext context)
+            {
+                if (TryRewritePropertySegment(context, out var rewrittenContext)) {
+                    return rewrittenContext;
+                }
+
+                return context;
+            }
+
+            public virtual void RewriteThenVisitDynamic(VisitContext context) =>
+                RewriteThenVisit(context);
 
             public override void RewriteThenVisitComplex(Type complexType, Context? context = null)
             {

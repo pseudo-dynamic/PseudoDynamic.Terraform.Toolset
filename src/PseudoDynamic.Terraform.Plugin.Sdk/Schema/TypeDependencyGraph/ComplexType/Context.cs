@@ -33,13 +33,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             _nullabilityInfoContext = context.NullabilityInfoContext;
         }
 
-        protected void RememberComplexTypeBeingVisited(Type type)
+        protected internal void RememberComplexTypeBeingVisited(IMaybeComplexType complexType)
         {
-            if (!type.IsComplexType()) {
+            if (!complexType.IsComplexType) {
                 return;
             }
 
-            _rememberedComplexVisitTypes.Add(type);
+            _rememberedComplexVisitTypes.Add(complexType.Type);
         }
     }
 }

@@ -5,11 +5,12 @@ using Namotion.Reflection;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
+
     /// <summary>
     /// The context originated from a visitation.
     /// </summary>
     [DebuggerDisplay($"{{{nameof(GetDebuggerDisplay)}(),nq}}")]
-    internal record VisitContext : Context, IVisitContext
+    internal record VisitContext : Context, IVisitContext, IMaybeComplexType
     {
         /// <summary>
         /// The context type.
@@ -38,6 +39,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
                 }
             }
         }
+
+        Type IVisitContext.VisitType => VisitType;
+        Type IMaybeComplexType.Type => VisitType;
 
         public ComplexTypeMetadata? ComplexTypeMetadata {
             get {
@@ -73,13 +77,14 @@ Visit type = {VisitType.FullName}");
             }
         }
 
-        Type IVisitContext.VisitType => VisitType;
+        bool IMaybeComplexType.IsComplexType => _isComplexType;
 
         private VisitContextType? _contextType;
         private Type? _visitType;
         private ContextualType? _visitedContextualType;
         private ComplexTypeMetadata? _complexMetadata;
         private IReadOnlySet<TerraformTypeConstraint>? _implicitTypeConstraints;
+        private bool _isComplexType;
 
         internal VisitContext(IContext context, Type visitType)
             : base(context) =>
@@ -103,7 +108,19 @@ Visit type = {VisitType.FullName}");
             }
 
             _visitType = visitType;
-            CheckNonDependencyCycle(visitType);
+            _isComplexType = visitType.IsComplexType();
+            CheckNonDependencyCycle();
+
+            void CheckNonDependencyCycle()
+            {
+                if (!_isComplexType) {
+                    return;
+                }
+
+                if (RememberedComplexVisitTypes.Contains(_visitType)) {
+                    throw new TypeDependencyCycleException() { Type = _visitType };
+                }
+            }
         }
 
         private void ApplyContext(IVisitContext context)
@@ -111,21 +128,11 @@ Visit type = {VisitType.FullName}");
             _contextType = context.ContextType;
             _visitType = context.VisitType;
             _implicitTypeConstraints = context.ImplicitTypeConstraints;
-        }
-
-        private void CheckNonDependencyCycle(Type type)
-        {
-            if (!type.IsComplexType()) {
-                return;
-            }
-
-            if (RememberedComplexVisitTypes.Contains(type)) {
-                throw new TypeDependencyCycleException($"A type dependency cycle has been detected: {type.FullName}");
-            }
+            _isComplexType = context.IsComplexType;
         }
 
         internal void RememberVisitTypeBeingVisited() =>
-            RememberComplexTypeBeingVisited(VisitType);
+            RememberComplexTypeBeingVisited(this);
 
         private ContextualType GetVisitedContextualType() =>
             _visitedContextualType ??= VisitType.ToContextualType();

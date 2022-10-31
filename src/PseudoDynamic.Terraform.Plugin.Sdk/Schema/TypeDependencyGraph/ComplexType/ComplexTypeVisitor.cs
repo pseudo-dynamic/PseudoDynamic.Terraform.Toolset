@@ -4,12 +4,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal class ComplexTypeVisitor
     {
-        protected virtual VisitContext Rewrite(VisitContext context) =>
-            context;
+        internal static readonly ComplexTypeVisitor Default = new ComplexTypeVisitor();
 
         private void VisitPropertySegment(IVisitPropertySegmentContext context)
         {
-            var visitTypeGenericArguments = context.NullabilityInfo.NativeGenericTypeArguments;
+            var visitTypeGenericArguments = context.NullabilityInfo.GenericTypeArguments;
 
             if (visitTypeGenericArguments is null || visitTypeGenericArguments.Length == 0) {
                 return;
@@ -50,12 +49,41 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             }
         }
 
+        protected virtual VisitContext RewriteComplex(VisitContext context) =>
+            context;
+
+        private T RewritePropertySegment<T>(T context)
+            where T : VisitContext, IVisitPropertySegmentContext
+        {
+            if (context.VisitType.IsComplexType()) {
+                return context with { ContextType = VisitContextType.Complex.Inherits(context.ContextType) };
+            }
+
+            return context;
+        }
+
+        protected virtual VisitPropertyContext RewriteProperty(VisitPropertyContext context) =>
+            RewritePropertySegment(context);
+
+        protected virtual VisitPropertyGenericSegmentContext RewritePropertyGenericArgument(VisitPropertyGenericSegmentContext context) =>
+            RewritePropertySegment(context);
+
+        protected virtual VisitContext Rewrite(VisitContext context)
+        {
+            if (context.ContextType == VisitContextType.Complex) {
+                return RewriteComplex(context);
+            } else if (context.ContextType == VisitContextType.Property) {
+                return RewriteProperty((VisitPropertyContext)context);
+            } else if (context.ContextType == VisitContextType.PropertyGenericSegment) {
+                return RewritePropertyGenericArgument((VisitPropertyGenericSegmentContext)context);
+            } else {
+                throw new ArgumentException($"The context type is not supported: {context.ContextType.Id}");
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void RewriteThenVisit(VisitContext context) =>
             Visit(Rewrite(context));
-
-        public virtual void RewriteThenVisitDynamic(VisitContext context) =>
-            RewriteThenVisit(context);
 
         /// <summary>
         /// Represents the entry point of visiting a complex type.
@@ -69,7 +97,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
                 throw new ArgumentException("The specified type must be a closed generic type");
             }
 
-            if (!complexType.IsComplexType()) {
+            if (!complexType.IsClassType()) {
                 throw new ArgumentException("The specified type must be a class type");
             }
 
