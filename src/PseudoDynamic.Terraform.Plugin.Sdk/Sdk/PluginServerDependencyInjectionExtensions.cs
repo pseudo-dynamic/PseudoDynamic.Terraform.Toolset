@@ -35,17 +35,21 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             });
         }
 
-        private static void ConfigureTerraformProvider<TProviderFeatures>(
-            TProviderFeatures providerFeatures,
-            string providerName,
-            IEnumerable<Action<TProviderFeatures>> configureProviderDelegates)
-            where TProviderFeatures : IProviderFeature
+        private static void ConfigureTerraformProvider<TServerSpecification>(
+            IServiceCollection services,
+            PluginServerSpecificationBase<TServerSpecification> serverSpecification)
+            where TServerSpecification : PluginServerSpecificationBase<TServerSpecification>
         {
-            providerFeatures.ConfigureProviderOptions(options => options.FullyQualifiedProviderName = providerName);
-
-            foreach (var configureProvider in configureProviderDelegates) {
-                configureProvider(providerFeatures);
+            if (!serverSpecification.ProviderConfiguration.HasValue) {
+                return;
             }
+
+            services.AddProviderOptions().Configure(options => {
+                options.FullyQualifiedProviderName = serverSpecification.ProviderConfiguration.Value.ProviderName;
+                options.ProviderSchemaType = serverSpecification.ProviderConfiguration.Value.ProviderMetaSchemaType;
+            });
+
+            serverSpecification.ProviderConfiguration.Value.ConfigureProvider(services);
         }
 
         public static IServiceCollection AddTerraformPluginServer(
@@ -54,14 +58,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             services.AddTerraformProvider();
             services.ConfigureTerraformPluginServer(serverSpecification);
-
-            if (serverSpecification.ProviderConfigurations.HasValue) {
-                ConfigureTerraformProvider(
-                    new IPluginServerSpecification.ProtocolV5.ProviderFeatures(services),
-                    serverSpecification.ProviderConfigurations.Value.ProviderName,
-                    serverSpecification.ProviderConfigurations.Value.Delegates);
-            }
-
+            ConfigureTerraformProvider(services, serverSpecification);
             return services;
         }
 
@@ -71,14 +68,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             services.AddTerraformProvider();
             services.ConfigureTerraformPluginServer(serverSpecification);
-
-            if (serverSpecification.ProviderConfigurations.HasValue) {
-                ConfigureTerraformProvider(
-                    new IPluginServerSpecification.ProtocolV6.ProviderFeatures(services),
-                    serverSpecification.ProviderConfigurations.Value.ProviderName,
-                    serverSpecification.ProviderConfigurations.Value.Delegates);
-            }
-
+            ConfigureTerraformProvider(services, serverSpecification);
             return services;
         }
     }

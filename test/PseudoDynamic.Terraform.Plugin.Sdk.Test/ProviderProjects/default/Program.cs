@@ -5,19 +5,15 @@ using PseudoDynamic.Terraform.Plugin.Schema;
 using PseudoDynamic.Terraform.Plugin.Sdk;
 using static Assertions;
 
-var providerName = "pseudo-dynamic/debug";
+var providerName = "debug";
 
 var webHost = new WebHostBuilder()
     .UseTerraformPluginServer(IPluginServerSpecification.NewProtocolV5()
-        .ConfigureProvider(providerName, provider =>
+        .UseProvider<ProviderMetaSchema>(providerName, provider =>
         {
             provider.SetProvider<ProviderImpl>();
-
-            provider.UseProviderMeta<ProviderMetaSchema>(metaSupport =>
-            {
-                metaSupport.AddResource<ResourceImpl>();
-                metaSupport.AddDataSource<DataSourceImpl>();
-            });
+            provider.AddResource<ResourceImpl>();
+            provider.AddDataSource<DataSourceImpl>();
         }))
     .Build();
 

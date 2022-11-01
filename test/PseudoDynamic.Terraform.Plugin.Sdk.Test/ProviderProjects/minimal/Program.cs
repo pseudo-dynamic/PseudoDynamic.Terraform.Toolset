@@ -10,7 +10,7 @@ resource.SetupGet(x => x.Name).Returns("empty");
 
 var webHost = new WebHostBuilder()
     .UseTerraformPluginServer(IPluginServerSpecification.NewProtocolV5()
-        .ConfigureProvider(providerName, provider => provider.AddResource<IResource<Schema>, Schema>(resource.Object)))
+        .UseProvider(providerName, provider => provider.AddResource<IResource<Schema>, Schema>(resource.Object)))
     .Build();
 
 await webHost.RunAsync();

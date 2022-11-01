@@ -9,14 +9,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     /// </summary>
     public static class ProviderFeatureDependencyInjectionExtensions
     {
-        internal static OptionsBuilder<ProviderContextOptions> AddProviderOptions(this IProviderFeature provider)
-        {
-            var serviceProvider = provider.Services;
-            return serviceProvider.AddOptions<ProviderContextOptions>();
-        }
+        internal static OptionsBuilder<ProviderContextOptions> AddProviderOptions(this IServiceCollection services) =>
+            services.AddOptions<ProviderContextOptions>();
 
-        internal static OptionsBuilder<ProviderContextOptions> ConfigureProviderOptions(this IProviderFeature provider, Action<ProviderContextOptions> configureOptions) =>
-            provider.AddProviderOptions().Configure(configureOptions);
+        internal static OptionsBuilder<ProviderContextOptions> AddProviderOptions(this IProviderFeature provider) =>
+            provider.Services.AddOptions<ProviderContextOptions>();
 
         internal static void SetProvider(this IProviderFeature providerFeature, Type providerType, Type schemaType, object? provider = null) =>
             providerFeature.AddProviderOptions().Configure(options => options.ProviderDescriptor = new ProviderServiceDescriptor(providerType, schemaType) { Implementation = provider });

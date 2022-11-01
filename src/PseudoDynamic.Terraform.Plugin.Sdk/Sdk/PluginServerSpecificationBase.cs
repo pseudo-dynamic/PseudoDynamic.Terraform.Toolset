@@ -1,11 +1,10 @@
-﻿using PseudoDynamic.Terraform.Plugin.Protocols;
-using PseudoDynamic.Terraform.Plugin.Sdk.Features;
+﻿using Microsoft.Extensions.DependencyInjection;
+using PseudoDynamic.Terraform.Plugin.Protocols;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public abstract record PluginServerSpecificationBase<TServerSpecification, TProviderFeatures> : IPluginServerSpecification
-        where TServerSpecification : PluginServerSpecificationBase<TServerSpecification, TProviderFeatures>
-        where TProviderFeatures : ProviderFeaturesBase
+    public abstract record PluginServerSpecificationBase<TDerived> : IPluginServerSpecification
+        where TDerived : PluginServerSpecificationBase<TDerived>
     {
         /// <summary>
         /// The intended plugin protocol version to be used by the gRPC server.
@@ -19,17 +18,21 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </summary>
         public bool IsDebuggable { get; init; }
 
-        internal (string ProviderName, List<Action<TProviderFeatures>> Delegates)? ProviderConfigurations { get; private set; }
+        internal (string ProviderName, Type? ProviderMetaSchemaType, Action<IServiceCollection> ConfigureProvider)? ProviderConfiguration { get; set; }
 
         internal PluginServerSpecificationBase()
         {
         }
 
-        public TServerSpecification ConfigureProvider(string providerName, Action<TProviderFeatures> configureProvider)
+        protected TDerived SetProvider<TProviderFeatures>(
+            string providerName,
+            Action<TProviderFeatures> configureProvider,
+            Func<IServiceCollection, TProviderFeatures> providerFeaturesFactory,
+            Type? providerMetaSchemaType)
+            where TProviderFeatures : IProviderFeature
         {
-            ProviderConfigurations = (providerName, ProviderConfigurations?.Delegates ?? new List<Action<TProviderFeatures>>());
-            ProviderConfigurations.Value.Delegates.Add(configureProvider);
-            return (TServerSpecification)this;
+            ProviderConfiguration = (providerName, providerMetaSchemaType, (IServiceCollection services) => configureProvider(providerFeaturesFactory(services)));
+            return (TDerived)this;
         }
     }
 }

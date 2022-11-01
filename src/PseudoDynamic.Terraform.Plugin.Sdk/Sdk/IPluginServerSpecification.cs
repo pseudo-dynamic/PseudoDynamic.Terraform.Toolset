@@ -21,28 +21,42 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </summary>
         bool IsDebuggable { get; }
 
-        public sealed record ProtocolV5 : PluginServerSpecificationBase<ProtocolV5, ProtocolV5.ProviderFeatures>
+        public sealed record ProtocolV5 : PluginServerSpecificationBase<ProtocolV5>
         {
             public override PluginProtocol Protocol => PluginProtocol.V5;
 
-            public class ProviderFeatures : ProviderFeaturesBase
+            public class ProviderFeatures<ProviderMetaSchema> : ProviderFeaturesBase<ProviderMetaSchema>
             {
-                public ProviderFeatures(IServiceCollection services) : base(services)
+                internal ProviderFeatures(IServiceCollection services) : base(services)
                 {
                 }
             }
+
+            public ProtocolV5 UseProvider<ProviderMetaSchema>(string providerName, Action<ProviderFeatures<ProviderMetaSchema>> configureProvider)
+                where ProviderMetaSchema : class =>
+                SetProvider(providerName, configureProvider, static services => new ProviderFeatures<ProviderMetaSchema>(services), typeof(ProviderMetaSchema));
+
+            public ProtocolV5 UseProvider(string providerName, Action<ProviderFeatures<object?>> configureProvider) =>
+                SetProvider(providerName, configureProvider, static services => new ProviderFeatures<object?>(services), providerMetaSchemaType: null);
         }
 
-        public sealed record ProtocolV6 : PluginServerSpecificationBase<ProtocolV6, ProtocolV6.ProviderFeatures>
+        public sealed record ProtocolV6 : PluginServerSpecificationBase<ProtocolV6>
         {
             public override PluginProtocol Protocol => PluginProtocol.V5;
 
-            public class ProviderFeatures : ProviderFeaturesBase
+            public class ProviderFeatures<ProviderMetaSchema> : ProviderFeaturesBase<ProviderMetaSchema>
             {
-                public ProviderFeatures(IServiceCollection services) : base(services)
+                internal ProviderFeatures(IServiceCollection services) : base(services)
                 {
                 }
             }
+
+            public ProtocolV6 UseProvider<ProviderMetaSchema>(string providerName, Action<ProviderFeatures<ProviderMetaSchema>> configureProvider)
+                where ProviderMetaSchema : class =>
+                SetProvider(providerName, configureProvider, static services => new ProviderFeatures<ProviderMetaSchema>(services), typeof(ProviderMetaSchema));
+
+            public ProtocolV6 UseProvider(string providerName, Action<ProviderFeatures<object?>> configureProvider) =>
+                SetProvider(providerName, configureProvider, static services => new ProviderFeatures<object?>(services), providerMetaSchemaType: null);
         }
     }
 }
