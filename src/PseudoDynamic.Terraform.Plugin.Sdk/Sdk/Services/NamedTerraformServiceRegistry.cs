@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace PseudoDynamic.Terraform.Plugin.Sdk
+namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
     internal class NamedTerraformServiceRegistry<TTerraformService>
         where TTerraformService : INameProvider

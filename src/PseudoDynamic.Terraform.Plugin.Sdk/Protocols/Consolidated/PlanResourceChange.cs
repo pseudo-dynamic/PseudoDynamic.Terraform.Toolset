@@ -9,7 +9,10 @@
                 set => _typeName = value;
             }
 
-            public DynamicValue? PriorState { get; set; }
+            public DynamicValue PriorState {
+                get => _priorState ?? throw new InvalidOperationException("Prior state is unexpectedly null");
+                set => _priorState = value;
+            }
 
             public DynamicValue ProposedNewState {
                 get => _proposedNewState ?? throw new InvalidOperationException("Proposed new state is unexpectedly null");
@@ -32,6 +35,7 @@
             private DynamicValue? _config;
             private DynamicValue? _proposedNewState;
             private DynamicValue? _providerMeta;
+            private DynamicValue? _priorState;
         }
 
         public class Response

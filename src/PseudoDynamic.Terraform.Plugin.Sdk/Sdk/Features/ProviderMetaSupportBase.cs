@@ -2,13 +2,13 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Features
 {
-    public abstract class ProviderMetaFeaturesBase<ProviderMetaSchema>
+    public abstract class ProviderMetaSupportBase<ProviderMetaSchema>
     {
         internal static readonly Type ProviderMetaSchemaType = typeof(ProviderMetaSchema);
 
         internal abstract IProviderFeature ProviderFeature { get; }
 
-        internal ProviderMetaFeaturesBase()
+        internal ProviderMetaSupportBase()
         {
         }
 

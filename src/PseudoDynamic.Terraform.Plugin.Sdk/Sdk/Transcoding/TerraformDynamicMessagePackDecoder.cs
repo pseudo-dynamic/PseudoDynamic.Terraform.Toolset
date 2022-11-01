@@ -116,7 +116,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             var addItem = listAccessor.GetMethodCaller(nameof(IList<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
-                var item = DecodeValue(ref reader, definition.Item, options).Value;
+                var item = DecodeValueWithContext(ref reader, definition.Item, options).Value;
                 addItem.Invoke(items, new[] { item });
             }
 
@@ -132,7 +132,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             var addItem = setAccessor.GetMethodCaller(nameof(ISet<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
-                var item = DecodeValue(ref reader, definition.Item, options).Value;
+                var item = DecodeValueWithContext(ref reader, definition.Item, options).Value;
                 addItem.Invoke(items, new[] { item });
             }
 
@@ -150,7 +150,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             for (int i = 0; i < itemCount; i++) {
                 // CONSIDER: allow key type other than string
                 var key = reader.ReadString();
-                var value = DecodeValue(ref reader, definition.Value, options).Value;
+                var value = DecodeValueWithContext(ref reader, definition.Value, options).Value;
                 addItem.Invoke(items, new[] { key, value });
             }
 
@@ -200,8 +200,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             return instance;
         }
 
-        private object DecodeComplex(ref MessagePackReader reader, ComplexDefinition definition, DecodingOptions options)
+        private object? DecodeNullableComplex(ref MessagePackReader reader, ComplexDefinition definition, DecodingOptions options)
         {
+            if (reader.IsNil) {
+                return null;
+            }
+
             if (definition is not IAttributeAccessor abstractAttributeAccessor) {
                 throw new NotImplementedException($"Complex definition does not implement {typeof(IAttributeAccessor).FullName}");
             }
@@ -213,7 +217,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 var attributeName = reader.ReadString();
                 var attribute = abstractAttributeAccessor.GetAttribute(attributeName);
                 var attributeRequired = attribute.IsRequired;
-                var attributeValueResult = DecodeValue(ref reader, attribute.Value, options, attributeRequired);
+                var attributeValueResult = DecodeValueWithContext(ref reader, attribute.Value, options, attributeRequired);
 
                 if (!attributeValueResult.IsUnknown && attributeRequired && attributeValueResult.IsNull) {
                     options.Reports.Error($"The attribute \"{attributeName}\" is required and must not be null");
@@ -225,7 +229,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             return ActivateComplex(definition, parsedAttributes);
         }
 
-        private object DecodeNonNullValue(ValueDefinition definition, ref MessagePackReader reader, DecodingOptions options) => definition.TypeConstraint switch {
+        private object DecodeNonNullableBlock(ref MessagePackReader reader, BlockDefinition definition, DecodingOptions options) =>
+            DecodeNullableComplex(ref reader, definition, options) ?? throw new TerraformDynamicMessagePackDecodingException($"The block to read was null{Environment.NewLine}{definition}");
+
+        private object DecodeValue(ValueDefinition definition, ref MessagePackReader reader, DecodingOptions options) => definition.TypeConstraint switch {
             TerraformTypeConstraint.Dynamic => DecodeDynamic(ref reader, (DynamicDefinition)definition),
             TerraformTypeConstraint.String => DecodeString(ref reader),
             TerraformTypeConstraint.Number => DecodeNumber(ref reader, definition),
@@ -233,12 +240,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             TerraformTypeConstraint.List => DecodeList(ref reader, (MonoRangeDefinition)definition, options),
             TerraformTypeConstraint.Set => DecodeSet(ref reader, (MonoRangeDefinition)definition, options),
             TerraformTypeConstraint.Map => DecodeMap(ref reader, (MapDefinition)definition, options),
-            TerraformTypeConstraint.Object => DecodeComplex(ref reader, (ObjectDefinition)definition, options),
-            TerraformTypeConstraint.Block => DecodeComplex(ref reader, (BlockDefinition)definition, options),
+            TerraformTypeConstraint.Object => DecodeNullableComplex(ref reader, (ObjectDefinition)definition, options) ?? throw new TerraformDynamicMessagePackDecodingException($"The object to read was null{Environment.NewLine}{definition}"),
+            TerraformTypeConstraint.Block => DecodeNonNullableBlock(ref reader, (BlockDefinition)definition, options),
             _ => throw new NotImplementedException($"The decoding of this Terraform constraint type is not implemented: {definition.TypeConstraint}")
         };
 
-        private ValueResult DecodeValue(ref MessagePackReader reader, ValueDefinition value, DecodingOptions options, bool isResultRequired = false)
+        private ValueResult DecodeValueWithContext(ref MessagePackReader reader, ValueDefinition value, DecodingOptions options, bool isResultRequired = false)
         {
             object? value2;
             bool isNull;
@@ -254,7 +261,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 isNull = true;
                 isUnknown = extension.TypeCode == 0;
             } else {
-                value2 = DecodeNonNullValue(value, ref reader, options);
+                value2 = DecodeValue(value, ref reader, options);
                 isNull = false;
                 isUnknown = false;
             }
@@ -271,14 +278,41 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             if (unknown is TerraformDynamic terraformDynamic) {
                 var value = _schemaBuilder.BuildDynamic(terraformDynamic.Definition, knownType);
                 var reader = new MessagePackReader(terraformDynamic.Memory);
-                return DecodeValue(ref reader, value, options);
+                return DecodeValueWithContext(ref reader, value, options);
             }
 
             return unknown;
         }
 
         /// <summary>
-        /// Decodes the schema.
+        /// Decodes the schema of a block.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="block"></param>
+        /// <param name="options"></param>
+        public object? DecodeNullableBlock(ref MessagePackReader reader, BlockDefinition block, DecodingOptions options)
+        {
+            if (options is null) {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            return DecodeNullableComplex(ref reader, block, options);
+        }
+
+        /// <summary>
+        /// Decodes the schema of a block.
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <param name="block"></param>
+        /// <param name="options"></param>
+        public object? DecodeNullableBlock(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)
+        {
+            var reader = new MessagePackReader(memory);
+            return DecodeNullableBlock(ref reader, block, options);
+        }
+
+        /// <summary>
+        /// Decodes the schema of a block.
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="block"></param>
@@ -289,9 +323,15 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 throw new ArgumentNullException(nameof(options));
             }
 
-            return DecodeComplex(ref reader, block, options) ?? throw new InvalidOperationException("The very first decoding block must have a non-nil map header");
+            return DecodeNonNullableBlock(ref reader, block, options);
         }
 
+        /// <summary>
+        /// Decodes the schema of a block.
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <param name="block"></param>
+        /// <param name="options"></param>
         public object DecodeBlock(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)
         {
             var reader = new MessagePackReader(memory);

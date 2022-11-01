@@ -25,10 +25,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
         }
 
-        public TServerSpecification ConfigureProvider(string providerName, Action<TProviderFeatures> configure)
+        public TServerSpecification ConfigureProvider(string providerName, Action<TProviderFeatures> configureProvider)
         {
             ProviderConfigurations = (providerName, ProviderConfigurations?.Delegates ?? new List<Action<TProviderFeatures>>());
-            ProviderConfigurations.Value.Delegates.Add(configure);
+            ProviderConfigurations.Value.Delegates.Add(configureProvider);
             return (TServerSpecification)this;
         }
     }

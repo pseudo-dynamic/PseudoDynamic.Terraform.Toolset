@@ -13,10 +13,10 @@ var webHost = new WebHostBuilder()
         {
             provider.SetProvider<ProviderImpl>();
 
-            provider.UseProviderMeta<ProviderMetaSchema>(providerMeta =>
+            provider.UseProviderMeta<ProviderMetaSchema>(metaSupport =>
             {
-                providerMeta.AddResource<ResourceImpl>();
-                providerMeta.AddDataSource<DataSourceImpl>();
+                metaSupport.AddResource<ResourceImpl>();
+                metaSupport.AddDataSource<DataSourceImpl>();
             });
         }))
     .Build();
@@ -148,8 +148,13 @@ static class Assertions
         @object.Map.Should().ContainValues("1", "2");
     }
 
-    public static void AssertObjectWithRangesAndNestedBlocks(Object.WithRanges.WithNestedBlocks schema)
+    public static void AssertObjectWithRangesAndNestedBlocks(Object.WithRanges.WithNestedBlocks? schema)
     {
+        if (schema is null)
+        {
+            return;
+        }
+
         AssertObjectIncludingRanges(schema);
         AssertObjectIncludingRanges(schema.SingleNested);
 

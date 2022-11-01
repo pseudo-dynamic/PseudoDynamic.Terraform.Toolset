@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using PseudoDynamic.Terraform.Plugin.Protocols.Consolidated;
 using PseudoDynamic.Terraform.Plugin.Sdk.Services;
@@ -180,10 +181,19 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 var resource = (IResource<Schema, ProviderMetaSchema>)service.Implementation;
                 var reports = new Reports();
                 var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
-                var decodedPlan = (Schema)decoder.DecodeBlock(request.ProposedNewState.Msgpack, service.Schema, decodingOptions);
                 var decodedConfig = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
+                var decodedState = (Schema?)decoder.DecodeNullableBlock(request.PriorState.Msgpack, service.Schema, decodingOptions);
+                var decodedPlan = (Schema?)decoder.DecodeNullableBlock(request.ProposedNewState.Msgpack, service.Schema, decodingOptions);
                 var decodedProviderMeta = (ProviderMetaSchema)decoder.DecodeBlock(request.ProviderMeta.Msgpack, provider.ProviderMetaSchema, decodingOptions);
-                var context = new Resource.PlanContext<Schema, ProviderMetaSchema>(reports, dynamicDecoder, decodedConfig, decodedPlan, decodedProviderMeta);
+
+                var context = new Resource.PlanContext<Schema, ProviderMetaSchema>(
+                    reports,
+                    dynamicDecoder,
+                    config: decodedConfig,
+                    state: decodedState,
+                    plan: decodedPlan,
+                    decodedProviderMeta);
+
                 await resource.Plan(context);
                 var diagnostics = mapper.Map<IList<Diagnostic>>(reports);
                 var encodedPlan = encoder.EncodeValue(service.Schema, context.Plan);

@@ -2,7 +2,7 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Features
 {
-    public abstract class ProviderFeaturesBase : ProviderMetaFeaturesBase<object>, IProviderFeature
+    public abstract class ProviderFeaturesBase : ProviderMetaSupportBase<object>, IProviderFeature
     {
         public IServiceCollection Services { get; }
 
@@ -11,15 +11,15 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Features
         internal ProviderFeaturesBase(IServiceCollection services) =>
             Services = services ?? throw new ArgumentNullException(nameof(services));
 
-        public void UseProviderMeta<ProviderMetaSchema>(Action<ProviderMetaFeatures<ProviderMetaSchema>> configure)
+        public void UseProviderMeta<ProviderMetaSchema>(Action<ProviderMetaSupport<ProviderMetaSchema>> configure)
             where ProviderMetaSchema : class
         {
             if (configure is null) {
                 throw new ArgumentNullException(nameof(configure));
             }
 
-            ProviderFeature.SetProviderMeta(ProviderMetaFeatures<ProviderMetaSchema>.ProviderMetaSchemaType);
-            configure(new ProviderMetaFeatures<ProviderMetaSchema>(this));
+            ProviderFeature.SetProviderMeta(ProviderMetaSupport<ProviderMetaSchema>.ProviderMetaSchemaType);
+            configure(new ProviderMetaSupport<ProviderMetaSchema>(this));
         }
     }
 }
