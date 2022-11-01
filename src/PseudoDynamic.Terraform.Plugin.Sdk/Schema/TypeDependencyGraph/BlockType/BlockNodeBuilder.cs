@@ -9,7 +9,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
     {
         internal static readonly BlockNodeBuilder Default = new BlockNodeBuilder();
 
-        public virtual BlockNode ResolveDynamic(VisitContext context)
+        public virtual BlockNode BuildDynamic(VisitContext context)
         {
             var visitor = new SameDepthCapturingVisitor();
             visitor.RewriteThenVisitDynamic(context);

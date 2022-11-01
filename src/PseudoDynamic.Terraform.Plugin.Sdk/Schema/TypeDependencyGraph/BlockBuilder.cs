@@ -2,8 +2,8 @@
 using Namotion.Reflection;
 using PseudoDynamic.Terraform.Plugin.Conventions;
 using PseudoDynamic.Terraform.Plugin.Schema.Conventions;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
@@ -248,10 +248,10 @@ Property type = {unwrappedNode.Context.VisitType}");
             };
         }
 
-        public ValueDefinition ResolveDynamic(DynamicDefinition definition, Type knownType)
+        public ValueDefinition BuildDynamic(DynamicDefinition definition, Type knownType)
         {
             var newContext = VisitPropertyGenericSegmentContext.Custom(definition.DynamicNode.Context, knownType);
-            var newNode = nodeBuilder.ResolveDynamic(newContext).AsContext<IVisitPropertySegmentContext>();
+            var newNode = nodeBuilder.BuildDynamic(newContext).AsContext<IVisitPropertySegmentContext>();
             return BuildValue(newNode).Value;
         }
 

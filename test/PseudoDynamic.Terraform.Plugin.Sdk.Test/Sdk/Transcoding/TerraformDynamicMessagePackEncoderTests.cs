@@ -7,8 +7,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
     public class TerraformDynamicMessagePackEncoderTests
     {
-        private readonly static DynamicDefinitionResolver DynamicResolver = new();
-        private readonly static TerraformDynamicMessagePackDecoder Decoder = new(new NonRequestableServiceProvider(), DynamicResolver);
+        private readonly static SchemaBuilder schemaBuilder = new();
+        private readonly static TerraformDynamicMessagePackDecoder Decoder = new(new NonRequestableServiceProvider(), schemaBuilder);
         private readonly static TerraformDynamicMessagePackEncoder Encoder = new(new());
 
         [Theory]

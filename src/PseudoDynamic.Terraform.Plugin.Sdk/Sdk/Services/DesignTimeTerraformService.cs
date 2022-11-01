@@ -1,6 +1,6 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Reflection;
 
-namespace PseudoDynamic.Terraform.Plugin.Sdk
+namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
     /// <summary>
     /// See <see cref="IDesignTimeTerraformService{Schema}"/>.

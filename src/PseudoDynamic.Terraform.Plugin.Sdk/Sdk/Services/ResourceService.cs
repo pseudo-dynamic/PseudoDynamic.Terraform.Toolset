@@ -1,6 +1,6 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
-namespace PseudoDynamic.Terraform.Plugin.Sdk
+namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
     internal record class ResourceService : TerraformService<IResource>
     {

@@ -35,7 +35,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                     DescriptionKind = StringKind.Markdown,
                     Deprecated = true,
                     Version = 2
-                }, BlockDefinition.Uncomputed() with
+                }, BlockDefinition.Uncomputed with
                 {
                     Description = "goofy",
                     DescriptionKind = DescriptionKind.Markdown,
@@ -57,7 +57,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                             }
                         }
                     }
-                }, BlockDefinition.Uncomputed() with
+                }, BlockDefinition.Uncomputed with
                 {
                     Attributes = new[] {
                         BlockAttributeDefinition.Uncomputed("list", stringList)
@@ -78,10 +78,10 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                             }
                         }
                     }
-                }, BlockDefinition.Uncomputed() with
+                }, BlockDefinition.Uncomputed with
                 {
                     Blocks = new[] {
-                        NestedBlockAttributeDefinition.Uncomputed("list", MonoRangeDefinition.ListUncomputed(BlockDefinition.Uncomputed()))
+                        NestedBlockAttributeDefinition.Uncomputed("list", MonoRangeDefinition.ListUncomputed(BlockDefinition.Uncomputed))
                     }
                 });
             }

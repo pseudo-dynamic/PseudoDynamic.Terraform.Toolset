@@ -5,7 +5,7 @@ using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
-    internal class DynamicDefinitionResolver
+    internal class SchemaBuilder
     {
         private List<TerraformDefinition>? _preloadableDefinitions;
         private TerraformDefinition? _loadableDefinition;
@@ -13,11 +13,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         private ConcurrentDictionary<(TerraformTypeConstraint TypeConstraint, Type SourceType), ValueDefinition> _knownDefinitions = new();
         private ValueDefinitionCollectingVisitor _visitor;
 
-        public DynamicDefinitionResolver() => _visitor = new ValueDefinitionCollectingVisitor(this);
+        public SchemaBuilder() => _visitor = new ValueDefinitionCollectingVisitor(this);
 
         private void ReplaceKnownDefinition(ValueDefinition value) => _knownDefinitions[(value.TypeConstraint, value.SourceType)] = value;
 
-        internal void AddPreloadable(TerraformDefinition resource)
+        private void AddPreloadable(TerraformDefinition resource)
         {
             if (_alreadyPreloaded != 0) {
                 throw new NotSupportedException();
@@ -64,7 +64,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             return false;
         }
 
-        internal ValueDefinition ResolveDynamic(DynamicDefinition dynamic, Type knownType)
+        internal ValueDefinition BuildDynamic(DynamicDefinition dynamic, Type knownType)
         {
             Preload();
 
@@ -72,17 +72,24 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 return cache;
             }
 
-            var resolvedDefinition = BlockBuilder.Default.ResolveDynamic(dynamic, knownType);
+            var resolvedDefinition = BlockBuilder.Default.BuildDynamic(dynamic, knownType);
             _loadableDefinition = resolvedDefinition;
             ReplaceKnownDefinition(resolvedDefinition);
             return resolvedDefinition;
         }
 
+        internal BlockDefinition BuildBlock(Type schemaType)
+        {
+            var schema = BlockBuilder.Default.BuildBlock(schemaType);
+            AddPreloadable(schema);
+            return schema;
+        }
+
         private class ValueDefinitionCollectingVisitor : TerraformDefinitionVisitor
         {
-            private DynamicDefinitionResolver _registry;
+            private SchemaBuilder _registry;
 
-            public ValueDefinitionCollectingVisitor(DynamicDefinitionResolver registry) =>
+            public ValueDefinitionCollectingVisitor(SchemaBuilder registry) =>
                 _registry = registry;
 
             protected internal override void VisitBlock(BlockDefinition definition)

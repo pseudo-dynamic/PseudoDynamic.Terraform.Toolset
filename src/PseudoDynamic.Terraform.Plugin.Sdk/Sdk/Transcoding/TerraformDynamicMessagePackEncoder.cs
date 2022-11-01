@@ -28,9 +28,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         private readonly static GenericTypeAccessor CollectionEncoderAccessor = new GenericTypeAccessor(typeof(CollectionEncoder<>));
         private readonly static GenericTypeAccessor DictionaryEncoderAccessor = new GenericTypeAccessor(typeof(DictionaryEncoder<,>));
 
-        private readonly DynamicDefinitionResolver _dynamicDefinitionResolver;
+        private readonly SchemaBuilder _dynamicDefinitionResolver;
 
-        public TerraformDynamicMessagePackEncoder(DynamicDefinitionResolver dynamicDefinitionResolver) =>
+        public TerraformDynamicMessagePackEncoder(SchemaBuilder dynamicDefinitionResolver) =>
             _dynamicDefinitionResolver = dynamicDefinitionResolver ?? throw new ArgumentNullException(nameof(dynamicDefinitionResolver));
 
         private void EncodeDynamic(ref MessagePackWriter writer, DynamicDefinition definition, object content)
@@ -48,7 +48,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 return;
             }
 
-            var resolvedDefinition = _dynamicDefinitionResolver.ResolveDynamic(definition, content.GetType());
+            var resolvedDefinition = _dynamicDefinitionResolver.BuildDynamic(definition, content.GetType());
             EncodeValue(ref writer, resolvedDefinition, content);
         }
 

@@ -13,7 +13,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             try {
                 var reports = new Reports();
-                content = (Schema)_decoder.ResolveDynamic(unknown, typeof(Schema), new TerraformDynamicMessagePackDecoder.DecodingOptions())!;
+                content = (Schema)_decoder.DecodeDynamic(unknown, typeof(Schema), new TerraformDynamicMessagePackDecoder.DecodingOptions())!;
                 return true;
             } catch {
                 content = default;

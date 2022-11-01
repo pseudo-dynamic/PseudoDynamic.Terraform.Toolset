@@ -5,8 +5,7 @@
     /// </summary>
     internal record class BlockDefinition : ComplexDefinition, IAttributeAccessor
     {
-        internal static BlockDefinition Uncomputed() =>
-            new BlockDefinition(new BlockDefinition(UncomputedSourceType));
+        internal static readonly BlockDefinition Uncomputed = new BlockDefinition(new BlockDefinition(UncomputedSourceType));
 
         internal const int DefaultVersion = 1;
 

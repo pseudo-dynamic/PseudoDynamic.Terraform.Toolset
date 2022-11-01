@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using PseudoDynamic.Terraform.Plugin.Sdk.Services;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -14,6 +15,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         }
 
         public ProviderServiceDescriptor? ProviderDescriptor { get; set; }
+
+        public Type? ProviderSchemaType { get; set; }
 
         public List<ResourceServiceDescriptor> ResourceDescriptors { get; } = new List<ResourceServiceDescriptor>();
 

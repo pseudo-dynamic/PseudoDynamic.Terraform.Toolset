@@ -1,6 +1,6 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
-namespace PseudoDynamic.Terraform.Plugin.Sdk
+namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
     public static class TerraformService
     {

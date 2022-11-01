@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
+﻿using PseudoDynamic.Terraform.Plugin.Sdk.Services;
+
+namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal class ProviderResourceServiceRegistry : NamedTerraformServiceRegistry<ProviderResourceService>
     {

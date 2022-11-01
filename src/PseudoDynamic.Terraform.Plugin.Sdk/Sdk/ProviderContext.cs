@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Options;
 using PseudoDynamic.Terraform.Plugin.Conventions;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+using PseudoDynamic.Terraform.Plugin.Sdk.Services;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -17,16 +20,31 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </summary>
         public string SnakeCaseProviderName { get; }
 
-        public ProviderService? ProviderService {
+        public ProviderService ProviderService {
             get {
-                var descriptor = _providerServiceDescriptor;
+                var providerService = _providerService;
 
-                if (descriptor != null) {
-                    _providerServiceDescriptor = null;
-                    _providerService = _providerServiceFactory.Build(descriptor);
+                if (providerService == null) {
+                    var descriptor = _providerServiceDescriptor;
+                    providerService = descriptor != null ? _providerServiceFactory.Build(descriptor) : _providerServiceFactory.BuildUnimplemented();
+                    _providerService = providerService;
                 }
 
-                return _providerService;
+                return providerService;
+            }
+        }
+
+        public BlockDefinition ProviderMetaSchema {
+            get {
+                var schema = _providerMetaSchema;
+
+                if (schema == null) {
+                    var schemaType = _providerMetaSchemaType;
+                    schema = schemaType != null ? BlockBuilder.Default.BuildBlock(schemaType) : BlockDefinition.Uncomputed;
+                    _providerMetaSchema = schema;
+                }
+
+                return schema;
             }
         }
 
@@ -62,32 +80,39 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             }
         }
 
+        private readonly SchemaBuilder _schemaBuilder;
         private readonly ProviderServiceFactory _providerServiceFactory;
         private ProviderService? _providerService;
         private ProviderServiceDescriptor? _providerServiceDescriptor;
+        private Type? _providerMetaSchemaType;
+        private BlockDefinition? _providerMetaSchema;
         private ProviderResourceServiceRegistry _resourceServiceRegistry;
         private IReadOnlyList<ResourceServiceDescriptor>? _resourceServiceDescriptors;
         private ProviderDataSourceServiceRegistry _dataSourceServiceRegistry;
         private IReadOnlyList<DataSourceServiceDescriptor>? _dataSourceServiceDescriptors;
 
         public ProviderContext(
+            SchemaBuilder schemaBuilder,
             ProviderServiceFactory providerServiceFactory,
             ProviderResourceServiceRegistry resourceServiceRegistry,
             ProviderDataSourceServiceRegistry dataSourceServiceRegistry,
             IOptions<ProviderContextOptions> options)
         {
-            _providerServiceFactory = providerServiceFactory;
-            _resourceServiceRegistry = resourceServiceRegistry;
-            _dataSourceServiceRegistry = dataSourceServiceRegistry;
+            _schemaBuilder = schemaBuilder ?? throw new ArgumentNullException(nameof(schemaBuilder));
+            _providerServiceFactory = providerServiceFactory ?? throw new ArgumentNullException(nameof(providerServiceFactory));
+            _resourceServiceRegistry = resourceServiceRegistry ?? throw new ArgumentNullException(nameof(resourceServiceRegistry));
+            _dataSourceServiceRegistry = dataSourceServiceRegistry ?? throw new ArgumentNullException(nameof(dataSourceServiceRegistry));
             var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
             FullyQualifiedProviderName = unwrappedOptions.FullyQualifiedProviderName;
             ProviderName = FullyQualifiedProviderName.Split("/").Last();
             SnakeCaseProviderName = SnakeCaseConvention.Default.Format(ProviderName);
 
-            // Service descriptors must be deferred until first Terraform initiated gRPC remote call
-            // to allow the user having a detailed error message on failure
+            // Service descriptors and schema evaluations must be deferred until first Terraform
+            // initiated gRPC remote call to allow the user having a detailed error message on
+            // failure
             _providerServiceDescriptor = unwrappedOptions.ProviderDescriptor;
+            _providerMetaSchemaType = unwrappedOptions.ProviderSchemaType;
             _resourceServiceDescriptors = unwrappedOptions.ResourceDescriptors;
             _dataSourceServiceDescriptors = unwrappedOptions.DataSourceDescriptors;
         }

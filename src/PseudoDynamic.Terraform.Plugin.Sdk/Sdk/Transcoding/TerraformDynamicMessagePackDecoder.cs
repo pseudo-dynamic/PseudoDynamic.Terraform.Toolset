@@ -18,12 +18,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         private readonly static GenericTypeAccessor DictionaryAccessor = new GenericTypeAccessor(typeof(Dictionary<,>));
 
         private IServiceProvider _serviceProvider;
-        private readonly DynamicDefinitionResolver _dynamicResolver;
+        private readonly SchemaBuilder _schemaBuilder;
 
-        public TerraformDynamicMessagePackDecoder(IServiceProvider serviceProvider, DynamicDefinitionResolver resolver)
+        public TerraformDynamicMessagePackDecoder(IServiceProvider serviceProvider, SchemaBuilder resolver)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _dynamicResolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
+            _schemaBuilder = resolver ?? throw new ArgumentNullException(nameof(resolver));
         }
 
         private TerraformDynamic DecodeDynamic(ref MessagePackReader reader, DynamicDefinition definition)
@@ -266,10 +266,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             return new ValueResult(value3, isNull, isUnknown);
         }
 
-        public object? ResolveDynamic(object? unknown, Type knownType, DecodingOptions options)
+        public object? DecodeDynamic(object? unknown, Type knownType, DecodingOptions options)
         {
             if (unknown is TerraformDynamic terraformDynamic) {
-                var value = _dynamicResolver.ResolveDynamic(terraformDynamic.Definition, knownType);
+                var value = _schemaBuilder.BuildDynamic(terraformDynamic.Definition, knownType);
                 var reader = new MessagePackReader(terraformDynamic.Memory);
                 return DecodeValue(ref reader, value, options);
             }

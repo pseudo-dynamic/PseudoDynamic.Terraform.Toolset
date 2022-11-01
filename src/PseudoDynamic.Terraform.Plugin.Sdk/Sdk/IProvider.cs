@@ -1,7 +1,7 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public interface IProvider<Schema> where Schema : class
+    public interface IProvider
     {
-        Task Configure(Provider.ConfigureContext<Schema> context);
+        internal ProviderAdapter.IProviderAdapter ProviderAdapter { get; }
     }
 }

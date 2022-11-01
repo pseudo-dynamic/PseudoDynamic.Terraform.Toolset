@@ -1,6 +1,5 @@
-﻿using PseudoDynamic.Terraform.Plugin.Reflection;
-using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
-using static PseudoDynamic.Terraform.Plugin.Sdk.TerraformService;
+﻿using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
+using static PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -21,20 +20,23 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 Config = config;
         }
 
-        public class PlanContext<Schema> : ShapingContext
+        public class PlanContext<Schema, ProviderMetaSchema> : ShapingContext
         {
             public Schema Config { get; }
             public Schema Plan { get; set; }
+            public ProviderMetaSchema ProviderMeta { get; set; }
 
             internal PlanContext(
                 Reports reports,
                 ITerraformDynamicDecoder dynamicDecoder,
                 Schema config,
-                Schema plan)
+                Schema plan,
+                ProviderMetaSchema providerMeta)
                 : base(reports, dynamicDecoder)
             {
                 Config = config;
                 Plan = plan;
+                ProviderMeta = providerMeta;
             }
         }
     }

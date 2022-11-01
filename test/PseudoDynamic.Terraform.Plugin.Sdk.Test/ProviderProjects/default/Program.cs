@@ -12,8 +12,12 @@ var webHost = new WebHostBuilder()
         .ConfigureProvider(providerName, provider =>
         {
             provider.SetProvider<ProviderImpl>();
-            provider.AddResource<ResourceImpl>();
-            provider.AddDataSource<DataSourceImpl>();
+
+            provider.UseProviderMeta<ProviderMetaSchema>(providerMeta =>
+            {
+                providerMeta.AddResource<ResourceImpl>();
+                providerMeta.AddDataSource<DataSourceImpl>();
+            });
         }))
     .Build();
 
@@ -66,11 +70,16 @@ class ProviderImpl : Provider<ProviderSchema>
 }
 
 [Block]
-class ResourceSchema : Object.WithRanges.WithNestedBlocks
+class ProviderMetaSchema : Object
 {
 }
 
-class ResourceImpl : Resource<ResourceSchema>
+[Block]
+internal class ResourceSchema : Object.WithRanges.WithNestedBlocks
+{
+}
+
+internal class ResourceImpl : Resource<ResourceSchema, ProviderMetaSchema>
 {
     public override string TypeName => "empty";
 
@@ -81,7 +90,7 @@ class ResourceImpl : Resource<ResourceSchema>
         return context.CompletedTask;
     }
 
-    public override Task Plan(Resource.PlanContext<ResourceSchema> context)
+    public override Task Plan(Resource.PlanContext<ResourceSchema, ProviderMetaSchema> context)
     {
         context.Reports.Warning("[resource] plan");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
@@ -91,11 +100,11 @@ class ResourceImpl : Resource<ResourceSchema>
 }
 
 [Block]
-class DataSourceSchema : Object.WithRanges.WithNestedBlocks
+internal class DataSourceSchema : Object.WithRanges.WithNestedBlocks
 {
 }
 
-class DataSourceImpl : DataSource<DataSourceSchema>
+internal class DataSourceImpl : DataSource<DataSourceSchema, ProviderMetaSchema>
 {
     public override string TypeName => "empty";
 
@@ -106,9 +115,10 @@ class DataSourceImpl : DataSource<DataSourceSchema>
         return context.CompletedTask;
     }
 
-    public override Task Read(DataSource.ReadContext<DataSourceSchema> context)
+    public override Task Read(DataSource.ReadContext<DataSourceSchema, ProviderMetaSchema> context)
     {
         context.Reports.Warning("[data source] read");
+        AssertObject(context.ProviderMeta);
         AssertObjectWithRangesAndNestedBlocks(context.State);
         return context.CompletedTask;
     }

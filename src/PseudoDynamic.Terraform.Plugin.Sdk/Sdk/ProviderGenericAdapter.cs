@@ -1,15 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using PseudoDynamic.Terraform.Plugin.Protocols.Consolidated;
-using PseudoDynamic.Terraform.Plugin.Reflection;
+using PseudoDynamic.Terraform.Plugin.Sdk.Services;
 using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal class ProviderAdapter : IProviderAdapter
     {
-        internal static readonly GenericTypeAccessor GenericResourceAdapterAccessor = new GenericTypeAccessor(typeof(ResourceAdapter<>));
-
         private readonly IProviderContext _provider;
         private readonly IMapper _mapper;
         private readonly TerraformDynamicMessagePackDecoder _decoder;
@@ -32,15 +30,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         #region Provider
 
-        public async Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request)
-        {
-            return new GetProviderSchema.Response() {
-                Provider = _provider.ProviderService?.Schema ?? Schema.TypeDependencyGraph.BlockDefinition.Uncomputed(),
-                ProviderMeta = Schema.TypeDependencyGraph.BlockDefinition.Uncomputed(),
+        public async Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request) =>
+            new GetProviderSchema.Response() {
+                Provider = _provider.ProviderService.Schema,
+                ProviderMeta = _provider.ProviderMetaSchema,
                 ResourceSchemas = _provider.ResourceServices.ToDictionary(x => x.Key, x => x.Value.Schema),
                 DataSourceSchemas = _provider.DataSourceServices.ToDictionary(x => x.Key, x => x.Value.Schema)
             };
-        }
 
         public async Task<ValidateProviderConfig.Response> ValidateProviderConfig(ValidateProviderConfig.Request request) =>
             new ValidateProviderConfig.Response() {
@@ -48,33 +44,15 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 Diagnostics = new List<Diagnostic>()
             };
 
-        public async Task<ConfigureProvider.Response> ConfigureProvider(ConfigureProvider.Request request)
+        public Task<ConfigureProvider.Response> ConfigureProvider(ConfigureProvider.Request request)
         {
-            var providerService = _provider.ProviderService;
+            var service = _provider.ProviderService;
 
-            if (providerService == null) {
-                return new ConfigureProvider.Response();
+            if (service.Implementation is null) {
+                return Task.FromResult(new ConfigureProvider.Response());
             }
 
-            var service = providerService.Implementation;
-            var reports = new Reports();
-
-            var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
-            var config = _decoder.DecodeBlock(request.Config.Msgpack, providerService.Schema, decodingOptions);
-
-            var context = Provider.ConfigureContextAccessor
-                .MakeGenericTypeAccessor(providerService.Schema.SourceType)
-                .CreateInstance(x => x.GetPrivateInstanceActivator, reports, _dynamicDecoder, config);
-
-            await (Task)providerService.ImplementationTypeAccessor
-                .GetMethodCaller(nameof(IProvider<object>.Configure))
-                .Invoke(service, new object?[] { context });
-
-            var diagnostics = _mapper.Map<IList<Diagnostic>>(reports);
-
-            return new ConfigureProvider.Response() {
-                Diagnostics = diagnostics
-            };
+            return service.Implementation.ProviderAdapter.ConfigureProvider(this, service, request);
         }
 
         #endregion
@@ -137,6 +115,31 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public Task<StopProvider.Response> StopProvider(StopProvider.Request request) => throw new NotImplementedException();
 
+        internal interface IProviderAdapter
+        {
+            Task<ConfigureProvider.Response> ConfigureProvider(ProviderAdapter adapter, ProviderService service, ConfigureProvider.Request request);
+        }
+
+        internal readonly struct ProviderGenericAdapter<Schema> : IProviderAdapter
+            where Schema : class
+        {
+            public async Task<ConfigureProvider.Response> ConfigureProvider(ProviderAdapter adapter, ProviderService service, ConfigureProvider.Request request)
+            {
+                var (_, mapper, decoder, dynamicDecoder, _) = adapter;
+                var provider = (IProvider<Schema>)service.Implementation!;
+                var reports = new Reports();
+                var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
+                var config = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
+                var context = new Provider.ConfigureContext<Schema>(reports, dynamicDecoder, config);
+                await provider.Configure(context);
+                var diagnostics = mapper.Map<IList<Diagnostic>>(reports);
+
+                return new ConfigureProvider.Response() {
+                    Diagnostics = diagnostics
+                };
+            }
+        }
+
         internal interface IResourceAdapter
         {
             Task<UpgradeResourceState.Response> UpgradeResourceState(ProviderAdapter adapter, ProviderResourceService service, UpgradeResourceState.Request request);
@@ -147,7 +150,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             Task<ApplyResourceChange.Response> ApplyResourceChange(ProviderAdapter adapter, ProviderResourceService service, ApplyResourceChange.Request request);
         }
 
-        internal readonly struct ResourceAdapter<Schema> : IResourceAdapter where Schema : class
+        internal readonly struct ResourceGenericAdapter<Schema, ProviderMetaSchema> : IResourceAdapter
+            where Schema : class
+            where ProviderMetaSchema : class
         {
             public Task<UpgradeResourceState.Response> UpgradeResourceState(ProviderAdapter adapter, ProviderResourceService service, UpgradeResourceState.Request request) => throw new NotImplementedException();
             public Task<ImportResourceState.Response> ImportResourceState(ProviderAdapter adapter, ProviderResourceService service, ImportResourceState.Request request) => throw new NotImplementedException();
@@ -156,7 +161,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             public async Task<ValidateResourceConfig.Response> ValidateResourceConfig(ProviderAdapter adapter, ProviderResourceService service, ValidateResourceConfig.Request request)
             {
                 var (_, mapper, decoder, dynamicDecoder, _) = adapter;
-                var resource = (IResource<Schema>)service.Implementation;
+                var resource = (IResource<Schema, ProviderMetaSchema>)service.Implementation;
                 var reports = new Reports();
                 var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
                 var config = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
@@ -171,13 +176,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
             public async Task<PlanResourceChange.Response> PlanResourceChange(ProviderAdapter adapter, ProviderResourceService service, PlanResourceChange.Request request)
             {
-                var (_, mapper, decoder, dynamicDecoder, encoder) = adapter;
-                var resource = (IResource<Schema>)service.Implementation;
+                var (provider, mapper, decoder, dynamicDecoder, encoder) = adapter;
+                var resource = (IResource<Schema, ProviderMetaSchema>)service.Implementation;
                 var reports = new Reports();
                 var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
                 var decodedPlan = (Schema)decoder.DecodeBlock(request.ProposedNewState.Msgpack, service.Schema, decodingOptions);
                 var decodedConfig = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
-                var context = new Resource.PlanContext<Schema>(reports, dynamicDecoder, decodedConfig, decodedPlan);
+                var decodedProviderMeta = (ProviderMetaSchema)decoder.DecodeBlock(request.ProviderMeta.Msgpack, provider.ProviderMetaSchema, decodingOptions);
+                var context = new Resource.PlanContext<Schema, ProviderMetaSchema>(reports, dynamicDecoder, decodedConfig, decodedPlan, decodedProviderMeta);
                 await resource.Plan(context);
                 var diagnostics = mapper.Map<IList<Diagnostic>>(reports);
                 var encodedPlan = encoder.EncodeValue(service.Schema, context.Plan);
@@ -197,12 +203,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             Task<ReadDataSource.Response> ReadDataSource(ProviderAdapter adapter, ProviderDataSourceService service, ReadDataSource.Request request);
         }
 
-        internal readonly struct DataSourceAdapter<Schema> : IDataSourceAdapter where Schema : class
+        internal readonly struct DataSourceGenericAdapter<Schema, ProviderMetaSchema> : IDataSourceAdapter
+            where Schema : class
+            where ProviderMetaSchema : class
         {
             public async Task<ValidateDataResourceConfig.Response> ValidateDataResourceConfig(ProviderAdapter adapter, ProviderDataSourceService service, ValidateDataResourceConfig.Request request)
             {
                 var (_, mapper, decoder, dynamicDecoder, _) = adapter;
-                var dataSource = (IDataSource<Schema>)service.Implementation;
+                var dataSource = (IDataSource<Schema, ProviderMetaSchema>)service.Implementation;
                 var reports = new Reports();
                 var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
                 var config = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
@@ -217,12 +225,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
             public async Task<ReadDataSource.Response> ReadDataSource(ProviderAdapter adapter, ProviderDataSourceService service, ReadDataSource.Request request)
             {
-                var (_, mapper, decoder, dynamicDecoder, encoder) = adapter;
-                var dataSource = (IDataSource<Schema>)service.Implementation;
+                var (provider, mapper, decoder, dynamicDecoder, encoder) = adapter;
+                var dataSource = (IDataSource<Schema, ProviderMetaSchema>)service.Implementation;
                 var reports = new Reports();
                 var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
                 var decodedState = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
-                var context = new DataSource.ReadContext<Schema>(reports, dynamicDecoder, decodedState);
+                var decodedProviderMeta = (ProviderMetaSchema)decoder.DecodeBlock(request.ProviderMeta.Msgpack, provider.ProviderMetaSchema, decodingOptions);
+                var context = new DataSource.ReadContext<Schema, ProviderMetaSchema>(reports, dynamicDecoder, decodedState, decodedProviderMeta);
                 await dataSource.Read(context);
                 var diagnostics = mapper.Map<IList<Diagnostic>>(reports);
                 var encodedState = encoder.EncodeValue(service.Schema, decodedState);

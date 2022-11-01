@@ -3,7 +3,7 @@
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     /// <summary>
-    /// Allows you to modify the Terraform provider.
+    /// Allows to modify the Terraform provider.
     /// </summary>
     public interface IProviderFeature
     {
@@ -11,20 +11,5 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// The original service collection.
         /// </summary>
         IServiceCollection Services { get; }
-
-        public interface IResourceFeature
-        {
-            internal IProviderFeature ProviderFeature { get; }
-        }
-
-        public interface IDataSourceFeature
-        {
-            internal IProviderFeature ProviderFeature { get; }
-        }
-
-        public interface IProvisionerFeature
-        {
-            internal IProviderFeature ProviderFeature { get; }
-        }
     }
 }

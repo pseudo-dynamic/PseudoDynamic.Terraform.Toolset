@@ -16,7 +16,6 @@
         <PackageReference Include="FastMember.Signed" Version="1.5.0" />
         <PackageReference Include="Google.Protobuf" Version="3.21.7" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
-        <PackageReference Include="InfoOf.Fody" Version="2.1.1" />
         <PackageReference Include="MessagePack" Version="2.4.35" />
         <!-- TODO: -->
         <!--<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.3">

@@ -22,11 +22,16 @@
             }
 
             public ReadOnlyMemory<byte> PriorPrivate { get; set; }
-            public DynamicValue? ProviderMeta { get; set; }
+
+            public DynamicValue ProviderMeta {
+                get => _providerMeta ?? throw new InvalidOperationException("Provider meta is unexpectedly null");
+                set => _providerMeta = value;
+            }
 
             private string? _typeName;
             private DynamicValue? _config;
             private DynamicValue? _proposedNewState;
+            private DynamicValue? _providerMeta;
         }
 
         public class Response

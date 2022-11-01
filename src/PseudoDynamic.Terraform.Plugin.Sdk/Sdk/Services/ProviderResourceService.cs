@@ -1,4 +1,4 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
+﻿namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
     internal record class ProviderResourceService : ResourceService, INameProvider
     {

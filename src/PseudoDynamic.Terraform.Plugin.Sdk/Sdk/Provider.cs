@@ -1,9 +1,10 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Reflection;
+using PseudoDynamic.Terraform.Plugin.Sdk.Services;
 using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public static class Provider
+    public sealed class Provider : Provider<object>
     {
         internal static readonly GenericTypeAccessor ConfigureContextAccessor = new(typeof(ConfigureContext<>));
 

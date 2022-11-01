@@ -1,6 +1,5 @@
-﻿using PseudoDynamic.Terraform.Plugin.Reflection;
-using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
-using static PseudoDynamic.Terraform.Plugin.Sdk.TerraformService;
+﻿using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
+using static PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -21,7 +20,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 Config = config;
         }
 
-        public class ReadContext<Schema> : ShapingContext
+        public class ReadContext<Schema, ProviderMetaSchema> : ShapingContext
         {
             /// <summary>
             /// The data Terraform is about to read in the plan phase and in the apply phase.
@@ -29,12 +28,18 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             /// </summary>
             public Schema State { get; set; }
 
+            public ProviderMetaSchema ProviderMeta { get; }
+
             internal ReadContext(
                 Reports reports,
                 ITerraformDynamicDecoder dynamicDecoder,
-                Schema state)
-                : base(reports, dynamicDecoder) =>
+                Schema state,
+                ProviderMetaSchema providerMeta)
+                : base(reports, dynamicDecoder)
+            {
                 State = state;
+                ProviderMeta = providerMeta;
+            }
         }
     }
 }

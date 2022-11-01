@@ -1,6 +1,7 @@
 ﻿using Moq;
 using PseudoDynamic.Terraform.Plugin.Infrastructure;
 using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
+using PseudoDynamic.Terraform.Plugin.Sdk.Services;
 using System.Numerics;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.CollectionFactories;
 
@@ -96,7 +97,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             Resource.ValidateContext<Schema>? actualContext = null;
             resourceMock.Setup(x => x.ValidateConfig(It.IsAny<Resource.ValidateContext<Schema>>())).Callback((Resource.ValidateContext<Schema> context) => actualContext = context);
 
-            _pluginHostFixture.Provider.ReplaceResource(new ResourceServiceDescriptor(typeof(IResource<Schema>), typeof(Schema)) { Service = resourceMock.Object });
+            _pluginHostFixture.Provider.ReplaceResource(new ResourceServiceDescriptor(typeof(IResource<Schema>), typeof(Schema), typeof(object)) { Implementation = resourceMock.Object });
 
             using var terraform = _pluginHostFixture.CreateTerraformCommand("TerraformProjects/resource-validate", filePattern);
             await terraform.Init();

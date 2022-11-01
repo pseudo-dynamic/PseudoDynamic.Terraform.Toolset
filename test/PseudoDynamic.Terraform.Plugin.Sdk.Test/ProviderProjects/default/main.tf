@@ -5,6 +5,12 @@ terraform {
       version = "0.1.0"
     }
   }
+
+  provider_meta "debug" {
+    string = "string"
+    number = 1
+    bool = true
+  }
 }
 
 locals {

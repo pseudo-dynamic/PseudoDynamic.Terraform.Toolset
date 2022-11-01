@@ -1,4 +1,7 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
+﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+using PseudoDynamic.Terraform.Plugin.Sdk.Services;
+
+namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal interface IProviderContext
     {
@@ -6,7 +9,8 @@
         string ProviderName { get; }
         string SnakeCaseProviderName { get; }
 
-        ProviderService? ProviderService { get; }
+        ProviderService ProviderService { get; }
+        BlockDefinition ProviderMetaSchema { get; }
         IReadOnlyDictionary<string, ProviderResourceService> ResourceServices { get; }
         IReadOnlyDictionary<string, ProviderDataSourceService> DataSourceServices { get; }
 
