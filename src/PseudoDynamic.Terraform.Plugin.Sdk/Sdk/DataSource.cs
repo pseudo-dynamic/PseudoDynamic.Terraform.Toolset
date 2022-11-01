@@ -6,9 +6,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     public static class DataSource
     {
-        internal static readonly GenericTypeAccessor ValidateContextAccessor = new(typeof(ValidateContext<>));
-        internal static readonly GenericTypeAccessor ReadContextAccessor = new(typeof(ReadContext<>));
-
         public class ValidateContext<Schema> : ShapingContext
         {
             /// <summary>
@@ -26,14 +23,18 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public class ReadContext<Schema> : ShapingContext
         {
-            public Schema Computed { get; }
+            /// <summary>
+            /// The data Terraform is about to read in the plan phase and in the apply phase.
+            /// In the plan phase, <see cref="State"/> may contain Terraform unknown.
+            /// </summary>
+            public Schema State { get; set; }
 
             internal ReadContext(
                 Reports reports,
                 ITerraformDynamicDecoder dynamicDecoder,
-                Schema computed)
+                Schema state)
                 : base(reports, dynamicDecoder) =>
-                Computed = computed;
+                State = state;
         }
     }
 }

@@ -2,6 +2,7 @@
 using AutoMapper;
 using Google.Protobuf.Collections;
 using Grpc.Core;
+using PseudoDynamic.Terraform.Plugin.Sdk;
 
 namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {

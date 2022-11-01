@@ -6,9 +6,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     public class Resource
     {
-        internal static readonly GenericTypeAccessor PlanContextAccessor = new(typeof(PlanContext<>));
-        internal static readonly GenericTypeAccessor ValidateContextAccessor = new(typeof(ValidateContext<>));
-
         public class ValidateContext<Schema> : ShapingContext
         {
             /// <summary>
@@ -27,17 +24,17 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public class PlanContext<Schema> : ShapingContext
         {
             public Schema Config { get; }
-            public Schema Planned { get; }
+            public Schema Plan { get; set; }
 
             internal PlanContext(
                 Reports reports,
                 ITerraformDynamicDecoder dynamicDecoder,
                 Schema config,
-                Schema planned)
+                Schema plan)
                 : base(reports, dynamicDecoder)
             {
                 Config = config;
-                Planned = planned;
+                Plan = plan;
             }
         }
     }

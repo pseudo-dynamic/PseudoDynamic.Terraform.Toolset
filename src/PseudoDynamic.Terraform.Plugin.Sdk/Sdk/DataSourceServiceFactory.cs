@@ -12,6 +12,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public DataSourceService Build(DataSourceServiceDescriptor resourceDescriptor) =>
             new DataSourceService(
                 BuildSchema(resourceDescriptor),
-                BuildService<INameProvider>(resourceDescriptor));
+                BuildService<IDataSource>(resourceDescriptor));
     }
 }

@@ -10,9 +10,10 @@
     public class NestedBlockAttribute : BlockAttribute
     {
         /// <summary>
-        /// You must set this property if the type, that represents the nested block,
-        /// is wrapped by a list, set or map and this wrapping type implicitly can
-        /// represent not only a list, set or map but several at once.
+        /// You must set this property if the type, that represents the nested block, is
+        /// wrapped by a Terraform list, Terraform set or Terraform map and this wrapping
+        /// type implicitly can represent not only a Terraform list, Terraform set or map
+        /// but several at once.
         /// </summary>
         public ValueDefinitionWrapping? WrappedBy { get; init; }
 

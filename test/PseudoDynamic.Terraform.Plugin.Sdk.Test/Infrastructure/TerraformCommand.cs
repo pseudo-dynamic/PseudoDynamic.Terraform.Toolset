@@ -84,8 +84,6 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
         public Task<string> Validate(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("validate -no-color", cancellationToken);
 
-        //public Task<string> ValidateAsync(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("validate", cancellationToken);
-
         public Task<string> Plan(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("plan -no-color -input=false -lock=false -out=terraform.plan", cancellationToken);
 
         public Task<string> Apply(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("apply -no-color -input=false -lock=false -auto-approve", cancellationToken);

@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
@@ -75,7 +74,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         #region Resource
 
-        internal static TProviderFeature AddResource<TProviderFeature>(this TProviderFeature providerFeature, Type resourceType, Type schemaType, object? resource = null)
+        internal static TProviderFeature AddResource<TProviderFeature>(
+            this TProviderFeature providerFeature,
+            Type resourceType,
+            Type schemaType,
+            object? resource = null)
             where TProviderFeature : IProviderFeature
         {
             providerFeature.AddProviderOptions().Configure(options => options.ResourceDescriptors.Add(new ResourceServiceDescriptor(resourceType, schemaType) { Service = resource }));

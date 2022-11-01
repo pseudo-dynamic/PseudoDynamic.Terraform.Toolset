@@ -27,31 +27,31 @@ class Object
     public bool Bool { get; set; }
 
     [Object]
-    public class InlcudingRanges : Object
+    public class WithRanges : Object
     {
         public IList<Object> List { get; set; }
         public ISet<Object> Set { get; set; }
         public IDictionary<string, string> Map { get; set; }
 
-        public class IncludingNestedBlocks : InlcudingRanges
+        public class WithNestedBlocks : WithRanges
         {
             [NestedBlock]
-            public InlcudingRanges SingleNested { get; set; }
+            public WithRanges SingleNested { get; set; }
 
             [NestedBlock]
-            public IList<InlcudingRanges> ListNested { get; set; }
+            public IList<WithRanges> ListNested { get; set; }
 
             [NestedBlock]
-            public ISet<InlcudingRanges> SetNested { get; set; }
+            public ISet<WithRanges> SetNested { get; set; }
 
             [NestedBlock]
-            public IDictionary<string, InlcudingRanges> MapNested { get; set; }
+            public IDictionary<string, WithRanges> MapNested { get; set; }
         }
     }
 }
 
 [Block]
-class ProviderSchema : Object.InlcudingRanges.IncludingNestedBlocks
+class ProviderSchema : Object.WithRanges.WithNestedBlocks
 {
 }
 
@@ -61,12 +61,12 @@ class ProviderImpl : Provider<ProviderSchema>
     {
         context.Reports.Warning("[provider] configure");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
-        return context;
+        return context.CompletedTask;
     }
 }
 
 [Block]
-class ResourceSchema : Object.InlcudingRanges.IncludingNestedBlocks
+class ResourceSchema : Object.WithRanges.WithNestedBlocks
 {
 }
 
@@ -78,20 +78,20 @@ class ResourceImpl : Resource<ResourceSchema>
     {
         context.Reports.Warning("[resource] validate");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
-        return context;
+        return context.CompletedTask;
     }
 
     public override Task Plan(Resource.PlanContext<ResourceSchema> context)
     {
         context.Reports.Warning("[resource] plan");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
-        AssertObjectWithRangesAndNestedBlocks(context.Planned);
-        return context;
+        AssertObjectWithRangesAndNestedBlocks(context.Plan);
+        return context.CompletedTask;
     }
 }
 
 [Block]
-class DataSourceSchema : Object.InlcudingRanges.IncludingNestedBlocks
+class DataSourceSchema : Object.WithRanges.WithNestedBlocks
 {
 }
 
@@ -103,14 +103,14 @@ class DataSourceImpl : DataSource<DataSourceSchema>
     {
         context.Reports.Warning("[data source] validate");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
-        return context;
+        return context.CompletedTask;
     }
 
     public override Task Read(DataSource.ReadContext<DataSourceSchema> context)
     {
         context.Reports.Warning("[data source] read");
-        AssertObjectWithRangesAndNestedBlocks(context.Computed);
-        return context;
+        AssertObjectWithRangesAndNestedBlocks(context.State);
+        return context.CompletedTask;
     }
 }
 
@@ -123,7 +123,7 @@ static class Assertions
         @object.Bool.Should().Be(true);
     }
 
-    public static void AssertObjectIncludingRanges(Object.InlcudingRanges @object)
+    public static void AssertObjectIncludingRanges(Object.WithRanges @object)
     {
         AssertObject(@object);
 
@@ -138,7 +138,7 @@ static class Assertions
         @object.Map.Should().ContainValues("1", "2");
     }
 
-    public static void AssertObjectWithRangesAndNestedBlocks(Object.InlcudingRanges.IncludingNestedBlocks schema)
+    public static void AssertObjectWithRangesAndNestedBlocks(Object.WithRanges.WithNestedBlocks schema)
     {
         AssertObjectIncludingRanges(schema);
         AssertObjectIncludingRanges(schema.SingleNested);

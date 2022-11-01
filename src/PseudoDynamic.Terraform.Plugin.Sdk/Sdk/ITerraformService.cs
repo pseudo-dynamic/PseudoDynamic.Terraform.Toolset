@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         where TService : class
     {
         BlockDefinition Schema { get; }
-        TService Service { get; }
-        TypeAccessor ServiceTypeAccessor { get; }
+        TService Implementation { get; }
+        TypeAccessor ImplementationTypeAccessor { get; }
     }
 }

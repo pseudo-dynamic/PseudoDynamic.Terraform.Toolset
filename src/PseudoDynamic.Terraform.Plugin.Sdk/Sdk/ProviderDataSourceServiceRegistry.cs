@@ -14,7 +14,7 @@
         private ProviderDataSourceService UpgradeDataSource(DataSourceServiceDescriptor dataSourceDescriptor)
         {
             var dataSource = _dataSourceDefinitionFactory.Build(dataSourceDescriptor);
-            var dataSourceName = dataSource.Service.Name;
+            var dataSourceName = dataSource.Implementation.Name;
             var fullDataSourceName = $"{_providerContext.Value.SnakeCaseProviderName}_{dataSourceName}";
             return new ProviderDataSourceService(dataSource, fullDataSourceName);
         }

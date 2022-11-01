@@ -60,6 +60,9 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
             return methodDelegate;
         }
 
+        public MethodCaller<object, object> GetMethodCaller(MethodInfo method) =>
+            method.DelegateForCall();
+
         public ConstructorInfo GetConstructor(int parametersCount, BindingFlags bindingFlags)
         {
             if (_constructorByParametersCount.TryGetValue(parametersCount, out var cachedConstructor)) {

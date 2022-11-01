@@ -14,7 +14,7 @@
         private ProviderResourceService UpgradeResource(ResourceServiceDescriptor resourceDescriptor)
         {
             var resource = _resourceDefinitionFactory.Build(resourceDescriptor);
-            var resourceName = resource.Service.Name;
+            var resourceName = resource.Implementation.Name;
             var fullResourceName = $"{_providerContext.Value.SnakeCaseProviderName}_{resourceName}";
             return new ProviderResourceService(resource, fullResourceName);
         }

@@ -14,15 +14,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             /// </summary>
             public Reports Reports { get; }
 
+            /// <summary>
+            /// Gets a task that is already completed. Shortcut for <see cref="Task.CompletedTask"/>.
+            /// </summary>
+            public Task CompletedTask => Task.CompletedTask;
+
             internal BaseContext(Reports reports) =>
                 Reports = reports;
-
-            /// <summary>
-            /// Converts this instance to a completed task.
-            /// </summary>
-            /// <param name="_"></param>
-            public static implicit operator Task(BaseContext _) =>
-                Task.CompletedTask;
         }
 
         public class ShapingContext : BaseContext

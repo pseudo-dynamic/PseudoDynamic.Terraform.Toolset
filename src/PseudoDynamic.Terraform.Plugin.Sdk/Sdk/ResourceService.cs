@@ -2,9 +2,9 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    internal record class ResourceService : TerraformService<INameProvider>
+    internal record class ResourceService : TerraformService<IResource>
     {
-        public ResourceService(BlockDefinition schema, INameProvider resource)
+        public ResourceService(BlockDefinition schema, IResource resource)
             : base(schema, resource) =>
             TerraformNameConventionException.EnsureResourceTypeNameConvention(resource.Name);
     }
