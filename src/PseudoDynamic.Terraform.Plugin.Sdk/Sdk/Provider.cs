@@ -3,7 +3,7 @@ using static PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public sealed class Provider : Provider<object>
+    public static class Provider
     {
         public interface IConfigureContext<out Schema> : IBaseContext, IShapingContext, IConfigContext<Schema>
         {

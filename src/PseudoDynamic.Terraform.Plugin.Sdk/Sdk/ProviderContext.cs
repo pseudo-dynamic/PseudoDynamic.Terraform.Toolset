@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Options;
-using PseudoDynamic.Terraform.Plugin.Conventions;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using PseudoDynamic.Terraform.Plugin.Infrastructure;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 using PseudoDynamic.Terraform.Plugin.Sdk.Services;
 using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
@@ -8,18 +9,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal class ProviderContext : IProviderContext
     {
-        public string FullyQualifiedProviderName { get; }
-
-        /// <summary>
-        /// The provider name. Represents the last "/"-separated part of <see cref="FullyQualifiedProviderName"/>.
-        /// </summary>
-        public string ProviderName { get; }
-
-        /// <summary>
-        /// Same as <see cref="ProviderName"/> but snake_case formatted to comply with resource and data source naming conventions.
-        /// </summary>
-        public string SnakeCaseProviderName { get; }
-
         public ProviderService ProviderService {
             get {
                 var providerService = _providerService;
@@ -40,7 +29,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
                 if (schema == null) {
                     var schemaType = _providerMetaSchemaType;
-                    schema = schemaType != null ? BlockBuilder.Default.BuildBlock(schemaType) : BlockDefinition.Uncomputed;
+                    schema = schemaType != null ? _schemaBuilder.BuildBlock(schemaType) : BlockDefinition.Uncomputed;
                     _providerMetaSchema = schema;
                 }
 
@@ -82,13 +71,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         private readonly SchemaBuilder _schemaBuilder;
         private readonly ProviderServiceFactory _providerServiceFactory;
+        private ProviderResourceServiceRegistry _resourceServiceRegistry;
+        private ProviderDataSourceServiceRegistry _dataSourceServiceRegistry;
         private ProviderService? _providerService;
         private ProviderServiceDescriptor? _providerServiceDescriptor;
         private Type? _providerMetaSchemaType;
         private BlockDefinition? _providerMetaSchema;
-        private ProviderResourceServiceRegistry _resourceServiceRegistry;
         private IReadOnlyList<ResourceServiceDescriptor>? _resourceServiceDescriptors;
-        private ProviderDataSourceServiceRegistry _dataSourceServiceRegistry;
         private IReadOnlyList<DataSourceServiceDescriptor>? _dataSourceServiceDescriptors;
 
         public ProviderContext(
@@ -96,17 +85,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             ProviderServiceFactory providerServiceFactory,
             ProviderResourceServiceRegistry resourceServiceRegistry,
             ProviderDataSourceServiceRegistry dataSourceServiceRegistry,
-            IOptions<ProviderContextOptions> options)
+            IOptions<ProviderOptions> options)
         {
             _schemaBuilder = schemaBuilder ?? throw new ArgumentNullException(nameof(schemaBuilder));
             _providerServiceFactory = providerServiceFactory ?? throw new ArgumentNullException(nameof(providerServiceFactory));
             _resourceServiceRegistry = resourceServiceRegistry ?? throw new ArgumentNullException(nameof(resourceServiceRegistry));
             _dataSourceServiceRegistry = dataSourceServiceRegistry ?? throw new ArgumentNullException(nameof(dataSourceServiceRegistry));
             var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
-
-            FullyQualifiedProviderName = unwrappedOptions.FullyQualifiedProviderName;
-            ProviderName = FullyQualifiedProviderName.Split("/").Last();
-            SnakeCaseProviderName = SnakeCaseConvention.Default.Format(ProviderName);
 
             // Service descriptors and schema evaluations must be deferred until first Terraform
             // initiated gRPC remote call to allow the user having a detailed error message on

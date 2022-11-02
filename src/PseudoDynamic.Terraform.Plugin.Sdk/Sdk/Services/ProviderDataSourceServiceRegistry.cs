@@ -3,19 +3,19 @@
     internal class ProviderDataSourceServiceRegistry : NamedTerraformServiceRegistry<ProviderDataSourceService>
     {
         DataSourceServiceFactory _dataSourceDefinitionFactory;
-        private readonly Lazy<IProviderContext> _providerContext;
+        private readonly IProviderServer _providerServer;
 
-        public ProviderDataSourceServiceRegistry(DataSourceServiceFactory dataSourceDefinitionFactory, Lazy<IProviderContext> providerContext)
+        public ProviderDataSourceServiceRegistry(DataSourceServiceFactory dataSourceDefinitionFactory, IProviderServer providerServer)
         {
             _dataSourceDefinitionFactory = dataSourceDefinitionFactory ?? throw new ArgumentNullException(nameof(dataSourceDefinitionFactory));
-            _providerContext = providerContext ?? throw new ArgumentNullException(nameof(providerContext));
+            _providerServer = providerServer ?? throw new ArgumentNullException(nameof(providerServer));
         }
 
         private ProviderDataSourceService UpgradeDataSource(DataSourceServiceDescriptor dataSourceDescriptor)
         {
             var dataSource = _dataSourceDefinitionFactory.Build(dataSourceDescriptor);
             var dataSourceName = dataSource.Implementation.Name;
-            var fullDataSourceName = $"{_providerContext.Value.SnakeCaseProviderName}_{dataSourceName}";
+            var fullDataSourceName = $"{_providerServer.SnakeCaseProviderName}_{dataSourceName}";
             return new ProviderDataSourceService(dataSource, fullDataSourceName);
         }
 

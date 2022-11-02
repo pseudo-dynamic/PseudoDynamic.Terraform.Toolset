@@ -50,7 +50,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 .UseTerraformPluginServerCore(this)
                 .ConfigureServices(services =>
                 {
-                    services.AddOptions<ProviderContextOptions>().Configure(options =>
+                    services.AddOptions<ProviderOptions>().Configure(options =>
                     {
                         options.FullyQualifiedProviderName = ProviderName;
                     });

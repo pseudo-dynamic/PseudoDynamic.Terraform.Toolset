@@ -9,16 +9,12 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             this IServiceProvider serviceProvider,
             Action<TerraformCommand.WorkingDirectoryCloning.WorkingDirectoryCloningOptions>? configureOptions = null)
         {
-            var pluginServer = serviceProvider.GetRequiredService<IPluginServer>();
-            var provider = serviceProvider.GetRequiredService<IProviderContext>();
-
-            var pluginProtocol = pluginServer.PluginProtocol;
-            var pluginServerHostPort = $"{pluginServer.ServerAddress.Host}:{pluginServer.ServerAddress.Port}";
-            var providerName = provider.FullyQualifiedProviderName;
+            var providerContext = serviceProvider.GetRequiredService<IProviderServer>();
+            var providerName = providerContext.FullyQualifiedProviderName;
 
             return new TerraformCommand.WorkingDirectoryCloning(options =>
             {
-                options.WithReattachingProvider(providerName, new TerraformReattachProvider(pluginProtocol, new TerraformReattachProviderAddress(pluginServerHostPort)));
+                options.WithReattachingProvider(providerName, providerContext.TerraformReattachProvider);
                 configureOptions?.Invoke(options);
             });
         }

@@ -3,7 +3,7 @@ using PseudoDynamic.Terraform.Plugin.Sdk.Services;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    internal class ProviderContextOptions
+    internal class ProviderOptions
     {
         private static void ValidateProviderName([NotNull] string? providerName)
         {

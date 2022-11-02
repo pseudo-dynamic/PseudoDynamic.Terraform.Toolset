@@ -23,9 +23,6 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             SetProtocolVersion(protocol);
         }
 
-        public TerraformReattachProvider(PluginProtocol protocol) =>
-            SetProtocolVersion(protocol);
-
         private void SetProtocolVersion(PluginProtocol protocol)
         {
             if (protocol == PluginProtocol.V5)

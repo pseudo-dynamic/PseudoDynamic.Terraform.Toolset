@@ -31,8 +31,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             services.TryAddSingleton<DataSourceServiceFactory>();
             services.TryAddSingleton<ProviderDataSourceService>();
             services.TryAddSingleton<ProviderDataSourceServiceRegistry>();
+            services.TryAddSingleton<IProviderServer, ProviderServer>();
+            services.AddHostedService<HostedService<IProviderServer>>();
             services.TryAddSingleton<IProviderContext, ProviderContext>();
-            services.TryAddSingleton(sp => new Lazy<IProviderContext>(sp.GetRequiredService<IProviderContext>));
             return services;
         }
     }

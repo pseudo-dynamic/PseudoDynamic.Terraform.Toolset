@@ -1,5 +1,5 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics;
-using System.Text.Json;
+using static PseudoDynamic.Terraform.Plugin.Infrastructure.Terraform;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 {
@@ -11,10 +11,6 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             configureOptions?.Invoke(options);
             return options;
         }
-
-        private const string TfReattachProvidersVariableName = "TF_REATTACH_PROVIDERS";
-        private const string TfCliConfigFileVariableName = "TF_CLI_CONFIG_FILE";
-        private const string TerraformCommandName = "terraform";
 
         public string? WorkingDirectory { get; init; }
         public IReadOnlyDictionary<string, string> EnvironmentVariables { get; }
@@ -48,7 +44,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
             if (TerraformReattachProviders != null && TerraformReattachProviders.Count > 0)
             {
-                environmentVariables.Add(TfReattachProvidersVariableName, JsonSerializer.Serialize(TerraformReattachProviders));
+                environmentVariables.Add(TfReattachProvidersVariableName, SerializeTerraformReattachProviders(TerraformReattachProviders));
             }
 
             if (TfCliConfigFile != null)

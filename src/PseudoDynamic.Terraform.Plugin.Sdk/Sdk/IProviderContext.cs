@@ -5,10 +5,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal interface IProviderContext
     {
-        string FullyQualifiedProviderName { get; }
-        string ProviderName { get; }
-        string SnakeCaseProviderName { get; }
-
         ProviderService ProviderService { get; }
         BlockDefinition ProviderMetaSchema { get; }
         IReadOnlyDictionary<string, ProviderResourceService> ResourceServices { get; }

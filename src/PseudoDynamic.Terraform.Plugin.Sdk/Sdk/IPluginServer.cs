@@ -10,5 +10,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         Uri ServerAddress { get; }
         PluginProtocol PluginProtocol { get; }
         bool IsDebuggable { get; }
+        CancellationToken ServerStarted { get; }
+        CancellationToken ServerStopping { get; }
+        CancellationToken ServerStopped { get; }
     }
 }

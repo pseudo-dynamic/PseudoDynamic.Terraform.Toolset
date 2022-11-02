@@ -15,12 +15,19 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public Uri ServerAddress => _serverAddress.Value;
         public PluginProtocol PluginProtocol { get; }
         public bool IsDebuggable { get; }
+        public CancellationToken ServerStarted { get; }
+        public CancellationToken ServerStopping { get; }
+        public CancellationToken ServerStopped { get; }
 
         private X509Certificate2? _clientCertificate;
         private Lazy<Uri> _serverAddress;
         private readonly ILogger<PluginServer> _logger;
 
-        public PluginServer(IServer server, IOptions<PluginServerOptions> options, IHostApplicationLifetime applicationLifetime, ILogger<PluginServer> logger)
+        public PluginServer(
+            IServer server,
+            IOptions<PluginServerOptions> options,
+            IHostApplicationLifetime applicationLifetime,
+            ILogger<PluginServer> logger)
         {
             var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
             PluginProtocol = unwrappedOptions.Protocol ?? throw new InvalidOperationException($"The plugin protocol has not been configured inside an instance of {typeof(PluginServerOptions).FullName}");
@@ -74,8 +81,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             });
 
             applicationLifetime.ApplicationStarted.Register(OnServerStarted);
+            ServerStarted = applicationLifetime.ApplicationStarted;
+
             applicationLifetime.ApplicationStopping.Register(OnServerStopping);
+            ServerStopping = applicationLifetime.ApplicationStopping;
+
             applicationLifetime.ApplicationStopped.Register(OnServerStopped);
+            ServerStopped = applicationLifetime.ApplicationStopped;
+
             _logger = logger;
         }
 

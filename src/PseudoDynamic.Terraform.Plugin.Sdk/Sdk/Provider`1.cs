@@ -2,9 +2,9 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public abstract class Provider<ProviderSchema> : DesignTimeTerraformService, IProvider<ProviderSchema>, IDesignTimeTerraformService<ProviderSchema>.IProvider
-        where ProviderSchema : class
+    public abstract class Provider<Schema> : DesignTimeTerraformService, IProvider<Schema>, IDesignTimeTerraformService<Schema>.IProvider
+        where Schema : class
     {
-        public virtual Task Configure(Provider.IConfigureContext<ProviderSchema> context) => Task.CompletedTask;
+        public virtual Task Configure(Provider.IConfigureContext<Schema> context) => Task.CompletedTask;
     }
 }

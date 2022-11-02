@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PseudoDynamic.Terraform.Plugin.Protocols;
 using PseudoDynamic.Terraform.Plugin.Sdk.Kestrel;
-using Serilog;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
@@ -22,16 +22,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             builder
                 .UseKestrel()
                 .ConfigureLogging(logging => {
-                    if (!serverSpecification.IsDebuggable) {
+                    if (serverSpecification.IsDebuggable) {
+                        logging.AddConsole();
+                    } else {
                         logging.ClearProviders();
-
-#if DEBUG
-                        var logger = new LoggerConfiguration()
-                            .WriteTo.File("logs.txt")
-                            .CreateLogger();
-
-                        logging.AddSerilog(logger, dispose: true);
-#endif
                     }
                 })
                 .ConfigureServices(services => {

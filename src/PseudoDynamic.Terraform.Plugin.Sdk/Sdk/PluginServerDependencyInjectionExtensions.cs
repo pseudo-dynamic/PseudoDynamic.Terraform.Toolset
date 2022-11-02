@@ -24,6 +24,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             services.AddGrpc(x => x.IgnoreUnknownServices = true);
             services.TryAddSingleton<IPluginServer, PluginServer>();
+            services.AddHostedService<HostedService<IPluginServer>>();
             return services;
         }
 

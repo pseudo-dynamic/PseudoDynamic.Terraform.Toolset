@@ -5,19 +5,19 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     internal class ProviderResourceServiceRegistry : NamedTerraformServiceRegistry<ProviderResourceService>
     {
         ResourceServiceFactory _resourceDefinitionFactory;
-        private readonly Lazy<IProviderContext> _providerContext;
+        private readonly IProviderServer _providerServer;
 
-        public ProviderResourceServiceRegistry(ResourceServiceFactory resourceDefinitionFactory, Lazy<IProviderContext> providerContext)
+        public ProviderResourceServiceRegistry(ResourceServiceFactory resourceDefinitionFactory, IProviderServer providerServer)
         {
             _resourceDefinitionFactory = resourceDefinitionFactory ?? throw new ArgumentNullException(nameof(resourceDefinitionFactory));
-            _providerContext = providerContext ?? throw new ArgumentNullException(nameof(providerContext));
+            _providerServer = providerServer ?? throw new ArgumentNullException(nameof(providerServer));
         }
 
         private ProviderResourceService UpgradeResource(ResourceServiceDescriptor resourceDescriptor)
         {
             var resource = _resourceDefinitionFactory.Build(resourceDescriptor);
             var resourceName = resource.Implementation.Name;
-            var fullResourceName = $"{_providerContext.Value.SnakeCaseProviderName}_{resourceName}";
+            var fullResourceName = $"{_providerServer.SnakeCaseProviderName}_{resourceName}";
             return new ProviderResourceService(resource, fullResourceName);
         }
 
