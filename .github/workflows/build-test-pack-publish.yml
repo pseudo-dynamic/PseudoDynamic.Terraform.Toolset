@@ -60,8 +60,6 @@ jobs:
           --configuration $MSBUILD_CONFIGURATION
         shell: bash
 
-      - uses: hashicorp/setup-terraform@v2
-
       - name: Test
         run: >
           dotnet test

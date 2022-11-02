@@ -86,7 +86,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             }
         }
 
-        [Theory]
+        [Theory.Terraform]
         [MemberData(nameof(Produce_terraform_validatable_config_schemas))]
         internal async Task Terraform_validate_config_schema<Schema>(Schema expectedConfig, string filePattern)
             where Schema : class, ISchemaFake

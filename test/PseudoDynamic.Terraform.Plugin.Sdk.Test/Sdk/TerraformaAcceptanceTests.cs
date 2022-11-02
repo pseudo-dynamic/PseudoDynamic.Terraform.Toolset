@@ -9,21 +9,21 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public TerraformaAcceptanceTests(ITestOutputHelper output) =>
             _output = output ?? throw new ArgumentNullException(nameof(output));
 
-        [Fact]
+        [Fact.Terraform]
         internal async Task Terraform_validate_passes()
         {
             using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("default"));
             await terraform.Validate();
         }
 
-        [Fact]
+        [Fact.Terraform]
         internal async Task Terraform_plan_passes()
         {
             using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("default"));
             await terraform.Plan();
         }
 
-        [Fact]
+        [Fact.Terraform]
         internal async Task Terraform_apply_passes()
         {
             using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("default"));
