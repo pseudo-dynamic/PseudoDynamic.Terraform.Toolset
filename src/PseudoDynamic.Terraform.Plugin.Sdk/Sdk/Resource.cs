@@ -5,47 +5,121 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     public class Resource
     {
-        public class ValidateContext<Schema> : ShapingContext
+        public interface IMigrateStateContext
         {
-            /// <summary>
-            /// Represents the transmitted configuration made by you in the Terraform project. May
-            /// contain unknown values. Keep in mind that if you are interested in differentiating
-            /// between null and unknown values, you need to use <see cref="ITerraformValue{T}"/>
-            /// in your schema.
-            /// </summary>
-            public Schema Config { get; }
-
-            internal ValidateContext(Reports reports, ITerraformDynamicDecoder dynamicDecoder, Schema config)
-                : base(reports, dynamicDecoder) =>
-                Config = config;
+            int Version { get; }
         }
 
-        public class PlanContext<Schema, ProviderMetaSchema> : ShapingContext
+        internal class MigrateStateContext : IBaseContext, IMigrateStateContext
         {
-            /// <summary>
-            /// This configuration may contain unknown values if a user uses
-            /// interpolation or other functionality that would prevent Terraform
-            /// from knowing the value at request time.
-            /// </summary>
+            public Reports Reports { get; }
+            public int Version { get; }
+
+            internal MigrateStateContext(Reports reports, int version)
+            {
+                Reports = reports;
+                Version = version;
+            }
+        }
+
+        public interface IReviseStateContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IStateContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
+        {
+            new Schema State { get; set; }
+        }
+
+        internal class ReviseStateContext<Schema, ProviderMetaSchema> : IReviseStateContext<Schema, ProviderMetaSchema>
+        {
+            public Reports Reports { get; }
+            public ITerraformDynamicDecoder DynamicDecoder { get; }
+            public Schema State { get; set; }
+            public ProviderMetaSchema ProviderMeta { get; }
+
+            internal ReviseStateContext(Reports reports, ITerraformDynamicDecoder dynamicDecoder, Schema state, ProviderMetaSchema providerMeta)
+            {
+                Reports = reports;
+                DynamicDecoder = dynamicDecoder;
+                State = state;
+                ProviderMeta = providerMeta;
+            }
+        }
+
+        public interface IValidateConfigContext<out Schema> : IBaseContext, IShapingContext, IConfigContext<Schema>
+        {
+        }
+
+        internal class ValidateConfigContext<Schema> : IValidateConfigContext<Schema>
+        {
+            public Reports Reports { get; }
+            public ITerraformDynamicDecoder DynamicDecoder { get; }
             public Schema Config { get; }
 
-            /// <summary>
-            /// The current state of the resource. Can be <see langword="null"/>,
-            /// if you creating this resource.
-            /// </summary>
-            public Schema? State { get; }
+            internal ValidateConfigContext(Reports reports, ITerraformDynamicDecoder dynamicDecoder, Schema config)
+            {
+                Reports = reports;
+                DynamicDecoder = dynamicDecoder;
+                Config = config;
+            }
+        }
 
+        public interface IPlanContext<Schema>
+        {
             /// <summary>
             /// The planned new state for the resource. Terraform 1.3 and later
             /// supports resource destroy planning, in which this will contain a null
             /// value.
             /// </summary>
+            Schema Plan { get; set; }
+        }
+
+        public interface ICreateContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IConfigContext<Schema>, IPlanContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
+        {
+        }
+
+        public interface IUpdateContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IConfigContext<Schema>, IStateContext<Schema>, IPlanContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
+        {
+        }
+
+        public interface IDeleteContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IConfigContext<Schema>, IStateContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
+        {
+        }
+
+        public interface IPlanContext<Schema, out ProviderMetaSchema> : ICreateContext<Schema, ProviderMetaSchema>, IUpdateContext<Schema, ProviderMetaSchema>, IDeleteContext<Schema, ProviderMetaSchema>
+        {
+            /// <inheritdoc cref="IStateContext{Schema}.State"/>
+            new Schema? State { get; }
+
+            /// <inheritdoc cref="IPlanContext{Schema}.Plan"/>
+            new Schema? Plan { get; set; }
+        }
+
+        public interface IApplyContext<Schema, out ProviderMetaSchema> : ICreateContext<Schema, ProviderMetaSchema>, IUpdateContext<Schema, ProviderMetaSchema>, IDeleteContext<Schema, ProviderMetaSchema>
+        {
+            /// <inheritdoc cref="IStateContext{Schema}.State"/>
+            new Schema? State { get; }
+
+            /// <inheritdoc cref="IPlanContext{Schema}.Plan"/>
+            new Schema? Plan { get; set; }
+        }
+
+        internal class PlanContext<Schema, ProviderMetaSchema> : IPlanContext<Schema, ProviderMetaSchema>, IApplyContext<Schema, ProviderMetaSchema>
+        {
+            public Reports Reports { get; }
+            public ITerraformDynamicDecoder DynamicDecoder { get; }
+            public Schema Config { get; }
+            public Schema? State { get; }
             public Schema? Plan { get; set; }
+
+            Schema IStateContext<Schema>.State => Plan ?? throw new InvalidOperationException();
+
+            Schema IPlanContext<Schema>.Plan {
+                get => Plan ?? throw new InvalidOperationException();
+                set => Plan = value ?? throw new InvalidOperationException();
+            }
 
             /// <summary>
             /// The metadata from the provider_meta block of the module.
             /// </summary>
-            public ProviderMetaSchema ProviderMeta { get; set; }
+            public ProviderMetaSchema ProviderMeta { get; }
 
             internal PlanContext(
                 Reports reports,
@@ -54,8 +128,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 Schema? state,
                 Schema? plan,
                 ProviderMetaSchema providerMeta)
-                : base(reports, dynamicDecoder)
             {
+                Reports = reports;
+                DynamicDecoder = dynamicDecoder;
                 Config = config;
                 State = state;
                 Plan = plan;

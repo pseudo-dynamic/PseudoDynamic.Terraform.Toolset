@@ -57,7 +57,7 @@ class ProviderSchema : Object.WithRanges.WithNestedBlocks
 
 class ProviderImpl : Provider<ProviderSchema>
 {
-    public override Task Configure(Provider.ConfigureContext<ProviderSchema> context)
+    public override Task Configure(Provider.IConfigureContext<ProviderSchema> context)
     {
         context.Reports.Warning("[provider] configure");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
@@ -79,14 +79,14 @@ internal class ResourceImpl : Resource<ResourceSchema, ProviderMetaSchema>
 {
     public override string TypeName => "empty";
 
-    public override Task ValidateConfig(Resource.ValidateContext<ResourceSchema> context)
+    public override Task ValidateConfig(Resource.IValidateConfigContext<ResourceSchema> context)
     {
         context.Reports.Warning("[resource] validate");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
         return context.CompletedTask;
     }
 
-    public override Task Plan(Resource.PlanContext<ResourceSchema, ProviderMetaSchema> context)
+    public override Task Plan(Resource.IPlanContext<ResourceSchema, ProviderMetaSchema> context)
     {
         context.Reports.Warning("[resource] plan");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
@@ -104,14 +104,14 @@ internal class DataSourceImpl : DataSource<DataSourceSchema, ProviderMetaSchema>
 {
     public override string TypeName => "empty";
 
-    public override Task ValidateConfig(DataSource.ValidateContext<DataSourceSchema> context)
+    public override Task ValidateConfig(DataSource.IValidateConfigContext<DataSourceSchema> context)
     {
         context.Reports.Warning("[data source] validate");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
         return context.CompletedTask;
     }
 
-    public override Task Read(DataSource.ReadContext<DataSourceSchema, ProviderMetaSchema> context)
+    public override Task Read(DataSource.IReadContext<DataSourceSchema, ProviderMetaSchema> context)
     {
         context.Reports.Warning("[data source] read");
         AssertObject(context.ProviderMeta);

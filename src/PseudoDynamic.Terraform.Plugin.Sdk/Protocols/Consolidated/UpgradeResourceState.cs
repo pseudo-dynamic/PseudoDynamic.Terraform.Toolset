@@ -17,9 +17,13 @@
             // provider's responsibility to interpret this value using the
             // appropriate older schema. The raw_state will be the json encoded
             // state, or a legacy flat-mapped format.
-            public RawState? RawState { get; set; }
+            public RawState RawState {
+                get => _rawState ?? throw new InvalidOperationException("Raw state is unexpectedly null");
+                set => _rawState = value;
+            }
 
             private string? _typeName;
+            private RawState? _rawState;
         }
 
         public class Response

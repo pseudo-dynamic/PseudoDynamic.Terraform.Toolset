@@ -9,13 +9,33 @@
                 set => _typeName = value;
             }
 
-            public DynamicValue? PriorState { get; set; }
-            public DynamicValue? PlannedState { get; set; }
-            public DynamicValue? Config { get; set; }
+            public DynamicValue PriorState {
+                get => _priorState ?? throw new InvalidOperationException("Prior state is unexpectedly null");
+                set => _priorState = value;
+            }
+
+            public DynamicValue PlannedState {
+                get => _plannedState ?? throw new InvalidOperationException("Planned state is unexpectedly null");
+                set => _plannedState = value;
+            }
+
+            public DynamicValue Config {
+                get => _config ?? throw new InvalidOperationException("Config is unexpectedly null");
+                set => _config = value;
+            }
+
             public ReadOnlyMemory<byte> PlannedPrivate { get; set; }
-            public DynamicValue? ProviderMeta { get; set; }
+
+            public DynamicValue ProviderMeta {
+                get => _providerMeta ?? throw new InvalidOperationException("Provider meta is unexpectedly null");
+                set => _providerMeta = value;
+            }
 
             private string? _typeName;
+            private DynamicValue? _priorState;
+            private DynamicValue? _plannedState;
+            private DynamicValue? _config;
+            private DynamicValue? _providerMeta;
         }
 
         public class Response

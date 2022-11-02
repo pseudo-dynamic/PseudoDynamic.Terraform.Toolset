@@ -94,8 +94,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             var resourceMock = new Mock<IResource<Schema>>();
             resourceMock.SetupGet(x => x.Name).Returns("validate").Verifiable();
 
-            Resource.ValidateContext<Schema>? actualContext = null;
-            resourceMock.Setup(x => x.ValidateConfig(It.IsAny<Resource.ValidateContext<Schema>>())).Callback((Resource.ValidateContext<Schema> context) => actualContext = context);
+            Resource.IValidateConfigContext<Schema>? actualContext = null;
+            resourceMock.Setup(x => x.ValidateConfig(It.IsAny<Resource.IValidateConfigContext<Schema>>())).Callback((Resource.IValidateConfigContext<Schema> context) => actualContext = context);
 
             _pluginHostFixture.Provider.ReplaceResource(new ResourceServiceDescriptor(typeof(IResource<Schema>), typeof(Schema), typeof(object)) { Implementation = resourceMock.Object });
 

@@ -6,6 +6,6 @@
 
         ProviderAdapter.IProviderAdapter IProvider.ProviderAdapter => ProviderAdapter;
 
-        Task Configure(Provider.ConfigureContext<Schema> context);
+        Task Configure(Provider.IConfigureContext<Schema> context);
     }
 }

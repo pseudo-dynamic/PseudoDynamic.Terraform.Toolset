@@ -22,5 +22,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("default"));
             await terraform.Plan();
         }
+
+        [Fact]
+        internal async Task Terraform_apply_passes()
+        {
+            using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("default"));
+            await terraform.Apply();
+        }
     }
 }

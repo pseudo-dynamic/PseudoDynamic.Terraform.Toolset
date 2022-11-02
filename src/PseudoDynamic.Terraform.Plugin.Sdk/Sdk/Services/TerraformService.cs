@@ -4,32 +4,50 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
     public static class TerraformService
     {
-        /// <summary>
-        /// Represents the base context for the provider, a resource, a data source or a provisioner.
-        /// </summary>
-        public class BaseContext
+        public interface IBaseContext
         {
             /// <summary>
             /// Stores Terraform reports.
             /// </summary>
-            public Reports Reports { get; }
+            Reports Reports { get; }
 
             /// <summary>
             /// Gets a task that is already completed. Shortcut for <see cref="Task.CompletedTask"/>.
             /// </summary>
-            public Task CompletedTask => Task.CompletedTask;
-
-            internal BaseContext(Reports reports) =>
-                Reports = reports;
+            Task CompletedTask => Task.CompletedTask;
         }
 
-        public class ShapingContext : BaseContext
+        public interface IShapingContext
         {
-            public ITerraformDynamicDecoder DynamicDecoder { get; }
+            ITerraformDynamicDecoder DynamicDecoder { get; }
+        }
 
-            internal ShapingContext(Reports reports, ITerraformDynamicDecoder dynamicDecoder)
-                : base(reports) =>
-                DynamicDecoder = dynamicDecoder ?? throw new ArgumentNullException(nameof(dynamicDecoder));
+        public interface IStateContext<out Schema>
+        {
+            /// <summary>
+            /// The current state of the resource. Can be <see langword="null"/>,
+            /// if you creating this resource.
+            /// </summary>
+            Schema State { get; }
+        }
+
+        public interface IConfigContext<out Schema> : IShapingContext
+        {
+            /// <summary>
+            /// Represents the transmitted configuration made by you in the Terraform project. May
+            /// contain unknown values. Keep in mind that if you are interested in differentiating
+            /// between null and unknown values, you need to use <see cref="ITerraformValue{T}"/>
+            /// in your schema.
+            /// </summary>
+            Schema Config { get; }
+        }
+
+        public interface IProviderMetaContext<out ProviderMetaSchema> : IShapingContext
+        {
+            /// <summary>
+            /// The metadata from the provider_meta block of the module.
+            /// </summary>
+            ProviderMetaSchema ProviderMeta { get; }
         }
     }
 }

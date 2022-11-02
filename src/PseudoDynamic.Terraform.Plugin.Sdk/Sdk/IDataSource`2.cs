@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
+﻿using static PseudoDynamic.Terraform.Plugin.Sdk.DataSource;
+
+namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     public interface IDataSource<Schema, ProviderMetaSchema> : IDataSource
         where Schema : class
@@ -24,11 +26,11 @@
         /// <summary>
         /// Validates the user-defined data source inputs that has been made in Terraform.
         /// </summary>
-        Task ValidateConfig(DataSource.ValidateContext<Schema> context);
+        Task ValidateConfig(IValidateConfigContext<Schema> context);
 
         /// <summary>
         /// Reads
         /// </summary>
-        Task Read(DataSource.ReadContext<Schema, ProviderMetaSchema> context);
+        Task Read(IReadContext<Schema, ProviderMetaSchema> context);
     }
 }

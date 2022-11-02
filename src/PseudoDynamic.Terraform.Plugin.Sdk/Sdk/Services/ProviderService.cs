@@ -1,4 +1,5 @@
-﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+﻿using System.Diagnostics.CodeAnalysis;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
@@ -6,6 +7,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
     {
         internal static ProviderService Unimplemented(BlockDefinition schema) =>
             new ProviderService(schema);
+
+        public override IProvider Implementation => base.Implementation;
+
+        [MemberNotNull(nameof(Implementation))]
+#pragma warning disable CS8774 // Member must have a non-null value when exiting.
+        public bool HasImplementation => GetImplementation() is not null;
+#pragma warning restore CS8774 // Member must have a non-null value when exiting.
 
         /// <summary>
         /// Creates an unimplemented provider service.

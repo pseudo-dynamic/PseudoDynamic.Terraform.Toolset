@@ -36,8 +36,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 where ProviderMetaSchema : class =>
                 SetProvider(providerName, configureProvider, static services => new ProviderFeatures<ProviderMetaSchema>(services), typeof(ProviderMetaSchema));
 
-            public ProtocolV5 UseProvider(string providerName, Action<ProviderFeatures<object?>> configureProvider) =>
-                SetProvider(providerName, configureProvider, static services => new ProviderFeatures<object?>(services), providerMetaSchemaType: null);
+            public ProtocolV5 UseProvider(string providerName, Action<ProviderFeatures<object>> configureProvider) =>
+                SetProvider(providerName, configureProvider, static services => new ProviderFeatures<object>(services), providerMetaSchemaType: null);
         }
 
         public sealed record ProtocolV6 : PluginServerSpecificationBase<ProtocolV6>
@@ -55,8 +55,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 where ProviderMetaSchema : class =>
                 SetProvider(providerName, configureProvider, static services => new ProviderFeatures<ProviderMetaSchema>(services), typeof(ProviderMetaSchema));
 
-            public ProtocolV6 UseProvider(string providerName, Action<ProviderFeatures<object?>> configureProvider) =>
-                SetProvider(providerName, configureProvider, static services => new ProviderFeatures<object?>(services), providerMetaSchemaType: null);
+            public ProtocolV6 UseProvider(string providerName, Action<ProviderFeatures<object>> configureProvider) =>
+                SetProvider(providerName, configureProvider, static services => new ProviderFeatures<object>(services), providerMetaSchemaType: null);
         }
     }
 }

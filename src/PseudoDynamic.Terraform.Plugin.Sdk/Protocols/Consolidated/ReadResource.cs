@@ -9,11 +9,21 @@
                 set => _typeName = value;
             }
 
-            public DynamicValue? CurrentState { get; set; }
+            public DynamicValue CurrentState {
+                get => _currentState ?? throw new InvalidOperationException("Current state is unexpectedly null");
+                set => _currentState = value;
+            }
+
             public ReadOnlyMemory<byte> Private { get; set; }
-            public DynamicValue? ProviderMeta { get; set; }
+
+            public DynamicValue ProviderMeta {
+                get => _providerMeta ?? throw new InvalidOperationException("Provider meta is unexpectedly null");
+                set => _providerMeta = value;
+            }
 
             private string? _typeName;
+            private DynamicValue? _currentState;
+            private DynamicValue? _providerMeta;
         }
 
         public class Response

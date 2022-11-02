@@ -10,9 +10,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public abstract string TypeName { get; }
 
         /// <inheritdoc/>
-        public virtual Task ValidateConfig(DataSource.ValidateContext<Schema> context) => Task.CompletedTask;
+        public virtual Task ValidateConfig(DataSource.IValidateConfigContext<Schema> context) => Task.CompletedTask;
 
         /// <inheritdoc/>
-        public virtual Task Read(DataSource.ReadContext<Schema, ProviderMetaSchema> context) => Task.CompletedTask;
+        public virtual Task Read(DataSource.IReadContext<Schema, ProviderMetaSchema> context) => Task.CompletedTask;
     }
 }

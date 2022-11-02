@@ -1,4 +1,5 @@
-﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+﻿using System.Diagnostics.CodeAnalysis;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
@@ -9,6 +10,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
     internal abstract record TerraformService<TImplementation> : ITerraformService<TImplementation>
     {
         public BlockDefinition Schema { get; }
+
+        [NotNull]
         public virtual TImplementation Implementation => _implementation ?? throw new InvalidOperationException("Implementation is not set");
 
         TImplementation? _implementation;
@@ -26,5 +29,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             _implementation = implementation ?? throw new ArgumentNullException(nameof(implementation));
         }
+
+        protected TImplementation GetImplementation() => _implementation!;
     }
 }

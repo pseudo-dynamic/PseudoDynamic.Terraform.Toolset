@@ -5,29 +5,38 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     public static class DataSource
     {
-        public class ValidateContext<Schema> : ShapingContext
+        public interface IValidateConfigContext<out Schema> : IBaseContext, IShapingContext, IConfigContext<Schema>
         {
-            /// <summary>
-            /// Represents the transmitted configuration made by you in the Terraform project. May
-            /// contain unknown values. Keep in mind that if you are interested in differentiating
-            /// between null and unknown values, you need to use <see cref="ITerraformValue{T}"/>
-            /// in your schema.
-            /// </summary>
-            public Schema Config { get; }
-
-            internal ValidateContext(Reports reports, ITerraformDynamicDecoder dynamicDecoder, Schema config)
-                : base(reports, dynamicDecoder) =>
-                Config = config;
         }
 
-        public class ReadContext<Schema, ProviderMetaSchema> : ShapingContext
+        internal class ValidateConfigContext<Schema> : IValidateConfigContext<Schema>
+        {
+            public Reports Reports { get; }
+            public ITerraformDynamicDecoder DynamicDecoder { get; }
+            public Schema Config { get; }
+
+            internal ValidateConfigContext(Reports reports, ITerraformDynamicDecoder dynamicDecoder, Schema config)
+            {
+                Reports = reports;
+                DynamicDecoder = dynamicDecoder;
+                Config = config;
+            }
+        }
+
+        public interface IReadContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IStateContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
         {
             /// <summary>
-            /// The data Terraform is about to read in the plan phase and in the apply phase.
-            /// In the plan phase, <see cref="State"/> may contain Terraform unknown.
+            /// The current state of the resource. Can be <see langword="null"/>,
+            /// if you creating this resource.
             /// </summary>
-            public Schema State { get; set; }
+            new Schema State { get; set; }
+        }
 
+        internal class ReadContext<Schema, ProviderMetaSchema> : IReadContext<Schema, ProviderMetaSchema>
+        {
+            public Reports Reports { get; }
+            public ITerraformDynamicDecoder DynamicDecoder { get; }
+            public Schema State { get; set; }
             public ProviderMetaSchema ProviderMeta { get; }
 
             internal ReadContext(
@@ -35,8 +44,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 ITerraformDynamicDecoder dynamicDecoder,
                 Schema state,
                 ProviderMetaSchema providerMeta)
-                : base(reports, dynamicDecoder)
             {
+                Reports = reports;
+                DynamicDecoder = dynamicDecoder;
                 State = state;
                 ProviderMeta = providerMeta;
             }

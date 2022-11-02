@@ -1,20 +1,26 @@
-﻿using PseudoDynamic.Terraform.Plugin.Reflection;
-using PseudoDynamic.Terraform.Plugin.Sdk.Services;
-using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
+﻿using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
+using static PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     public sealed class Provider : Provider<object>
     {
-        internal static readonly GenericTypeAccessor ConfigureContextAccessor = new(typeof(ConfigureContext<>));
-
-        public class ConfigureContext<Schema> : TerraformService.ShapingContext
+        public interface IConfigureContext<out Schema> : IBaseContext, IShapingContext, IConfigContext<Schema>
         {
+        }
+
+        internal class ConfigureContext<Schema> : IConfigureContext<Schema>
+        {
+            public Reports Reports { get; }
+            public ITerraformDynamicDecoder DynamicDecoder { get; }
             public Schema Config { get; }
 
             internal ConfigureContext(Reports reports, ITerraformDynamicDecoder dynamicDecoder, Schema config)
-                : base(reports, dynamicDecoder) =>
+            {
+                Reports = reports;
+                DynamicDecoder = dynamicDecoder;
                 Config = config;
+            }
         }
     }
 }

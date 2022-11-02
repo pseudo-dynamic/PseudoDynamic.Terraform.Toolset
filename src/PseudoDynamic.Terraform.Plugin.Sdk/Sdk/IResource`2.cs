@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Sdk
+﻿using static PseudoDynamic.Terraform.Plugin.Sdk.Resource;
+
+namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     /// <summary>
     /// <para>
@@ -81,7 +83,7 @@
         /// This method is always called before the state gets read during plan stage or
         /// before validating the config during apply stage.
         /// </summary>
-        Task MigrateState();
+        Task MigrateState(IMigrateStateContext context);
 
         /// <summary>
         /// This method enables importing a resource. It is then always followed by
@@ -99,12 +101,12 @@
         /// plan stage, and you then accept the execution plan for applying, this method
         /// won't be called again before the "second" <see cref="Plan"/> during apply stage.
         /// </summary>
-        Task ReviseState();
+        Task ReviseState(IReviseStateContext<Schema, ProviderMetaSchema> context);
 
         /// <summary>
         /// Validates the user-defined resource inputs that has been made in Terraform.
         /// </summary>
-        Task ValidateConfig(Resource.ValidateContext<Schema> context);
+        Task ValidateConfig(IValidateConfigContext<Schema> context);
 
         /// <summary>
         /// Plans the possible result of the resource. It is called twice, once during
@@ -114,24 +116,8 @@
         /// is only dependent on <see cref="MigrateState"/> and <see cref="ValidateConfig"/>.
         /// <see cref="ValidateConfig"/>, in this order.
         /// </summary>
-        Task Plan(Resource.PlanContext<Schema, ProviderMetaSchema> context);
+        Task Plan(IPlanContext<Schema, ProviderMetaSchema> context);
 
-        /// <summary>
-        /// Creates the resource. During apply stage <see cref="Create"/> is dependent
-        /// on <see cref="Plan"/>.
-        /// </summary>
-        Task Create();
-
-        /// <summary>
-        /// Updates the resource. During apply stage <see cref="Update"/> is dependent
-        /// on <see cref="Plan"/>.
-        /// </summary>
-        Task Update();
-
-        /// <summary>
-        /// Deletes the resource. During apply stage <see cref="Delete"/> is dependent
-        /// on <see cref="MigrateState"/>.
-        /// </summary>
-        Task Delete();
+        Task Apply(IApplyContext<Schema, ProviderMetaSchema> context);
     }
 }
