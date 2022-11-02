@@ -5,11 +5,11 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseudoDynamic.Terraform.Plugin.Sdk", "src\PseudoDynamic.Terraform.Plugin.Sdk\PseudoDynamic.Terraform.Plugin.Sdk.csproj", "{2163370A-AF6F-4075-ACAB-2B735779FF9A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C96B942D-A325-43E4-966F-53AA61F3904E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C96B942D-A325-43E4-966F-53AA61F3904E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PseudoDynamic.Terraform.Plugin.Sdk.Test", "test\PseudoDynamic.Terraform.Plugin.Sdk.Test\PseudoDynamic.Terraform.Plugin.Sdk.Test.csproj", "{46E641F7-E67A-41B5-9A46-9BF4311DC4D8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "provider-projects", "provider-projects", "{F0788E20-AAF1-440A-8AFF-25955B47FA22}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ProviderProjects", "ProviderProjects", "{F0788E20-AAF1-440A-8AFF-25955B47FA22}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Provider.Minimal", "test\PseudoDynamic.Terraform.Plugin.Sdk.Test\ProviderProjects\minimal\Provider.Minimal.csproj", "{76434601-0429-4818-A970-E77A7CA46CB7}"
 EndProject

@@ -6,7 +6,6 @@
 		<Nullable>enable</Nullable>
 		<RootNamespace>PseudoDynamic.Terraform.Plugin</RootNamespace>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<LangVersion>preview</LangVersion>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
