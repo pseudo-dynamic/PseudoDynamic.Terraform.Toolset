@@ -1,10 +1,16 @@
-﻿using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
+﻿using PseudoDynamic.Terraform.Plugin.Sdk.Services;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 using static PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public class Resource
+    public class Resource : DesignTimeTerraformService
     {
+        // We do not allow inheritance from the public
+        internal Resource()
+        {
+        }
+
         public interface IMigrateStateContext
         {
             int Version { get; }

@@ -1,10 +1,16 @@
-﻿using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
+﻿using PseudoDynamic.Terraform.Plugin.Sdk.Services;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 using static PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public static class DataSource
+    public class DataSource : DesignTimeTerraformService
     {
+        // We do not allow inheritance from the public
+        internal DataSource()
+        {
+        }
+
         public interface IValidateConfigContext<out Schema> : IBaseContext, IShapingContext, IConfigContext<Schema>
         {
         }

@@ -1,9 +1,8 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Sdk.Services;
-using static PseudoDynamic.Terraform.Plugin.Sdk.Resource;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public abstract class Resource<Schema, ProviderMetaSchema> : DesignTimeTerraformService, IResource<Schema, ProviderMetaSchema>, IDesignTimeTerraformService<Schema>.IResource<ProviderMetaSchema>
+    public abstract class Resource<Schema, ProviderMetaSchema> : Resource, IResource<Schema, ProviderMetaSchema>, IDesignTimeTerraformService<Schema>.IResource<ProviderMetaSchema>
         where Schema : class
         where ProviderMetaSchema : class
     {

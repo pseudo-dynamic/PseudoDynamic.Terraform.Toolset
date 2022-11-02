@@ -79,14 +79,22 @@ internal class ResourceImpl : Resource<ResourceSchema, ProviderMetaSchema>
 {
     public override string TypeName => "empty";
 
-    public override Task ValidateConfig(Resource.IValidateConfigContext<ResourceSchema> context)
+    public override Task ValidateConfig(IValidateConfigContext<ResourceSchema> context)
     {
         context.Reports.Warning("[resource] validate");
         AssertObjectWithRangesAndNestedBlocks(context.Config);
         return context.CompletedTask;
     }
 
-    public override Task Plan(Resource.IPlanContext<ResourceSchema, ProviderMetaSchema> context)
+    public override Task Plan(IPlanContext<ResourceSchema, ProviderMetaSchema> context)
+    {
+        context.Reports.Warning("[resource] plan");
+        AssertObjectWithRangesAndNestedBlocks(context.Config);
+        AssertObjectWithRangesAndNestedBlocks(context.Plan);
+        return context.CompletedTask;
+    }
+
+    public override Task Apply(IApplyContext<ResourceSchema, ProviderMetaSchema> context)
     {
         context.Reports.Warning("[resource] plan");
         AssertObjectWithRangesAndNestedBlocks(context.Config);

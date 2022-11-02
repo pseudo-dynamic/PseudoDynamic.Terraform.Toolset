@@ -1,5 +1,5 @@
-﻿using PseudoDynamic.Terraform.Plugin.Protocols;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using PseudoDynamic.Terraform.Plugin.Protocols;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 {
@@ -25,16 +25,11 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
         private void SetProtocolVersion(PluginProtocol protocol)
         {
-            if (protocol == PluginProtocol.V5)
-            {
+            if (protocol == PluginProtocol.V5) {
                 ProtocolVersion = 5;
-            }
-            else if (protocol == PluginProtocol.V6)
-            {
+            } else if (protocol == PluginProtocol.V6) {
                 ProtocolVersion = 6;
-            }
-            else
-            {
+            } else {
                 throw new NotSupportedException("Bad protocol");
             }
         }
