@@ -11,6 +11,24 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
         }
 
+        public interface IValidateConfigContext<out Schema> : IBaseContext, IShapingContext, IConfigContext<Schema>
+        {
+        }
+
+        internal class ValidateConfigContext<Schema> : IValidateConfigContext<Schema>
+        {
+            public Reports Reports { get; }
+            public ITerraformDynamicDecoder DynamicDecoder { get; }
+            public Schema Config { get; }
+
+            internal ValidateConfigContext(Reports reports, ITerraformDynamicDecoder dynamicDecoder, Schema config)
+            {
+                Reports = reports;
+                DynamicDecoder = dynamicDecoder;
+                Config = config;
+            }
+        }
+
         public interface IConfigureContext<out Schema> : IBaseContext, IShapingContext, IConfigContext<Schema>
         {
         }

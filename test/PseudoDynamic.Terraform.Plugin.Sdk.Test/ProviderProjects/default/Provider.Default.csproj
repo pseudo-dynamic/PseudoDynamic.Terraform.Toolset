@@ -17,24 +17,24 @@
 		<ProjectReference Include="..\..\..\..\src\PseudoDynamic.Terraform.Plugin.Sdk\PseudoDynamic.Terraform.Plugin.Sdk.csproj" />
 	</ItemGroup>
 
-	<Target Name="_WriteTerraformConfig" AfterTargets="AfterBuild">
-		<PropertyGroup>
-			<_RelativeProvider>bin/$(Configuration)/$(TargetFramework)</_RelativeProvider>
-			<_Provider>$(MSBuildProjectDirectory)/$(_RelativeProvider)</_Provider>
-			<_Provider>$([System.String]::Copy('$(_Provider)').Replace('\','/'))</_Provider>
-			<_Lines>
+<Target Name="_WriteTerraformConfig" AfterTargets="AfterBuild">
+	<PropertyGroup>
+		<_RelativeProvider>bin/$(Configuration)/$(TargetFramework)</_RelativeProvider>
+		<_Provider>$(MSBuildProjectDirectory)/$(_RelativeProvider)</_Provider>
+		<_Provider>$([System.String]::Copy('$(_Provider)').Replace('\','/'))</_Provider>
+		<_Lines>
 				<![CDATA[
 provider_installation {
 	dev_overrides {
-		"pseudo-dynamic/debug" = "$(_Provider)"
+		"debug" = "$(_Provider)"
 	}
 }
 ]]>
-			</_Lines>
-		</PropertyGroup>
+		</_Lines>
+	</PropertyGroup>
 
-		<WriteLinesToFile File="terraform.tfrc" Lines="$(_Lines)" Overwrite="true" />
-		<Copy SourceFiles="$(_Provider)/$(AssemblyName).exe" DestinationFiles="$(_Provider)/terraform-provider-debug.exe" />
-	</Target>
+	<WriteLinesToFile File="terraform.tfrc" Lines="$(_Lines)" Overwrite="true" />
+	<Copy SourceFiles="$(_Provider)/$(AssemblyName).exe" DestinationFiles="$(_Provider)/terraform-provider-debug.exe" />
+</Target>
 
 </Project>

@@ -6,6 +6,8 @@
 
         ProviderAdapter.IProviderAdapter IProvider.ProviderAdapter => ProviderAdapter;
 
+        Task ValidateConfig(Provider.IValidateConfigContext<Schema> context);
+
         Task Configure(Provider.IConfigureContext<Schema> context);
     }
 }

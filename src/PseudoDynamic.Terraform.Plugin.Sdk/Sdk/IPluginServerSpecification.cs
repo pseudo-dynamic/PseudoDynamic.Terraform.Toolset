@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     public interface IPluginServerSpecification
     {
         public static ProtocolV5 NewProtocolV5() => new ProtocolV5();
-        public static ProtocolV6 NewProtocolV6() => new ProtocolV6();
+        internal static ProtocolV6 NewProtocolV6() => new ProtocolV6();
 
         /// <summary>
         /// The intended plugin protocol version to be used by the gRPC server.
@@ -60,6 +60,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public sealed record ProtocolV6 : PluginServerSpecificationBase<ProtocolV6>
         {
             public override PluginProtocol Protocol => PluginProtocol.V5;
+
+            internal ProtocolV6()
+            {
+            }
 
             public class ProviderFeatures<ProviderMetaSchema> : ProviderFeaturesBase<ProviderMetaSchema>
             {

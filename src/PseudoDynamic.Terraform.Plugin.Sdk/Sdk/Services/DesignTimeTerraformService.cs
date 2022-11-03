@@ -9,6 +9,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
     {
         private static readonly Type GenericTypeDefinition = typeof(IDesignTimeTerraformService<>);
 
+        // We do not allow inheritance from the public
+        internal DesignTimeTerraformService()
+        {
+        }
+
         internal static Type GetSchemaType(Type terraformServiceType)
         {
             if (!terraformServiceType.IsImplementingGenericTypeDefinition(GenericTypeDefinition, out _, out var genericTypeArguments)) {

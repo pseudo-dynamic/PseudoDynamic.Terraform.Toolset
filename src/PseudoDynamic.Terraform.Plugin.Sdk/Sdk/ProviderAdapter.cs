@@ -38,11 +38,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 DataSourceSchemas = _provider.DataSourceServices.ToDictionary(x => x.Key, x => x.Value.Schema)
             };
 
-        public async Task<ValidateProviderConfig.Response> ValidateProviderConfig(ValidateProviderConfig.Request request) =>
-            new ValidateProviderConfig.Response() {
-                PreparedConfig = request.Config,
-                Diagnostics = new List<Diagnostic>()
-            };
+        public Task<ValidateProviderConfig.Response> ValidateProviderConfig(ValidateProviderConfig.Request request)
+        {
+            var service = _provider.ProviderService;
+            return service.Implementation.ProviderAdapter.ValidateProviderConfig(this, service, request);
+        }
 
         public Task<ConfigureProvider.Response> ConfigureProvider(ConfigureProvider.Request request)
         {
@@ -129,12 +129,29 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         internal interface IProviderAdapter
         {
+            Task<ValidateProviderConfig.Response> ValidateProviderConfig(ProviderAdapter adapter, ProviderService service, ValidateProviderConfig.Request request);
             Task<ConfigureProvider.Response> ConfigureProvider(ProviderAdapter adapter, ProviderService service, ConfigureProvider.Request request);
         }
 
         internal readonly struct ProviderGenericAdapter<Schema> : IProviderAdapter
             where Schema : class
         {
+            public async Task<ValidateProviderConfig.Response> ValidateProviderConfig(ProviderAdapter adapter, ProviderService service, ValidateProviderConfig.Request request)
+            {
+                var (_, mapper, decoder, dynamicDecoder, _) = adapter;
+                var provider = (IProvider<Schema>)service.Implementation;
+                var reports = new Reports();
+                var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
+                var config = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
+                var context = new Provider.ValidateConfigContext<Schema>(reports, dynamicDecoder, config);
+                await provider.ValidateConfig(context);
+                var diagnostics = mapper.Map<IList<Diagnostic>>(reports);
+
+                return new ValidateProviderConfig.Response() {
+                    Diagnostics = diagnostics
+                };
+            }
+
             public async Task<ConfigureProvider.Response> ConfigureProvider(ProviderAdapter adapter, ProviderService service, ConfigureProvider.Request request)
             {
                 var (_, mapper, decoder, dynamicDecoder, _) = adapter;

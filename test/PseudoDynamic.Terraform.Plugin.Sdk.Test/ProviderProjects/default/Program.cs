@@ -57,7 +57,14 @@ class ProviderSchema : Object.WithRanges.WithNestedBlocks
 
 class ProviderImpl : Provider<ProviderSchema>
 {
-    public override Task Configure(Provider.IConfigureContext<ProviderSchema> context)
+    public override Task ValidateConfig(IValidateConfigContext<ProviderSchema> context)
+    {
+        context.Reports.Warning("[provider] validate config");
+        AssertObjectWithRangesAndNestedBlocks(context.Config);
+        return context.CompletedTask;
+    }
+
+    public override Task Configure(IConfigureContext<ProviderSchema> context)
     {
         context.Reports.Warning("[provider] configure");
         AssertObjectWithRangesAndNestedBlocks(context.Config);

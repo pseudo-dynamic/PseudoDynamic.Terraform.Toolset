@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     debug = {
-      source  = "pseudo-dynamic/debug"
+      source  = "debug"
       version = "0.1.0"
     }
   }
