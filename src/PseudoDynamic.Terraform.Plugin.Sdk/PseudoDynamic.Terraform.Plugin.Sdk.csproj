@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>PseudoDynamic.Terraform.Plugin</RootNamespace>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Description>Implement Terraform provider plugins, including resources and data sources, in best C# manner</Description>
     </PropertyGroup>
 
     <ItemGroup>
