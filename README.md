@@ -26,7 +26,7 @@ By saying this, let me give you a short list of protocol features that are or ar
   - :heavy_check_mark: ApplyResourceChange
 - Terraform Types
   - :x: Tuples
-  - :heavy_check_mark: [All others](#supported-mappings) are supported
+  - :heavy_check_mark: [All others](#supported-c-mappings) are supported
 
 Still fine? Then continue with the usage examples.
 
@@ -106,9 +106,11 @@ internal class DataSourceImpl : DataSource<DataSourceSchema, ProviderMetaSchema>
 
 Feel free to take a look at the other overload methods.
 
-### Supported Mappings
+### Supported C# Mappings
 
-Attribute names are automatically turned to kebab_case.
+Property names are taken as attribute names and property names are automatically converted to kebab_case.
+
+> :bulb: If you prefer using a custom attribute name, then use [NameAttribute](#supported-c-attributes).
 
 ```csharp
 
@@ -168,7 +170,25 @@ class Schema {
 }
 ```
 
-### Supported Attributes
+As you may have seen, only public properties with public getter and public setter are considered as attributes. You can omit the setter if you specify an equivalent as constructor parameter. The names may only differ in upper and lower case. Read more about [schema class constructor](#schema-class-constructor).
+
+## Optional Terraform Attributes
+
+Whether an attribute is treated as optional or not is dependent on the fact whether the property type is nullable or not.
+
+> :exclamation: This is only true if nullability analysis is enabled, otherwise the attributes are optional by default.
+
+> :bulb: To enable nullability analysis, please use `<Nullable>enable</Nullable>` in your .csproj-file or use `#nullable enable` inside the source code, primarily where the schema classes are defined.
+
+> :bulb: If you make your property type non-nullable, but the attribute is still opional, then you can use `OptionalAttribute` to enforce the attribute being optional.
+
+> :exclamation: Currently Nullable<> is **not** supported.
+
+Assuming nullability analysis is enabled, the attribute equivalent of `public AnObject Object { get; set; }` is required and the attribute equivalent of `public AnObject? Object { get; set; }` is optional.
+
+> :exclamation: Because the nullability analysis feature should be always enabled, I do not support `RequiredAttribute`.
+
+### Supported C# Attributes
 
 - Class Attribtues
   - TupleAttribute (no function yet)
@@ -184,16 +204,17 @@ class Schema {
   - NameAttribute => use custom name
   - NestedBlockAttribute => mark attribute as nested block
   - OptionalAttribute => mark attribute as optional
+    Why is there no RequiredAttribute? See [optional Terraform attributes](#optional-terraform-attributes)
   - SensitiveAttribute => mark attribute as sensitive
   - ValueAttribute => overwrite implicit Terraform type determination
 
-### Unknown Values
+### Unknown Terraform Values
 
-What about **unknown values**? Just wrap any type with `ITerraformValue<>`.
+What about **unknown values**? Just wrap any type with `ITerraformValue<>`. By doing so, you are able to differentiate between unknown and null values.
 
 > :exclamation: The only types you cannot wrap with `ITerraformValue<>` are nested blocks.
 
-### Dynamic Values
+### Dynamic Terraform Values
 
 If you use `System.Object` as type, you can decode it by an instance of `ITerraformDynamicDecoder`, which you can access through any context that provides data. For example:
 
@@ -204,9 +225,9 @@ public override Task Plan(IPlanContext<,> context)
 }
 ```
 
-### Schema Constructor
+### Schema Class Constructor
 
-If you use an constructor for objects or blocks, your constructor parameter names must match the properties. By using `AttributeIgnoreAttribute` you can ignore certain properties, so they won't be recognized as attributes anymore. Those constructor parameters that are not present as attributes, are requested from the service provider.
+If you use an constructor for objects or blocks, your constructor parameter names must match the properties. During matching, property names and constructor parameter names are compared case insensitive. By using `AttributeIgnoreAttribute` you can ignore certain properties, so they won't be recognized as attributes anymore. Those constructor parameters that are not present as attributes, are requested from the service provider.
 
 ## Provider Debugging
 
