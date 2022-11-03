@@ -24,6 +24,9 @@ By saying this, let me give you a short list of protocol features that are or ar
   - :heavy_check_mark: ValidateResourceConfig
   - :heavy_check_mark: PlanResourceChange
   - :heavy_check_mark: ApplyResourceChange
+- Terraform Types
+  - :x: Tuples
+  - :heavy_check_mark: [All others](#supported-mappings) are supported
 
 Still fine? Then continue with the usage examples.
 
@@ -66,6 +69,7 @@ class ProviderMetaSchema {}
 [Block]
 class ProviderSchema {}
 
+/* If using constructor, the constructor parameters are resolved by service provider. */
 class ProviderImpl : Provider<ProviderSchema>
 {
     public override Task ValidateConfig(IValidateConfigContext<ProviderSchema> context) => base.ValidateConfig(context);
@@ -77,6 +81,7 @@ class ResourceSchema
 {
 }
 
+/* If using constructor, the constructor parameters are resolved by service provider. */
 internal class ResourceImpl : Resource<ResourceSchema, ProviderMetaSchema>
 {
     public override string TypeName => "sum_a_b";
@@ -90,6 +95,7 @@ internal class ResourceImpl : Resource<ResourceSchema, ProviderMetaSchema>
 [Block]
 internal class DataSourceSchema : Object.WithRanges.WithNestedBlocks {}
 
+/* If using constructor, the constructor parameters are resolved by service provider. */
 internal class DataSourceImpl : DataSource<DataSourceSchema, ProviderMetaSchema>
 {
     public override string TypeName => "sum_x_y";
@@ -102,7 +108,14 @@ Feel free to take a look at the other overload methods.
 
 ### Supported Mappings
 
+Attribute names are automatically turned to kebab_case.
+
 ```csharp
+
+[Object]
+class AnObject {
+    /* Can contain everything like a block except nested blocks. */
+}
 
 [Block]
 class AnotherSchema { }
@@ -111,15 +124,15 @@ class AnotherSchema { }
 class Schema {
     // By using object, you can decode parts of it at runtime.
     // See section for Terraform dynamic.
-    public object dynamic { get; set; }
+    public object Dynamic { get; set; }
 
     // String decoded as UTF8.
-    public string text { get; set; }
+    public string String { get; set; }
 
     /* Here a list of all supported primitives:
      * Byte, SByte, UInt16, Int16, UInt32, Int32, UInt64, Int64, Single, Double
      */
-    public int number { get; set; }
+    public int Number { get; set; }
     // For numbers bigger than UInt64.
     public BigInteger BigNumber { get;set;}
 
@@ -134,6 +147,8 @@ class Schema {
 
     // Map of any supported type. The key must be of type string.
     public IDictionary<string,> List { get; set; }
+
+    public AnObject Object { get; set; }
 
     // A nested block where only a single block definition is allowed.
     [NestedBlock]
@@ -153,6 +168,25 @@ class Schema {
 }
 ```
 
+### Supported Attributes
+
+- Class Attribtues
+  - TupleAttribute (no function yet)
+  - ObjectAttribute => make class equivalent to Terraform object type
+  - BlockAttribute => make class equivalent to Terraform block type
+- Class Constructor Attributes
+  - BlockConstructorAttribute => prefer a constructor in case of two
+- Propertiy Attributes
+  - AttributeIgnoreAttribute => do not treat property as attribute
+  - ComputedAttribute => mark attribute as computed
+  - DeprecatedAttribute => mark attribute as deprecated
+  - DescriptionKindAttribute => description kind of XML comment
+  - NameAttribute => use custom name
+  - NestedBlockAttribute => mark attribute as nested block
+  - OptionalAttribute => mark attribute as optional
+  - SensitiveAttribute => mark attribute as sensitive
+  - ValueAttribute => overwrite implicit Terraform type determination
+
 ### Unknown Values
 
 What about **unknown values**? Just wrap any type with `ITerraformValue<>`.
@@ -169,6 +203,10 @@ public override Task Plan(IPlanContext<,> context)
     if (context.DynamicDecoder.TryDecode... // Use of dynamic decoder
 }
 ```
+
+### Schema Constructor
+
+If you use an constructor for objects or blocks, your constructor parameter names must match the properties. By using `AttributeIgnoreAttribute` you can ignore certain properties, so they won't be recognized as attributes anymore. Those constructor parameters that are not present as attributes, are requested from the service provider.
 
 ## Provider Debugging
 
