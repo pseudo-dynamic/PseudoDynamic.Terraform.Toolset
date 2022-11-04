@@ -25,8 +25,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
         public interface IStateContext<out Schema>
         {
             /// <summary>
-            /// The current state of the resource. Can be <see langword="null"/>,
-            /// if you creating this resource.
+            /// The current state of the resource. Is <see langword="null"/> when creating this resource.
             /// </summary>
             Schema State { get; }
         }
@@ -37,7 +36,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
             /// Represents the transmitted configuration made by you in the Terraform project. May
             /// contain unknown values. Keep in mind that if you are interested in differentiating
             /// between null and unknown values, you need to use <see cref="ITerraformValue{T}"/>
-            /// in your schema.
+            /// in your schema. Is <see langword="null"/> when deleting this resource.
             /// </summary>
             Schema Config { get; }
         }

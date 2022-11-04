@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using PseudoDynamic.Terraform.Plugin.Protocols.Consolidated;
 using PseudoDynamic.Terraform.Plugin.Sdk.Services;
@@ -30,17 +31,24 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         #region Provider
 
-        public async Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request) =>
-            new GetProviderSchema.Response() {
+        public Task<GetProviderSchema.Response> GetProviderSchema(GetProviderSchema.Request request) =>
+            Task.FromResult(new GetProviderSchema.Response() {
                 Provider = _provider.ProviderService.Schema,
                 ProviderMeta = _provider.ProviderMetaSchema,
                 ResourceSchemas = _provider.ResourceServices.ToDictionary(x => x.Key, x => x.Value.Schema),
                 DataSourceSchemas = _provider.DataSourceServices.ToDictionary(x => x.Key, x => x.Value.Schema)
-            };
+            });
 
         public Task<ValidateProviderConfig.Response> ValidateProviderConfig(ValidateProviderConfig.Request request)
         {
             var service = _provider.ProviderService;
+
+            if (!service.HasImplementation) {
+                return Task.FromResult(new ValidateProviderConfig.Response() {
+                    PreparedConfig = request.Config
+                });
+            }
+
             return service.Implementation.ProviderAdapter.ValidateProviderConfig(this, service, request);
         }
 
@@ -241,7 +249,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 var resource = (IResource<Schema, ProviderMetaSchema>)service.Implementation;
                 var reports = new Reports();
                 var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
-                var decodedConfig = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
+                var decodedConfig = (Schema?)decoder.DecodeNullableBlock(request.Config.Msgpack, service.Schema, decodingOptions);
                 var decodedState = (Schema?)decoder.DecodeNullableBlock(request.PriorState.Msgpack, service.Schema, decodingOptions);
                 var decodedPlan = (Schema?)decoder.DecodeNullableBlock(request.ProposedNewState.Msgpack, service.Schema, decodingOptions);
                 var decodedProviderMeta = (ProviderMetaSchema)decoder.DecodeNullableBlock(request.ProviderMeta.Msgpack, provider.ProviderMetaSchema, decodingOptions)!;
@@ -270,7 +278,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 var resource = (IResource<Schema, ProviderMetaSchema>)service.Implementation;
                 var reports = new Reports();
                 var decodingOptions = new TerraformDynamicMessagePackDecoder.DecodingOptions() { Reports = reports };
-                var decodedConfig = (Schema)decoder.DecodeBlock(request.Config.Msgpack, service.Schema, decodingOptions);
+                var decodedConfig = (Schema?)decoder.DecodeNullableBlock(request.Config.Msgpack, service.Schema, decodingOptions);
                 var decodedState = (Schema?)decoder.DecodeNullableBlock(request.PriorState.Msgpack, service.Schema, decodingOptions);
                 var decodedPlan = (Schema?)decoder.DecodeNullableBlock(request.PlannedState.Msgpack, service.Schema, decodingOptions);
                 var decodedProviderMeta = (ProviderMetaSchema)decoder.DecodeNullableBlock(request.ProviderMeta.Msgpack, provider.ProviderMetaSchema, decodingOptions)!;

@@ -164,5 +164,8 @@ namespace PseudoDynamic.Terraform.Plugin
             _value,
             !_isNotNull,
             _isUnknown);
+
+        public static implicit operator TerraformValue<T>(T value) =>
+            new TerraformValue<T>(value);
     }
 }

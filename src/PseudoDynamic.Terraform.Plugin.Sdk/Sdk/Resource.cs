@@ -72,7 +72,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             /// <summary>
             /// The planned new state for the resource. Terraform 1.3 and later
             /// supports resource destroy planning, in which this will contain a null
-            /// value.
+            /// value. Is <see langword="null"/> when deleting this resource.
             /// </summary>
             Schema Plan { get; set; }
         }
@@ -85,12 +85,15 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
         }
 
-        public interface IDeleteContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IConfigContext<Schema>, IStateContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
+        public interface IDeleteContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IStateContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
         {
         }
 
         public interface IPlanContext<Schema, out ProviderMetaSchema> : ICreateContext<Schema, ProviderMetaSchema>, IUpdateContext<Schema, ProviderMetaSchema>, IDeleteContext<Schema, ProviderMetaSchema>
         {
+            /// <inheritdoc cref="IConfigContext{Schema}.Config"/>
+            new Schema? Config { get; }
+
             /// <inheritdoc cref="IStateContext{Schema}.State"/>
             new Schema? State { get; }
 
@@ -100,6 +103,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public interface IApplyContext<Schema, out ProviderMetaSchema> : ICreateContext<Schema, ProviderMetaSchema>, IUpdateContext<Schema, ProviderMetaSchema>, IDeleteContext<Schema, ProviderMetaSchema>
         {
+            /// <inheritdoc cref="IConfigContext{Schema}.Config"/>
+            new Schema? Config { get; }
+
             /// <inheritdoc cref="IStateContext{Schema}.State"/>
             new Schema? State { get; }
 
@@ -111,10 +117,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             public Reports Reports { get; }
             public ITerraformDynamicDecoder DynamicDecoder { get; }
-            public Schema Config { get; }
+            public Schema? Config { get; }
             public Schema? State { get; }
             public Schema? Plan { get; set; }
 
+            Schema IConfigContext<Schema>.Config => Config ?? throw new InvalidOperationException();
             Schema IStateContext<Schema>.State => Plan ?? throw new InvalidOperationException();
 
             Schema IPlanContext<Schema>.Plan {
@@ -130,7 +137,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             internal PlanContext(
                 Reports reports,
                 ITerraformDynamicDecoder dynamicDecoder,
-                Schema config,
+                Schema? config,
                 Schema? state,
                 Schema? plan,
                 ProviderMetaSchema providerMeta)

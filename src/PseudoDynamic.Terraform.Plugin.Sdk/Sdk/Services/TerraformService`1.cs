@@ -11,6 +11,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
     {
         public BlockDefinition Schema { get; }
 
+        /// <summary>
+        /// The implementation. Throws if <see langword="null"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"/>
         [NotNull]
         public virtual TImplementation Implementation => _implementation ?? throw new InvalidOperationException("Implementation is not set");
 
@@ -30,6 +34,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
             _implementation = implementation ?? throw new ArgumentNullException(nameof(implementation));
         }
 
+        /// <summary>
+        /// The implementation. Does not throw if <see langword="null"/>.
+        /// </summary>
         protected TImplementation GetImplementation() => _implementation!;
     }
 }

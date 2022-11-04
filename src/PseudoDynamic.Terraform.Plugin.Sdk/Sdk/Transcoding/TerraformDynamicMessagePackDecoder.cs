@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 using DotNext.Buffers;
@@ -193,7 +194,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 foreach (var nonConstructorSupportedProperty in reflectionMetadata.NonConstructorSupportedProperties) {
                     var propertyName = nonConstructorSupportedProperty.Name;
                     var attributeName = reflectionMetadata.PropertyNameAttributeNameMapping[propertyName];
-                    instanceAccessor[propertyName] = attributes[attributeName];
+                    var propertyValue = attributes[attributeName];
+
+                    if (nonConstructorSupportedProperty.PropertyType.IsValueType && propertyValue is null) {
+                        continue;
+                    }
+
+                    instanceAccessor[propertyName] = propertyValue;
                 }
             }
 
@@ -230,7 +237,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         }
 
         private object DecodeNonNullableBlock(ref MessagePackReader reader, BlockDefinition definition, DecodingOptions options) =>
-            DecodeNullableComplex(ref reader, definition, options) ?? throw new TerraformDynamicMessagePackDecodingException($"The block to read was null{Environment.NewLine}{definition}");
+            DecodeNullableComplex(ref reader, definition, options) ?? throw new TerraformDynamicMessagePackDecodingException($"The MessagePack reader tried to reconstruct the Terraform block of type {definition.SourceType.FullName}, but the data delivered to the reader was empty{Environment.NewLine}{definition}");
 
         private object DecodeValue(ValueDefinition definition, ref MessagePackReader reader, DecodingOptions options) => definition.TypeConstraint switch {
             TerraformTypeConstraint.Dynamic => DecodeDynamic(ref reader, (DynamicDefinition)definition),
@@ -240,7 +247,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             TerraformTypeConstraint.List => DecodeList(ref reader, (MonoRangeDefinition)definition, options),
             TerraformTypeConstraint.Set => DecodeSet(ref reader, (MonoRangeDefinition)definition, options),
             TerraformTypeConstraint.Map => DecodeMap(ref reader, (MapDefinition)definition, options),
-            TerraformTypeConstraint.Object => DecodeNullableComplex(ref reader, (ObjectDefinition)definition, options) ?? throw new TerraformDynamicMessagePackDecodingException($"The object to read was null{Environment.NewLine}{definition}"),
+            TerraformTypeConstraint.Object => DecodeNullableComplex(ref reader, (ObjectDefinition)definition, options) ?? throw new TerraformDynamicMessagePackDecodingException($"The MessagePack reader tried to reconstruct the Terraform object of type {definition.SourceType.FullName}, but the data delivered to the reader was empty{Environment.NewLine}{definition}"),
             TerraformTypeConstraint.Block => DecodeNonNullableBlock(ref reader, (BlockDefinition)definition, options),
             _ => throw new NotImplementedException($"The decoding of this Terraform constraint type is not implemented: {definition.TypeConstraint}")
         };
