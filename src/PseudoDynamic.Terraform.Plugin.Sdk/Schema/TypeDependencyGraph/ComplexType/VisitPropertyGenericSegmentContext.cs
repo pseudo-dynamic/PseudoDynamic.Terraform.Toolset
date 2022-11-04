@@ -11,23 +11,35 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// </summary>
         /// <param name="underlyingContext"></param>
         /// <param name="visitType"></param>
+        /// <param name="contextType"></param>
         /// <remarks>
         /// Breaks the nullability chain of this and next property generic segments. They are treated as they would be annotated by <see cref="MaybeNullAttribute"/>.
         /// </remarks>
-        internal static VisitPropertyGenericSegmentContext Custom(IVisitPropertySegmentContext underlyingContext, Type visitType) =>
-            new VisitPropertyGenericSegmentContext(underlyingContext, visitType);
+        internal static VisitPropertyGenericSegmentContext Custom(IVisitPropertySegmentContext underlyingContext, Type visitType, VisitContextType contextType) =>
+            new VisitPropertyGenericSegmentContext(underlyingContext, visitType) { ContextType = contextType };
 
         /// <summary>
         /// Creates a custom property generic segment, that inherits a pre-existing underlying context.
         /// </summary>
         /// <param name="underlyingContext"></param>
         /// <param name="visitType"></param>
-        /// <param name="visitTypeGenericArguments"></param>
         /// <remarks>
         /// Breaks the nullability chain of this and next property generic segments. They are treated as they would be annotated by <see cref="MaybeNullAttribute"/>.
         /// </remarks>
-        internal static VisitPropertyGenericSegmentContext Custom(IVisitPropertySegmentContext underlyingContext, Type visitType, params Type[]? visitTypeGenericArguments) =>
-            new VisitPropertyGenericSegmentContext(underlyingContext, new NullableInfo(visitType) { GenericTypeArguments = visitTypeGenericArguments });
+        internal static VisitPropertyGenericSegmentContext Custom(IVisitPropertySegmentContext underlyingContext, Type visitType) =>
+            new VisitPropertyGenericSegmentContext(underlyingContext, visitType);
+
+        ///// <summary>
+        ///// Creates a custom property generic segment, that inherits a pre-existing underlying context.
+        ///// </summary>
+        ///// <param name="underlyingContext"></param>
+        ///// <param name="visitType"></param>
+        ///// <param name="visitTypeGenericArguments"></param>
+        ///// <remarks>
+        ///// Breaks the nullability chain of this and next property generic segments. They are treated as they would be annotated by <see cref="MaybeNullAttribute"/>.
+        ///// </remarks>
+        //internal static VisitPropertyGenericSegmentContext Custom(IVisitPropertySegmentContext underlyingContext, Type visitType, params Type[]? visitTypeGenericArguments) =>
+        //    new VisitPropertyGenericSegmentContext(underlyingContext, new NullableInfo(visitType) { GenericTypeArguments = visitTypeGenericArguments });
 
         /// <inheritdoc/>
         public override VisitContextType ContextType { get; internal init; } = VisitContextType.PropertyGenericSegment;

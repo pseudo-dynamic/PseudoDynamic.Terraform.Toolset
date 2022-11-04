@@ -2,6 +2,7 @@
 {
     public enum TypeWrapping
     {
-        TerraformValue
+        TerraformValue,
+        Nullable
     }
 }

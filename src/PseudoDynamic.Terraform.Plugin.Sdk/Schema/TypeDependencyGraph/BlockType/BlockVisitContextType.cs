@@ -2,8 +2,9 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
-    internal sealed class TerraformVisitContextType : VisitContextType
+    internal sealed class BlockVisitContextType : VisitContextType
     {
         public static readonly VisitContextType TerraformValue = New().Inherits(PropertyGenericSegment);
+        public static readonly VisitContextType Nullable = New().Inherits(PropertyGenericSegment);
     }
 }

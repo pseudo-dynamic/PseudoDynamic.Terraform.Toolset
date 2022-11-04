@@ -41,8 +41,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                                 Attributes = new []{
                                     new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 },
-                                OuterType = typeof(TerraformValue<Blocks.HavingString>),
-                                SourceTypeWrapping = TypeWrapping.TerraformValue
+                                OuterType = typeof(ITerraformValue<Blocks.HavingString>),
+                                SourceTypeWrapping = new [] { TypeWrapping.TerraformValue }
                             })
                     }
                 }
@@ -52,12 +52,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 typeof(Blocks.ListOfTerraformValueWrappedNestedBlocks),
                 new BlockDefinition(typeof(Blocks.ListOfTerraformValueWrappedNestedBlocks)) {
                     Blocks = new []{
-                        new NestedBlockAttributeDefinition(typeof(IList<TerraformValue<Blocks.HavingString>>), "block", MonoRangeDefinition.List<IList<TerraformValue<Blocks.HavingString>>>(new BlockDefinition(typeof(Blocks.HavingString)) {
+                        new NestedBlockAttributeDefinition(typeof(IList<ITerraformValue<Blocks.HavingString>>), "block", MonoRangeDefinition.List<IList<ITerraformValue<Blocks.HavingString>>>(new BlockDefinition(typeof(Blocks.HavingString)) {
                                 Attributes = new []{
                                     new BlockAttributeDefinition(typeof(string),"string", PrimitiveDefinition.String)
                                 },
-                                OuterType = typeof(TerraformValue<Blocks.HavingString>),
-                                SourceTypeWrapping = TypeWrapping.TerraformValue
+                                OuterType = typeof(ITerraformValue<Blocks.HavingString>),
+                                SourceTypeWrapping = new [] { TypeWrapping.TerraformValue }
                             }))
                     }
                 }
@@ -119,6 +119,20 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                     }
                 }
             };
+
+            yield return new object[] {
+                typeof(Blocks.Nullable),
+                new BlockDefinition(typeof(Blocks.Nullable)) {
+                    Attributes = new []{
+                        new BlockAttributeDefinition(typeof(int), "nullable_number", PrimitiveDefinition.Number with {
+                            SourceTypeWrapping = new [] { TypeWrapping.Nullable },
+                            OuterType= typeof(int?)
+                        }) {
+                            IsOptional = true
+                        }
+                    },
+                }
+            };
         }
 
         [Theory]
@@ -151,14 +165,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             internal class TerraformValueNestedBlock
             {
                 [NestedBlock]
-                public TerraformValue<HavingString> Block { get; set; }
+                public ITerraformValue<HavingString> Block { get; set; }
             }
 
             [Block]
             internal class ListOfTerraformValueWrappedNestedBlocks
             {
                 [NestedBlock]
-                public IList<TerraformValue<HavingString>> Block { get; set; }
+                public IList<ITerraformValue<HavingString>> Block { get; set; }
             }
 
             [Block]
@@ -187,19 +201,24 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             }
 
 
-            internal class InheritableStringFloorZero
+            internal class InheritedStringBase
             {
                 public string String { get; set; }
 
-                internal class FloorOne : InheritableStringFloorZero
+                internal class FloorOne : InheritedStringBase
                 {
                 }
             }
 
             [Block]
-            internal class InheritedString : InheritableStringFloorZero.FloorOne
+            internal class InheritedString : InheritedStringBase.FloorOne
             {
+            }
 
+            [Block]
+            internal class Nullable
+            {
+                public int? NullableNumber { get; set; }
             }
         }
     }

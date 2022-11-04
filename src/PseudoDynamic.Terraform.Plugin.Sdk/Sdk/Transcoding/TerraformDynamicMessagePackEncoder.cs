@@ -145,7 +145,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             }
         }
 
-        private void EncodeNonNullValue(ref MessagePackWriter writer, ValueDefinition value, object content)
+        private void EncodeNonWrappedlValue(ref MessagePackWriter writer, ValueDefinition value, object content)
         {
             switch (value.TypeConstraint) {
                 case TerraformTypeConstraint.Dynamic:
@@ -191,7 +191,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 return;
             }
 
-            EncodeNonNullValue(ref writer, value, terraformValue.Value);
+            EncodeNonWrappedlValue(ref writer, value, terraformValue.Value);
         }
 
         private void EncodeValue(ref MessagePackWriter writer, ValueDefinition value, object? content)
@@ -201,12 +201,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 return;
             }
 
-            if (value.SourceTypeWrapping == TypeWrapping.TerraformValue) {
+            if (value.SourceTypeWrapping.Contains(TypeWrapping.TerraformValue)) {
                 EncodeTerraformValue(ref writer, value, (ITerraformValue)content);
                 return;
             }
 
-            EncodeNonNullValue(ref writer, value, content);
+            EncodeNonWrappedlValue(ref writer, value, content);
         }
 
         public ReadOnlyMemory<byte> EncodeValue(ValueDefinition value, object? content) =>

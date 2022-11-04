@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="CSF.CollectionComparers" Version="1.1.1" />
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
         <PackageReference Include="CaseExtensions" Version="1.1.0" />
         <PackageReference Include="Concurrent.FastReflection.NetStandard" Version="1.2.1.1" />

@@ -18,8 +18,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
             _ => default
         };
 
-        private TerraformTypeConstraint? EvaluateObjectTypeCodedValueType(Type valueType) => valueType switch {
-            var _ when valueType == typeof(BigInteger) => TerraformTypeConstraint.Number,
+        private TerraformTypeConstraint? EvaluateStructType(Type structType) => structType switch {
+            var _ when structType == typeof(BigInteger) => TerraformTypeConstraint.Number,
             _ => default
         };
 
@@ -33,7 +33,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
             return TerraformTypeConstraint.Object;
         }
 
-        private TerraformTypeConstraint? EvaluateGenericClassTypeDefinition(Type typeDefinition)
+        private TerraformTypeConstraint? EvaluateClassTypeDefinition(Type typeDefinition)
         {
             if (typeDefinition == typeof(List<>)) {
                 return TerraformTypeConstraint.List;
@@ -50,7 +50,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
             return default;
         }
 
-        private TerraformTypeConstraint? EvaluateGenericReferenceTypeDefinition(Type typeDefinition)
+        private TerraformTypeConstraint? EvaluateInterfaceTypeDefinition(Type typeDefinition)
         {
 
             if (typeDefinition == typeof(IList<>)) {
@@ -73,32 +73,34 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
             var typeConstraints = new HashSet<TerraformTypeConstraint>();
             var typeCode = Type.GetTypeCode(type);
 
-            if (typeCode != TypeCode.Object) {
+            if (typeCode == TypeCode.Object) {
+                if (type.IsValueType) {
+                    if (!type.IsGenericType) {
+                        // Structs
+                        AddNonNull(EvaluateStructType(type));
+                    }
+                } else if (type.IsInterface) {
+                    if (type.IsGenericType) {
+                        // Generic interfaces
+                        AddNonNull(EvaluateInterfaceTypeDefinition(type.GetGenericTypeDefinition()));
+                    }
+                } else if (type.IsClass) {
+                    // If we find predestinated generic classes ..
+                    var genericClassTypeDefinitionEvaluation = type.IsGenericType
+                        ? EvaluateClassTypeDefinition(type.GetGenericTypeDefinition())
+                        : default;
+
+                    if (genericClassTypeDefinitionEvaluation.HasValue) {
+                        // .. then we add it and skip class type evaluation
+                        typeConstraints.Add(genericClassTypeDefinitionEvaluation.Value);
+                    } else {
+                        // Classes except string
+                        typeConstraints.Add(EvaluateClassType(type));
+                    }
+                }
+            } else {
                 // Primitives including string
                 AddNonNull(EvaluateNonObjectTypeCode(Type.GetTypeCode(type)));
-            }
-
-            if (typeCode == TypeCode.Object && type.IsValueType) {
-                // Structs
-                AddNonNull(EvaluateObjectTypeCodedValueType(type));
-            }
-
-            if (type.IsInterface && type.IsGenericType) {
-                // Generic interfaces
-                AddNonNull(EvaluateGenericReferenceTypeDefinition(type.GetGenericTypeDefinition()));
-            } else if (typeCode == TypeCode.Object && type.IsClass) {
-                // If we find predestinated generic classes ..
-                var genericClassTypeDefinitionEvaluation = type.IsGenericType
-                    ? EvaluateGenericClassTypeDefinition(type.GetGenericTypeDefinition())
-                    : default;
-
-                if (genericClassTypeDefinitionEvaluation.HasValue) {
-                    // .. then we add it and skip class type evaluation
-                    typeConstraints.Add(genericClassTypeDefinitionEvaluation.Value);
-                } else {
-                    // Classes except string
-                    typeConstraints.Add(EvaluateClassType(type));
-                }
             }
 
             return typeConstraints;

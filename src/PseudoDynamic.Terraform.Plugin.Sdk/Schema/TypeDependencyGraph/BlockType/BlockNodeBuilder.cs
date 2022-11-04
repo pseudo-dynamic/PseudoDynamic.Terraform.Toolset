@@ -42,46 +42,71 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
             private bool TryVisitPropertySegment(IVisitPropertySegmentContext context)
             {
                 var visitType = context.VisitType;
+                return TryVisitTerraformValue() || TryVisitNullable();
 
-                if (visitType == TerraformValue.BaseInterfaceType) {
-                    RewriteThenVisitTerraformDynamic();
-                } else if (visitType.IsImplementingGenericTypeDefinition(TerraformValue.InterfaceGenericTypeDefinition, out _, out var genericTypeArguments)) {
-                    var genericTypeArgument = genericTypeArguments.Single();
-
-                    var annotatedTerraformValueGenericTypeParameters = visitType.GetGenericTypeDefinition().GetGenericArguments()
-                        .Select((GenericTypeParameter, Index) => (Index, GenericTypeParameter))
-                        .Where(tuple => tuple.GenericTypeParameter.GetCustomAttribute<TerraformValueTypeAttribute>() is not null)
-                        .ToArray();
-
-                    if (annotatedTerraformValueGenericTypeParameters.Length == 0) {
-                        throw new NotSupportedException($"Custom types implementing {TerraformValue.InterfaceGenericTypeDefinition.FullName} without using {typeof(TerraformValueTypeAttribute).FullName} is not supported");
+                bool TryVisitTerraformValue()
+                {
+                    if (!(visitType.IsInterface || visitType.IsClass)) {
+                        return false;
                     }
 
-                    if (annotatedTerraformValueGenericTypeParameters.Length > 1) {
-                        throw new TerraformValueException($"The generic type argument for {TerraformValue.InterfaceGenericTypeDefinition.FullName} generic type definition can only originate from one generic type argument");
+                    if (visitType == TerraformValue.BaseInterfaceType) {
+                        // Direct type equality leads to Terraform dynamic
+                        RewriteThenVisitTerraformDynamic();
+                        return true;
                     }
 
-                    var terraformValueGenericTypeParameterTuple = annotatedTerraformValueGenericTypeParameters.Single();
-                    var terraformValueGenericTypeArgumentIndex = terraformValueGenericTypeParameterTuple.Index;
-                    var terraformValueGenericTypeArgument = visitType.GetGenericArguments()[terraformValueGenericTypeArgumentIndex];
+                    if (visitType.IsImplementingGenericTypeDefinition(TerraformValue.InterfaceGenericTypeDefinition, out _, out var genericTypeArguments)) {
+                        var genericTypeArgument = genericTypeArguments.Single();
 
-                    if (terraformValueGenericTypeArgument != genericTypeArgument) {
-                        throw new TerraformValueException($@"The actual generic type argument of {TerraformValue.InterfaceGenericTypeDefinition.FullName} generic type definition is incompatible with the indicated generic type argument of {visitType.FullName}
+                        var annotatedTerraformValueGenericTypeParameters = visitType.GetGenericTypeDefinition().GetGenericArguments()
+                            .Select((GenericTypeParameter, Index) => (Index, GenericTypeParameter))
+                            .Where(tuple => tuple.GenericTypeParameter.GetCustomAttribute<TerraformValueTypeAttribute>() is not null)
+                            .ToArray();
+
+                        if (annotatedTerraformValueGenericTypeParameters.Length == 0) {
+                            throw new NotSupportedException($"Custom types implementing {TerraformValue.InterfaceGenericTypeDefinition.FullName} without using {typeof(TerraformValueTypeAttribute).FullName} is not supported");
+                        }
+
+                        if (annotatedTerraformValueGenericTypeParameters.Length > 1) {
+                            throw new TerraformValueException($"The generic type argument for {TerraformValue.InterfaceGenericTypeDefinition.FullName} generic type definition can only originate from one generic type argument");
+                        }
+
+                        var terraformValueGenericTypeParameterTuple = annotatedTerraformValueGenericTypeParameters.Single();
+                        var terraformValueGenericTypeArgumentIndex = terraformValueGenericTypeParameterTuple.Index;
+                        var terraformValueGenericTypeArgument = visitType.GetGenericArguments()[terraformValueGenericTypeArgumentIndex];
+
+                        if (terraformValueGenericTypeArgument != genericTypeArgument) {
+                            throw new TerraformValueException($@"The actual generic type argument of {TerraformValue.InterfaceGenericTypeDefinition.FullName} generic type definition is incompatible with the indicated generic type argument of {visitType.FullName}
 actual generic type argument: {genericTypeArgument.FullName}
 indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (indicated by {typeof(TerraformValueTypeAttribute).FullName}");
+                        }
+
+                        RewriteThenVisit(new VisitPropertyGenericSegmentContext(context, terraformValueGenericTypeArgument, terraformValueGenericTypeArgumentIndex) { ContextType = BlockVisitContextType.TerraformValue });
+                        return true;
                     }
 
-                    RewriteThenVisit(new VisitPropertyGenericSegmentContext(context, terraformValueGenericTypeArgument, terraformValueGenericTypeArgumentIndex) { ContextType = TerraformVisitContextType.TerraformValue });
-                } else if (visitType.IsAssignableTo(TerraformValue.BaseInterfaceType)) {
-                    RewriteThenVisitTerraformDynamic();
-                } else {
+                    if (visitType.IsAssignableTo(TerraformValue.BaseInterfaceType)) {
+                        RewriteThenVisitTerraformDynamic();
+                        return true;
+                    }
+
                     return false;
+
+                    // Produces a Terraform dynamic
+                    void RewriteThenVisitTerraformDynamic() => RewriteThenVisit(VisitPropertyGenericSegmentContext.Custom(context, typeof(object), BlockVisitContextType.TerraformValue));
                 }
 
-                return true;
+                bool TryVisitNullable()
+                {
+                    if (!visitType.IsGenericType || visitType.GetGenericTypeDefinition() != typeof(Nullable<>)) {
+                        return false;
+                    }
 
-                // Produces a Terraform dynamic
-                void RewriteThenVisitTerraformDynamic() => RewriteThenVisit(VisitPropertyGenericSegmentContext.Custom(context, typeof(object)) with { ContextType = TerraformVisitContextType.TerraformValue });
+                    var genericTypeArgument = visitType.GenericTypeArguments.Single();
+                    RewriteThenVisit(VisitPropertyGenericSegmentContext.Custom(context, genericTypeArgument, BlockVisitContextType.Nullable));
+                    return true;
+                }
             }
 
             protected override void VisitPropertyGenericArgument(VisitPropertyGenericSegmentContext context)

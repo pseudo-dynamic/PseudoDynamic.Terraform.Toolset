@@ -1,7 +1,11 @@
-﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿using CSF.Collections;
+
+namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal abstract record class ValueDefinition : TerraformDefinition
     {
+        private static readonly ListEqualityComparer<TypeWrapping> TypeWrappingListEqualityComparer = new ListEqualityComparer<TypeWrapping>();
+
         /// <summary>
         /// If differing from <see cref="TerraformDefinition.SourceType"/>
         /// then <see cref="TerraformDefinition.SourceType"/> was computed
@@ -14,11 +18,15 @@
             init => _outerType = value;
         }
 
-        public TypeWrapping? SourceTypeWrapping { get; init; }
+        public IReadOnlyList<TypeWrapping> SourceTypeWrapping {
+            get => _sourceTypeWrapping ??= Array.Empty<TypeWrapping>();
+            init => _sourceTypeWrapping = value;
+        }
 
         public abstract TerraformTypeConstraint TypeConstraint { get; }
 
         private Type? _outerType;
+        private IReadOnlyList<TypeWrapping>? _sourceTypeWrapping;
 
         protected ValueDefinition(Type sourceType) : base(sourceType)
         {
@@ -28,12 +36,12 @@
             other is not null
             && base.Equals(other)
             && OuterType == other.OuterType
-            && SourceTypeWrapping == other.SourceTypeWrapping
+            && SourceTypeWrapping.SequenceEqual(other.SourceTypeWrapping)
             && TypeConstraint == other.TypeConstraint;
 
         public override int GetHashCode() => HashCode.Combine(
             OuterType,
-            SourceTypeWrapping,
+            TypeWrappingListEqualityComparer.GetHashCode(SourceTypeWrapping),
             TypeConstraint);
     }
 }

@@ -9,7 +9,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
             yield return new object[] {
                 typeof(TerraformValueBlock),
                 new BlockNode(new VisitContext(typeof(TerraformValueBlock)) { ContextType = VisitContextType.Complex }) {
-                    new BlockNode(new VisitContext(typeof(TerraformValue<ZeroDepthBlock>)) { ContextType = VisitContextType.Property }) {
+                    new BlockNode(new VisitContext(typeof(ITerraformValue<ZeroDepthBlock>)) { ContextType = VisitContextType.Property }) {
                         new BlockNode(new VisitContext(typeof(ZeroDepthBlock)) { ContextType = VisitContextType.Complex})
                     }
                 }
@@ -30,7 +30,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         [Block]
         public class TerraformValueBlock
         {
-            public TerraformValue<ZeroDepthBlock> Block { get; set; }
+            public ITerraformValue<ZeroDepthBlock> Block { get; set; }
         }
     }
 }

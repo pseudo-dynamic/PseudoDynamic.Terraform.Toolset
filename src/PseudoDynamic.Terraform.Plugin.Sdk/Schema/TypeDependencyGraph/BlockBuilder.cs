@@ -195,15 +195,17 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected ValueResult BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {
-            var isTerraformValue = node.TryUnwrapTerraformValue(out var unwrappedNode);
+            var sourceTypeWrapping = node.TryUnwrap(out var unwrappedNode);
+            var isWrappedByTerraformValue = sourceTypeWrapping.Contains(TypeWrapping.TerraformValue);
 
             var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint();
             bool isNestedBlock;
             ValueDefinition builtValue;
-            var implicitValueTypeConstraints = unwrappedNode.Context.ImplicitTypeConstraints;
 
             // We can now allow to treat dynamic as block
             if (explicitTypeConstraint == TerraformTypeConstraint.Block) {
+                var implicitValueTypeConstraints = unwrappedNode.Context.ImplicitTypeConstraints;
+
                 var singleImplicitValueTypeConstraint = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
                     ?? (implicitValueTypeConstraints.Count == 1
                         ? implicitValueTypeConstraints.Single()
@@ -217,7 +219,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
                 if (singleImplicitValueTypeConstraint.Value.IsComplex()) {
                     builtValue = BuildBlock(unwrappedNode);
-                } else if (isTerraformValue) {
+                } else if (isWrappedByTerraformValue) {
                     throw new NestedBlockException($"The {unwrappedContext.Property.GetPath()} property wants to be a nested block but can only be wrapped by " +
                         $"{TerraformValue.InterfaceGenericTypeDefinition.FullName} if the implicit type constraint is object, tuple or block");
                 } else if (singleImplicitValueTypeConstraint.Value.IsRange()) {
@@ -235,8 +237,6 @@ Property type = {unwrappedNode.Context.VisitType}");
                 builtValue = BuildValue(unwrappedNode, explicitTypeConstraint);
                 isNestedBlock = false;
             }
-
-            var sourceTypeWrapping = isTerraformValue ? TypeWrapping.TerraformValue : default(TypeWrapping?);
 
             var updatedValue = builtValue with {
                 OuterType = node.Context.VisitType,
