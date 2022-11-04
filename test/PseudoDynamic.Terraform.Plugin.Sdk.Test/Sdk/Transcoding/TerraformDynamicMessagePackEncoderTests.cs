@@ -1,5 +1,7 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+using System.Numerics;
+using static PseudoDynamic.Terraform.Plugin.Infrastructure.CollectionFactories;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
@@ -40,54 +42,54 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
             public SchemasGeneratorBase()
             {
-                //// dynamic
-                //Add<object>(default(string));
-                //Add<ITerraformValue>(TerraformValue.OfUnknown<object>(), notWrappable: true);
+                // dynamic
+                Add<object>(default(string));
+                Add<ITerraformValue>(TerraformValue.OfUnknown<object>(), notWrappable: true);
 
                 // number
                 Add(byte.MaxValue);
-                //Add(sbyte.MaxValue);
-                //Add(ushort.MaxValue);
-                //Add(short.MaxValue);
-                //Add(uint.MaxValue);
-                //Add(int.MaxValue);
-                //Add(float.MaxValue);
-                //Add(ulong.MaxValue);
-                //Add(long.MaxValue);
-                //Add(double.MaxValue);
-                //Add(new BigInteger(Enumerable.Range(0, 16).Select(x => byte.MaxValue).ToArray(), isUnsigned: true)); // 128 bit
+                Add(sbyte.MaxValue);
+                Add(ushort.MaxValue);
+                Add(short.MaxValue);
+                Add(uint.MaxValue);
+                Add(int.MaxValue);
+                Add(float.MaxValue);
+                Add(ulong.MaxValue);
+                Add(long.MaxValue);
+                Add(double.MaxValue);
+                Add(new BigInteger(Enumerable.Range(0, 16).Select(x => byte.MaxValue).ToArray(), isUnsigned: true)); // 128 bit
 
-                //// string
-                //Add("works");
+                // string
+                Add("works");
 
-                //// bool
-                //Add(true);
+                // bool
+                Add(true);
 
-                //// list
-                //Add(List("first", "second"));
+                // list
+                Add(List("first", "second"));
 
-                //// set
-                //Add(Set("first", "second"));
+                // set
+                Add(Set("first", "second"));
 
-                //// map
-                //Add(Map(("key", "value")));
+                // map
+                Add(Map(("key", "value")));
 
-                //// object
-                //Add(new SchemaFake<string>.Object("disney world"));
-                //Add(SchemaFake<string>.Object.HavingList("disney", "world"));
-                //Add(SchemaFake<string>.Object.RangeList("first", "second"));
+                // object
+                Add(new SchemaFake<string>.Object("disney world"));
+                Add(SchemaFake<string>.Object.HavingList("disney", "world"));
+                Add(SchemaFake<string>.Object.RangeList("first", "second"));
 
-                //// nested block
-                //Add(new SchemaFake<string>.Block("nested"), isNested: true);
+                // nested block
+                Add(new SchemaFake<string>.Block("nested"), isNested: true);
 
-                //Add(SchemaFake<string>.Block.RangeList("first", "second"), isNested: true, notWrappable: true);
-                //Add(SchemaFake<string>.Block.RangeSet("first", "second"), isNested: true, notWrappable: true);
+                Add(SchemaFake<string>.Block.RangeList("first", "second"), isNested: true, notWrappable: true);
+                Add(SchemaFake<string>.Block.RangeSet("first", "second"), isNested: true, notWrappable: true);
 
-                //Add(SchemaFake<string>.Block.RangeMap(
-                //        ("first_nested_block", "first_nested_block_attribute"),
-                //        ("second_nested_block", "second_nested_block_attribute")),
-                //    isNested: true,
-                //    notWrappable: true);
+                Add(SchemaFake<string>.Block.RangeMap(
+                        ("first_nested_block", "first_nested_block_attribute"),
+                        ("second_nested_block", "second_nested_block_attribute")),
+                    isNested: true,
+                    notWrappable: true);
             }
 
             protected virtual void Add(params object[] row) => AddRow(row);
