@@ -7,20 +7,32 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
     public class TerraformDynamicMessagePackEncoderTests
     {
-        private readonly static SchemaBuilder schemaBuilder = new();
-        private readonly static TerraformDynamicMessagePackDecoder Decoder = new(new NonRequestableServiceProvider(), schemaBuilder);
+        private readonly static BlockBuilder BlockBuilder = BlockBuilder.Default;
+        private readonly static SchemaBuilder SchemaBuilder = new();
+        private readonly static TerraformDynamicMessagePackDecoder Decoder = new(new NonRequestableServiceProvider(), SchemaBuilder);
         private readonly static TerraformDynamicMessagePackEncoder Encoder = new(new());
 
         [Theory]
         [ClassData(typeof(DynamicSchemasGenerator))]
-        internal void Encoder_should_encode_dynamic(object content, Type contentType, Type dynamicType)
+        internal void Encoder_should_encode_non_wrapped_dynamic(object content, Type contentType, Type dynamicType)
         {
-            var encoder = new TerraformDynamicMessagePackEncoder(new());
+            var dynamicBlock = BlockBuilder.BuildBlock(dynamicType);
+            var encoded = Encoder.EncodeBlock(dynamicBlock, content);
 
-            var dynamicBlock = BlockBuilder.Default.BuildBlock(dynamicType);
-            var encoded = encoder.EncodeBlock(dynamicBlock, content);
+            var block = BlockBuilder.BuildBlock(contentType);
+            var decoded = Decoder.DecodeBlock(encoded, block, new());
 
-            var block = BlockBuilder.Default.BuildBlock(contentType);
+            Assert.Equal(content, decoded);
+        }
+
+        [Theory]
+        [ClassData(typeof(DynamicSchemasGenerator.Wrapped))]
+        internal void Encoder_should_encode_wrapped_dynamic(object content, Type contentType, Type dynamicType)
+        {
+            var dynamicBlock = BlockBuilder.BuildBlock(dynamicType);
+            var encoded = Encoder.EncodeBlock(dynamicBlock, content);
+
+            var block = BlockBuilder.BuildBlock(contentType);
             var decoded = Decoder.DecodeBlock(encoded, block, new());
 
             Assert.Equal(content, decoded);
@@ -28,9 +40,19 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         [Theory]
         [ClassData(typeof(SchemasGenerator))]
-        internal void Encoder_should_encode_then_decode_schemas(object content, Type contentType)
+        internal void Encoder_should_encode_non_wrapped(object content, Type contentType)
         {
-            var block = BlockBuilder.Default.BuildBlock(contentType);
+            var block = BlockBuilder.BuildBlock(contentType);
+            var bytes = Encoder.EncodeBlock(block, content);
+            var result = Decoder.DecodeBlock(bytes, block, new());
+            Assert.Equal(content, result);
+        }
+
+        [Theory]
+        [ClassData(typeof(SchemasGenerator.Wrapped))]
+        internal void Encoder_should_encode_wrapped(object content, Type contentType)
+        {
+            var block = BlockBuilder.BuildBlock(contentType);
             var bytes = Encoder.EncodeBlock(block, content);
             var result = Decoder.DecodeBlock(bytes, block, new());
             Assert.Equal(content, result);
@@ -38,6 +60,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         internal class SchemasGeneratorBase : TheoryData
         {
+            protected virtual bool OnlyWrappedOrOnlyNonWrapped { get; }
             protected Type CurrentDynamicType { get; private set; } = null!;
 
             public SchemasGeneratorBase()
@@ -97,13 +120,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             protected void Add<T>(T value, bool isNested = false, bool notWrappable = false)
                 where T : notnull
             {
+                if (!OnlyWrappedOrOnlyNonWrapped)
                 {
                     var schema = new SchemaFake<T>(value) { IsNestedBlock = isNested }.Schema;
                     CurrentDynamicType = new SchemaFake<object>(value) { IsNestedBlock = isNested }.Schema.GetType();
                     Add(schema, schema.GetType());
                 }
 
-                if (!notWrappable)
+                if (OnlyWrappedOrOnlyNonWrapped && !notWrappable)
                 {
                     var schema = new SchemaFake<T>.TerraformValueFake(TerraformValue.OfValue(value)) { IsNestedBlock = isNested }.Schema;
                     CurrentDynamicType = new SchemaFake<object>.TerraformValueFake(TerraformValue.OfValue((object)value)) { IsNestedBlock = isNested }.Schema.GetType();
@@ -114,12 +138,21 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         internal class SchemasGenerator : SchemasGeneratorBase
         {
+            internal class Wrapped : SchemasGenerator
+            {
+                protected override bool OnlyWrappedOrOnlyNonWrapped => true;
+            }
         }
 
         internal class DynamicSchemasGenerator : SchemasGeneratorBase
         {
             protected override void Add(params object[] row) =>
                 AddRow(row.Concat(new[] { CurrentDynamicType }).ToArray());
+
+            internal class Wrapped : DynamicSchemasGenerator
+            {
+                protected override bool OnlyWrappedOrOnlyNonWrapped => true;
+            }
         }
 
         private class NonRequestableServiceProvider : IServiceProvider

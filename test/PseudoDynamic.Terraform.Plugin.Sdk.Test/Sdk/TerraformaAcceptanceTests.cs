@@ -4,11 +4,6 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     public class TerraformaAcceptanceTests
     {
-        private readonly ITestOutputHelper _output;
-
-        public TerraformaAcceptanceTests(ITestOutputHelper output) =>
-            _output = output ?? throw new ArgumentNullException(nameof(output));
-
         [Fact.Terraform]
         internal async Task Terraform_validate_passes()
         {

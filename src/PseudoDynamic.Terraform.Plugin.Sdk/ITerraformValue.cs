@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using MessagePack;
+using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin
 {
@@ -37,5 +40,9 @@ namespace PseudoDynamic.Terraform.Plugin
         /// A shortcut for <see cref="TerraformValue{T}.Unknown"/>.
         /// </summary>
         ITerraformValue<object> AsUnknown => TerraformValue<object>.Unknown;
+
+        internal void Encode<TEncoder>(TEncoder encoder, ref MessagePackWriter writer, ValueDefinition value)
+            where TEncoder : ITerraformValueMessagePackEncoder =>
+            encoder.Encode(ref writer, value, this);
     }
 }
