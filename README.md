@@ -1,6 +1,6 @@
 # PseudoDynamic.Terraform.Plugin.Sdk
 
-This library want to take charge and allow you to write a provider in C# with ease. Before I begin, yes, this library has a lot similarities with [terraform-plugin-framework](https://github.com/hashicorp/terraform-plugin-framework)!
+This library wants to take charge and allows you to write a provider in C# with ease. Before I begin, yes, this library has a lot of similarities with [terraform-plugin-framework](https://github.com/hashicorp/terraform-plugin-framework)!
 
 This is the main goal that this library should fullfill:
 
@@ -30,6 +30,12 @@ By saying this, let me give you a short list of protocol features that are or ar
 
 Still fine? Then continue with the usage examples.
 
+## Example
+
+It may be easier to have a concrete example before proceeding with [the usage](#usage), so here a minimal setup to get started:
+
+https://github.com/pseudo-dynamic/Terraform.Provider.Scaffolding
+
 ## Usage
 
 To make use of this library, you need to install the NuGet package.
@@ -50,11 +56,12 @@ var webHost = new WebHostBuilder()
     .Build();
 ```
 
-This is a minimal provider configuration with a provider, one resource and one data source:
+This is an advanced provider configuration with a provider, one resource, one data source and the usage of [provider meta](https://developer.hashicorp.com/terraform/internals/provider-meta) schema:
 
 ```csharp
 var webHost = new WebHostBuilder()
     .UseTerraformPluginServer(IPluginServerSpecification.NewProtocolV5()
+        // Feel free to take a look at the other overload methods.
         .UseProvider<ProviderMetaSchema>(providerName, provider =>
         {
             provider.SetProvider<ProviderImpl>();
@@ -93,7 +100,7 @@ internal class ResourceImpl : Resource<ResourceSchema, ProviderMetaSchema>
 }
 
 [Block]
-internal class DataSourceSchema : Object.WithRanges.WithNestedBlocks {}
+internal class DataSourceSchema {}
 
 /* If using constructor, the constructor parameters are resolved by service provider. */
 internal class DataSourceImpl : DataSource<DataSourceSchema, ProviderMetaSchema>
@@ -103,8 +110,6 @@ internal class DataSourceImpl : DataSource<DataSourceSchema, ProviderMetaSchema>
     public override Task Read(IReadContext<DataSourceSchema, ProviderMetaSchema> context) => base.Read(context);
 }
 ```
-
-Feel free to take a look at the other overload methods.
 
 ### Supported C# Mappings
 
@@ -204,15 +209,19 @@ Assuming nullability analysis is enabled, the attribute equivalent of `public An
   - NameAttribute => use custom name
   - NestedBlockAttribute => mark attribute as nested block
   - OptionalAttribute => mark attribute as optional
-    Why is there no RequiredAttribute? See [optional Terraform attributes](#optional-terraform-attributes)
+    <br/>Why is there no RequiredAttribute? See [optional Terraform attributes](#optional-terraform-attributes)
   - SensitiveAttribute => mark attribute as sensitive
   - ValueAttribute => overwrite implicit Terraform type determination
 
 ### Unknown Terraform Values
 
-What about **unknown values**? Just wrap any type with `ITerraformValue<>`. By doing so, you are able to differentiate between unknown and null values.
+What about **unknown values**? Just wrap any type with `ITerraformValue<>` or `TerraformValue<>`. By doing so, you are able to differentiate between unknown and null values.
 
-> :exclamation: The only types you cannot wrap with `ITerraformValue<>` are nested blocks.
+The only types **you cannot wrap** with `ITerraformValue<>` are
+- :x: lists of nested blocks (e.g. `ITerraformValue<IList<ANestedBlock>>`),
+- :x: sets of nested blocks (e.g. `ITerraformValue<ISet<ANestedBlock>>`) or
+- :x: map of nested blocks (e.g. `ITerraformValue<IDictionary<ANestedBlock>>`), but
+- :heavy_check_mark: nested blocks inside collections can be wrapped (e.g. `IList<ITerraformValue<ANestedBlock>>`)
 
 ### Dynamic Terraform Values
 
