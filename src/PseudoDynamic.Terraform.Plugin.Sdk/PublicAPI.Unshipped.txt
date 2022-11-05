@@ -225,6 +225,7 @@ PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>
 PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.Resource() -> void
 PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema>
 PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema>.Resource() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.ResourceExtensions
 PseudoDynamic.Terraform.Plugin.Sdk.Services.DesignTimeTerraformService
 PseudoDynamic.Terraform.Plugin.Sdk.Services.IDesignTimeTerraformService<Schema>
 PseudoDynamic.Terraform.Plugin.Sdk.Services.IDesignTimeTerraformService<Schema>.IDataSource<ProviderSchemaType>
@@ -262,6 +263,9 @@ static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerWebHostBuilderExtensions.U
 static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerWebHostBuilderExtensions.UseTerraformPluginServer<THostBuilder>(this THostBuilder builder, PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6! serverSpecification) -> THostBuilder
 static PseudoDynamic.Terraform.Plugin.Sdk.ProviderFeatureDependencyInjectionExtensions.SetProvider<Provider, Schema>(this PseudoDynamic.Terraform.Plugin.Sdk.IProviderFeature! providerFeature) -> void
 static PseudoDynamic.Terraform.Plugin.Sdk.ProviderFeatureDependencyInjectionExtensions.SetProvider<Provider>(this PseudoDynamic.Terraform.Plugin.Sdk.IProviderFeature! providerFeature, Provider? provider = null) -> void
+static PseudoDynamic.Terraform.Plugin.Sdk.ResourceExtensions.IsCreating<Schema, ProviderMetaSchema>(this PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>! planContext, out PseudoDynamic.Terraform.Plugin.Sdk.Resource.ICreateContext<Schema, ProviderMetaSchema>! createContext) -> bool
+static PseudoDynamic.Terraform.Plugin.Sdk.ResourceExtensions.IsDeleting<Schema, ProviderMetaSchema>(this PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>! planContext, out PseudoDynamic.Terraform.Plugin.Sdk.Resource.IDeleteContext<Schema, ProviderMetaSchema>! deleteContext) -> bool
+static PseudoDynamic.Terraform.Plugin.Sdk.ResourceExtensions.IsUpdating<Schema, ProviderMetaSchema>(this PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>! planContext, out PseudoDynamic.Terraform.Plugin.Sdk.Resource.IUpdateContext<Schema, ProviderMetaSchema>! updateContext) -> bool
 static PseudoDynamic.Terraform.Plugin.TerraformValue.OfNull<T>() -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
 static PseudoDynamic.Terraform.Plugin.TerraformValue.OfNull<T>(bool isUnknown) -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
 static PseudoDynamic.Terraform.Plugin.TerraformValue.OfUnknown<T>() -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!

@@ -101,19 +101,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             new Schema? Plan { get; set; }
         }
 
-        public interface IApplyContext<Schema, out ProviderMetaSchema> : ICreateContext<Schema, ProviderMetaSchema>, IUpdateContext<Schema, ProviderMetaSchema>, IDeleteContext<Schema, ProviderMetaSchema>
+        public interface IApplyContext<Schema, out ProviderMetaSchema> : IPlanContext<Schema, ProviderMetaSchema>
         {
-            /// <inheritdoc cref="IConfigContext{Schema}.Config"/>
-            new Schema? Config { get; }
-
-            /// <inheritdoc cref="IStateContext{Schema}.State"/>
-            new Schema? State { get; }
-
-            /// <inheritdoc cref="IPlanContext{Schema}.Plan"/>
-            new Schema? Plan { get; set; }
         }
 
-        internal class PlanContext<Schema, ProviderMetaSchema> : IPlanContext<Schema, ProviderMetaSchema>, IApplyContext<Schema, ProviderMetaSchema>
+        internal class PlanContext<Schema, ProviderMetaSchema> : IApplyContext<Schema, ProviderMetaSchema>
         {
             public Reports Reports { get; }
             public ITerraformDynamicDecoder DynamicDecoder { get; }
