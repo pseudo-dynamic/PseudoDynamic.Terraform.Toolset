@@ -24,8 +24,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         /// </summary>
         public string? WorkingDirectory { get; init; }
 
-        public IReadOnlyDictionary<string, string> EnvironmentVariables
-        {
+        public IReadOnlyDictionary<string, string> EnvironmentVariables {
             get => environmentVariables;
             init => environmentVariables = value ?? throw new ArgumentNullException(nameof(value));
         }
@@ -46,25 +45,18 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
             var workingDirectory = WorkingDirectory ?? string.Empty;
             ProcessStartInfo processStartInfo;
 
-            if (arguments == null)
-            {
-                processStartInfo = new ProcessStartInfo(executable)
-                {
+            if (arguments == null) {
+                processStartInfo = new ProcessStartInfo(executable) {
                     WorkingDirectory = workingDirectory
                 };
-            }
-            else
-            {
-                processStartInfo = new ProcessStartInfo(executable, arguments)
-                {
+            } else {
+                processStartInfo = new ProcessStartInfo(executable, arguments) {
                     WorkingDirectory = workingDirectory
                 };
             }
 
-            if (EnvironmentVariables is not null)
-            {
-                foreach (var environmentVariable in EnvironmentVariables)
-                {
+            if (EnvironmentVariables is not null) {
+                foreach (var environmentVariable in EnvironmentVariables) {
                     processStartInfo.EnvironmentVariables.Add(environmentVariable.Key, environmentVariable.Value);
                 }
             }

@@ -70,6 +70,8 @@ var webHost = new WebHostBuilder()
         }))
     .Build();
 
+await webHost.RunAsync();
+
 [Block]
 class ProviderMetaSchema {}
 

@@ -1,7 +1,7 @@
-﻿using FluentAssertions;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentAssertions;
 using MessagePack;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {

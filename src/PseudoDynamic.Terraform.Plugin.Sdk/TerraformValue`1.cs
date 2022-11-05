@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using PseudoDynamic.Terraform.Plugin.Schema;
+﻿using PseudoDynamic.Terraform.Plugin.Schema;
 
 namespace PseudoDynamic.Terraform.Plugin
 {

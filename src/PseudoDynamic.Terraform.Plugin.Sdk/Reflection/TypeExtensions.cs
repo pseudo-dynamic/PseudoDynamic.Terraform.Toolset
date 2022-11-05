@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace PseudoDynamic.Terraform.Plugin.Reflection
+﻿namespace PseudoDynamic.Terraform.Plugin.Reflection
 {
     internal static class TypeExtensions
     {

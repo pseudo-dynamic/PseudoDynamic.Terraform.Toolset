@@ -24,26 +24,21 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 
             var process = XProcess.Start(startInfo.CreateProcessStartInfo());
 
-            var readOutput = Task.Run(async () =>
-            {
-                await foreach (var line in process.GetOutputAsyncStream(cancellationToken))
-                {
+            var readOutput = Task.Run(async () => {
+                await foreach (var line in process.GetOutputAsyncStream(cancellationToken)) {
                     outputBuilder.AppendLine(line);
                 }
             });
 
-            var readError = Task.Run(async () =>
-            {
-                await foreach (var line in process.GetOutputAsyncStream(cancellationToken))
-                {
+            var readError = Task.Run(async () => {
+                await foreach (var line in process.GetOutputAsyncStream(cancellationToken)) {
                     errorBuilder.AppendLine(line);
                 }
             });
 
             await Task.WhenAll(readOutput, readError);
 
-            if (process.ExitCode!.Value != 0)
-            {
+            if (process.ExitCode!.Value != 0) {
                 throw new NonZeroExitCodeException(process.ExitCode!.Value, errorBuilder.ToString());
             }
 

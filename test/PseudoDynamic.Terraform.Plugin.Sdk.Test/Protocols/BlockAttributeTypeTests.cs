@@ -24,8 +24,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
                 Add("""["list","string"]""", MonoRangeDefinition.ListUncomputed(PrimitiveDefinition.String));
                 Add("""["list",["list","string"]]""", MonoRangeDefinition.ListUncomputed(MonoRangeDefinition.ListUncomputed(PrimitiveDefinition.String)));
 
-                Add("""["object",{"list":["list","string"]}]""", ObjectDefinition.Uncomputed() with
-                {
+                Add("""["object",{"list":["list","string"]}]""", ObjectDefinition.Uncomputed() with {
                     Attributes = new[] {
                         ObjectAttributeDefinition.Uncomputed("list", MonoRangeDefinition.ListUncomputed(PrimitiveDefinition.String))
                     }

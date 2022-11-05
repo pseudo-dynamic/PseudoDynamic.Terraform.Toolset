@@ -11,6 +11,7 @@
         /// <summary>
         /// Creates an instance of this type.
         /// </summary>
+        [SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Prevents inheriting base")]
         public BlockAttribute() : base(TerraformTypeConstraint.Block)
         {
         }
@@ -20,6 +21,7 @@
         /// </summary>
         /// <param name="version">The schema version. Can get be overriden by the version of <see cref="NestedBlockAttribute"/>.</param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
+        [SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Prevents inheriting base")]
         public BlockAttribute(int version)
             : this()
         {

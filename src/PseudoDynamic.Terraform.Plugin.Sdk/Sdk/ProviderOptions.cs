@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using PseudoDynamic.Terraform.Plugin.Sdk.Services;
+﻿using PseudoDynamic.Terraform.Plugin.Sdk.Services;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {

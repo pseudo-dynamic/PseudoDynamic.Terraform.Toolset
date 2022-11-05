@@ -2,6 +2,7 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
+    [SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Prevents inheriting base")]
     public abstract class Provider<Schema> : Provider, IProvider<Schema>, IDesignTimeTerraformService<Schema>.IProvider
         where Schema : class
     {

@@ -42,11 +42,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     /// <br/>3. <see cref="ValidateConfig"/> except for [routes: Delete]
     /// <br/>4. <see cref="Plan"/> except for [routes: Delete]
     /// <br/>- [routes: Create] (depends on prior steps)
-    /// <br/>5. <see cref="Create"/>
+    /// <br/>5. <see cref="Apply"/>
     /// <br/>- [routes: Update] (depends on prior steps)
-    /// <br/>6. <see cref="Update"/> (may be skipped if TF sees no change)
+    /// <br/>6. <see cref="Apply"/> (may be skipped if TF sees no change)
     /// <br/>- [routes: Delete] (depends on prior steps)
-    /// <br/>7. <see cref="Delete"/>
+    /// <br/>7. <see cref="Apply"/>
     /// </para>
     /// <br/>The <b>Import route</b> is special as it does not follow the flow of the plan
     /// or apply stage at all:

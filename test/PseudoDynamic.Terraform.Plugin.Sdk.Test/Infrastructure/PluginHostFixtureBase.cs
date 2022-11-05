@@ -38,8 +38,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         /// Specifies custom file patterns that are used to copy matching files from working directory to the temporary directory.
         /// </param>
         /// <returns></returns>
-        internal TerraformCommand.WorkingDirectoryCloning CreateTerraformCommand(string workingDirectory, params string[] copyableFilePatterns) => CreateTerraformCommand(options =>
-        {
+        internal TerraformCommand.WorkingDirectoryCloning CreateTerraformCommand(string workingDirectory, params string[] copyableFilePatterns) => CreateTerraformCommand(options => {
             options.WorkingDirectory = workingDirectory;
             options.CopyableFilePatterns = copyableFilePatterns;
         });
@@ -48,15 +47,12 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         {
             var host = new WebHostBuilder()
                 .UseTerraformPluginServerCore(this)
-                .ConfigureServices(services =>
-                {
-                    services.AddOptions<ProviderOptions>().Configure(options =>
-                    {
+                .ConfigureServices(services => {
+                    services.AddOptions<ProviderOptions>().Configure(options => {
                         options.FullyQualifiedProviderName = ProviderName;
                     });
 
-                    services.AddOptions<PluginServerOptions>().Configure(options =>
-                    {
+                    services.AddOptions<PluginServerOptions>().Configure(options => {
                         options.Protocol = Protocol;
                         options.IsDebuggable = true;
                     });

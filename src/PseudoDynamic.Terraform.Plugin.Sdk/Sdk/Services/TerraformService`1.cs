@@ -1,10 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
     /// <summary>
-    /// Describes a Terraform service, which can be <see cref="ProviderService"/>, <see cref="ResourceService"/>, <see cref="DataSourceService"/>, or <see cref="ProvisionerService"/>.
+    /// Describes a Terraform service, which can be <see cref="ProviderService"/>, <see cref="ResourceService"/>, <see cref="DataSourceService"/>.
     /// </summary>
     /// <typeparam name="TImplementation"></typeparam>
     internal abstract record TerraformService<TImplementation> : ITerraformService<TImplementation>

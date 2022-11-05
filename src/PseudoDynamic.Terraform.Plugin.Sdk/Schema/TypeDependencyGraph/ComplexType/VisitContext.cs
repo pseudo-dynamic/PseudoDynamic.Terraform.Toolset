@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Namotion.Reflection;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType

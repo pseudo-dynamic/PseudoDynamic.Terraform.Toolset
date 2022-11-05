@@ -1,0 +1,286 @@
+﻿#nullable enable
+abstract PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema, ProviderMetaSchema>.TypeName.get -> string!
+abstract PseudoDynamic.Terraform.Plugin.Sdk.PluginServerSpecificationBase<TDerived>.Protocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
+abstract PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.TypeName.get -> string!
+override PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.Message.get -> string!
+override PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5.Protocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
+override PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6.Protocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
+override PseudoDynamic.Terraform.Plugin.TerraformValue<T>.Equals(object? other) -> bool
+override PseudoDynamic.Terraform.Plugin.TerraformValue<T>.GetHashCode() -> int
+PseudoDynamic.Terraform.Plugin.ITerraformValue
+PseudoDynamic.Terraform.Plugin.ITerraformValue.AsNull.get -> PseudoDynamic.Terraform.Plugin.ITerraformValue<object!>!
+PseudoDynamic.Terraform.Plugin.ITerraformValue.AsUnknown.get -> PseudoDynamic.Terraform.Plugin.ITerraformValue<object!>!
+PseudoDynamic.Terraform.Plugin.ITerraformValue.IsNull.get -> bool
+PseudoDynamic.Terraform.Plugin.ITerraformValue.IsUnknown.get -> bool
+PseudoDynamic.Terraform.Plugin.ITerraformValue.Value.get -> object?
+PseudoDynamic.Terraform.Plugin.ITerraformValue<T>
+PseudoDynamic.Terraform.Plugin.ITerraformValue<T>.AsNull.get -> PseudoDynamic.Terraform.Plugin.ITerraformValue<T>!
+PseudoDynamic.Terraform.Plugin.ITerraformValue<T>.AsUnknown.get -> PseudoDynamic.Terraform.Plugin.ITerraformValue<T>!
+PseudoDynamic.Terraform.Plugin.ITerraformValue<T>.IsNull.get -> bool
+PseudoDynamic.Terraform.Plugin.ITerraformValue<T>.IsUnknown.get -> bool
+PseudoDynamic.Terraform.Plugin.ITerraformValue<T>.Value.get -> T
+PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
+PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol.V5 = 0 -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
+PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol.V6 = 1 -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
+PseudoDynamic.Terraform.Plugin.Schema.BlockAttribute
+PseudoDynamic.Terraform.Plugin.Schema.BlockAttribute.BlockAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.BlockAttribute.BlockAttribute(int version) -> void
+PseudoDynamic.Terraform.Plugin.Schema.BlockConstructorAttribute
+PseudoDynamic.Terraform.Plugin.Schema.BlockConstructorAttribute.BlockConstructorAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.ComplexAttribute
+PseudoDynamic.Terraform.Plugin.Schema.ComputedAttribute
+PseudoDynamic.Terraform.Plugin.Schema.ComputedAttribute.ComputedAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.DeprecatedAttribute
+PseudoDynamic.Terraform.Plugin.Schema.DeprecatedAttribute.DeprecatedAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind
+PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind.Markdown = 1 -> PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind
+PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind.Plain = 0 -> PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind
+PseudoDynamic.Terraform.Plugin.Schema.DescriptionKindAttribute
+PseudoDynamic.Terraform.Plugin.Schema.DescriptionKindAttribute.DescriptionKind.get -> PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind
+PseudoDynamic.Terraform.Plugin.Schema.DescriptionKindAttribute.DescriptionKindAttribute(PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind descriptionKind) -> void
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.MaximumItems.get -> int
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.MaximumItems.init -> void
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.MinimumItems.get -> int
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.MinimumItems.init -> void
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.NestedBlockAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.NestedBlockAttribute(int version) -> void
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.WrappedBy.get -> PseudoDynamic.Terraform.Plugin.Schema.ValueDefinitionWrapping?
+PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.WrappedBy.init -> void
+PseudoDynamic.Terraform.Plugin.Schema.ObjectAttribute
+PseudoDynamic.Terraform.Plugin.Schema.ObjectAttribute.ObjectAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.OptionalAttribute
+PseudoDynamic.Terraform.Plugin.Schema.OptionalAttribute.OptionalAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.SensitiveAttribute
+PseudoDynamic.Terraform.Plugin.Schema.SensitiveAttribute.SensitiveAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Block = 9 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Bool = 3 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Dynamic = 0 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.List = 4 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Map = 6 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Number = 1 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Object = 7 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Set = 5 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.String = 2 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Tuple = 8 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TupleAttribute
+PseudoDynamic.Terraform.Plugin.Schema.TupleAttribute.TupleAttribute() -> void
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.MissingAttributeAnnotationException() -> void
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.MissingAttributeAnnotationException(string? message) -> void
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.MissingAttributeAnnotationException(string? message, System.Exception? innerException) -> void
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.MissingAttributeAnnotationException(System.Runtime.Serialization.SerializationInfo! info, System.Runtime.Serialization.StreamingContext context) -> void
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.MissingAttributeType.get -> System.Type?
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.MissingAttributeType.init -> void
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.ReceiverType.get -> System.Type?
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.ReceiverType.init -> void
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.Block = 7 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.BlockAttribute = 8 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.Dynamic = 0 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.Map = 3 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.MonoRange = 2 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.NestedBlockAttribute = 9 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.Object = 4 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.ObjectAttribute = 5 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.Primitive = 1 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType.Tuple = 6 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TerraformDefinitionType
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TypeWrapping
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TypeWrapping.Nullable = 1 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TypeWrapping
+PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TypeWrapping.TerraformValue = 0 -> PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.TypeWrapping
+PseudoDynamic.Terraform.Plugin.Schema.ValueAttribute
+PseudoDynamic.Terraform.Plugin.Schema.ValueAttribute.TypeConstraint.get -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.ValueAttribute.ValueAttribute(PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint typeConstraint) -> void
+PseudoDynamic.Terraform.Plugin.Schema.ValueDefinitionWrapping
+PseudoDynamic.Terraform.Plugin.Schema.ValueDefinitionWrapping.List = 0 -> PseudoDynamic.Terraform.Plugin.Schema.ValueDefinitionWrapping
+PseudoDynamic.Terraform.Plugin.Schema.ValueDefinitionWrapping.Map = 2 -> PseudoDynamic.Terraform.Plugin.Schema.ValueDefinitionWrapping
+PseudoDynamic.Terraform.Plugin.Schema.ValueDefinitionWrapping.Set = 1 -> PseudoDynamic.Terraform.Plugin.Schema.ValueDefinitionWrapping
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IReadContext<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IReadContext<Schema, ProviderMetaSchema>.State.get -> Schema
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IReadContext<Schema, ProviderMetaSchema>.State.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IValidateConfigContext<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema, ProviderMetaSchema>.DataSource() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema>.DataSource() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderFeaturesBase<ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderFeaturesBase<ProviderMetaSchema>.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupport<ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>.AddDataSource<DataSource, Schema>() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>.AddDataSource<DataSource, Schema>(DataSource! dataSource) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>.AddDataSource<DataSource>() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>.AddDataSource<DataSource>(DataSource? dataSource) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>.AddResource<Resource, Schema>() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>.AddResource<Resource, Schema>(Resource! resource) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>.AddResource<Resource>() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Features.ProviderMetaSupportBase<ProviderMetaSchema>.AddResource<Resource>(Resource? resource) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.IDataSource
+PseudoDynamic.Terraform.Plugin.Sdk.IDataSource<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.IDataSource<Schema, ProviderMetaSchema>.Read(PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IReadContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IDataSource<Schema, ProviderMetaSchema>.TypeName.get -> string!
+PseudoDynamic.Terraform.Plugin.Sdk.IDataSource<Schema, ProviderMetaSchema>.ValidateConfig(PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IValidateConfigContext<Schema!>! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IDataSource<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.INameProvider
+PseudoDynamic.Terraform.Plugin.Sdk.INameProvider.Name.get -> string!
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServer
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServer.IsDebuggable.get -> bool
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServer.PluginProtocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServer.ServerAddress.get -> System.Uri!
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServer.ServerStarted.get -> System.Threading.CancellationToken
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServer.ServerStopped.get -> System.Threading.CancellationToken
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServer.ServerStopping.get -> System.Threading.CancellationToken
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.IsDebuggable.get -> bool
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.NewProtocolV5() -> PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5!
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.Protocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5.ProviderFeatures<ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5.UseProvider(string! providerName, System.Action<PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5.ProviderFeatures<object!>!>! configureProvider) -> PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5!
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5.UseProvider<ProviderMetaSchema>(string! providerName, System.Action<PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5.ProviderFeatures<ProviderMetaSchema!>!>! configureProvider) -> PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5!
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6.ProviderFeatures<ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6.UseProvider(string! providerName, System.Action<PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6.ProviderFeatures<object!>!>! configureProvider) -> PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6!
+PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6.UseProvider<ProviderMetaSchema>(string! providerName, System.Action<PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6.ProviderFeatures<ProviderMetaSchema!>!>! configureProvider) -> PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6!
+PseudoDynamic.Terraform.Plugin.Sdk.IProvider
+PseudoDynamic.Terraform.Plugin.Sdk.IProvider<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.IProvider<Schema>.Configure(PseudoDynamic.Terraform.Plugin.Sdk.Provider.IConfigureContext<Schema!>! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IProvider<Schema>.ValidateConfig(PseudoDynamic.Terraform.Plugin.Sdk.Provider.IValidateConfigContext<Schema!>! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IProviderFeature
+PseudoDynamic.Terraform.Plugin.Sdk.IProviderFeature.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+PseudoDynamic.Terraform.Plugin.Sdk.IResource
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema, ProviderMetaSchema>.Apply(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IApplyContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema, ProviderMetaSchema>.ImportState() -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema, ProviderMetaSchema>.MigrateState(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IMigrateStateContext! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema, ProviderMetaSchema>.Plan(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema, ProviderMetaSchema>.ReviseState(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IReviseStateContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema, ProviderMetaSchema>.TypeName.get -> string!
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema, ProviderMetaSchema>.ValidateConfig(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IValidateConfigContext<Schema!>! context) -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.IResource<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerDependencyInjectionExtensions
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions.ClientCertificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2?
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions.ClientCertificate.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions.IsDebuggable.get -> bool
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions.IsDebuggable.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions.PluginServerOptions() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions.Protocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol?
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions.ServerAddressFilter.get -> System.Func<string!, string?>?
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerOptions.ServerAddressFilter.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerSpecificationBase<TDerived>
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerSpecificationBase<TDerived>.Debuggable(bool isDebuggable = true) -> TDerived!
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerSpecificationBase<TDerived>.IsDebuggable.get -> bool
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerSpecificationBase<TDerived>.IsDebuggable.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerSpecificationBase<TDerived>.SetProvider<TProviderFeatures>(string! providerName, System.Action<TProviderFeatures>! configureProvider, System.Func<Microsoft.Extensions.DependencyInjection.IServiceCollection!, TProviderFeatures>! providerFeaturesFactory, System.Type? providerMetaSchemaType) -> TDerived!
+PseudoDynamic.Terraform.Plugin.Sdk.PluginServerWebHostBuilderExtensions
+PseudoDynamic.Terraform.Plugin.Sdk.Provider
+PseudoDynamic.Terraform.Plugin.Sdk.Provider.IConfigureContext<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Provider.IValidateConfigContext<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Provider<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Provider<Schema>.Provider() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.ProviderFeatureDependencyInjectionExtensions
+PseudoDynamic.Terraform.Plugin.Sdk.ReportKind
+PseudoDynamic.Terraform.Plugin.Sdk.ReportKind.Error = 1 -> PseudoDynamic.Terraform.Plugin.Sdk.ReportKind
+PseudoDynamic.Terraform.Plugin.Sdk.ReportKind.Warning = 0 -> PseudoDynamic.Terraform.Plugin.Sdk.ReportKind
+PseudoDynamic.Terraform.Plugin.Sdk.Reports
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.Error(string! header) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.Error(string! header, string! body) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.Error(System.Exception! error) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.HavingErrors.get -> bool
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.HavingWarnings.get -> bool
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.Report(PseudoDynamic.Terraform.Plugin.Sdk.ReportKind kind, string! header) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.Report(PseudoDynamic.Terraform.Plugin.Sdk.ReportKind kind, string! header, string! body) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.Reports() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.TotalErrors.get -> int
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.TotalWarnings.get -> int
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.Warning(string! header) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Reports.Warning(string! header, string! body) -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Resource
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IApplyContext<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IApplyContext<Schema, ProviderMetaSchema>.Config.get -> Schema?
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IApplyContext<Schema, ProviderMetaSchema>.Plan.get -> Schema?
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IApplyContext<Schema, ProviderMetaSchema>.Plan.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IApplyContext<Schema, ProviderMetaSchema>.State.get -> Schema?
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.ICreateContext<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IDeleteContext<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IMigrateStateContext
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IMigrateStateContext.Version.get -> int
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>.Config.get -> Schema?
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>.Plan.get -> Schema?
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>.Plan.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>.State.get -> Schema?
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema>.Plan.get -> Schema
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema>.Plan.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IReviseStateContext<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IReviseStateContext<Schema, ProviderMetaSchema>.State.get -> Schema
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IReviseStateContext<Schema, ProviderMetaSchema>.State.set -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IUpdateContext<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource.IValidateConfigContext<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.Resource() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema>.Resource() -> void
+PseudoDynamic.Terraform.Plugin.Sdk.Services.DesignTimeTerraformService
+PseudoDynamic.Terraform.Plugin.Sdk.Services.IDesignTimeTerraformService<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Services.IDesignTimeTerraformService<Schema>.IDataSource<ProviderSchemaType>
+PseudoDynamic.Terraform.Plugin.Sdk.Services.IDesignTimeTerraformService<Schema>.IProvider
+PseudoDynamic.Terraform.Plugin.Sdk.Services.IDesignTimeTerraformService<Schema>.IProvisioner<ProviderSchemaType>
+PseudoDynamic.Terraform.Plugin.Sdk.Services.IDesignTimeTerraformService<Schema>.IResource<ProviderSchemaType>
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IBaseContext
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IBaseContext.CompletedTask.get -> System.Threading.Tasks.Task!
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IBaseContext.Reports.get -> PseudoDynamic.Terraform.Plugin.Sdk.Reports!
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IConfigContext<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IConfigContext<Schema>.Config.get -> Schema
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IProviderMetaContext<ProviderMetaSchema>
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IProviderMetaContext<ProviderMetaSchema>.ProviderMeta.get -> ProviderMetaSchema
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IShapingContext
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IShapingContext.DynamicDecoder.get -> PseudoDynamic.Terraform.Plugin.Sdk.Transcoding.ITerraformDynamicDecoder!
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IStateContext<Schema>
+PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IStateContext<Schema>.State.get -> Schema
+PseudoDynamic.Terraform.Plugin.Sdk.Transcoding.ITerraformDynamicDecoder
+PseudoDynamic.Terraform.Plugin.Sdk.Transcoding.ITerraformDynamicDecoder.TryDecode<Schema>(object? unknown, out Schema? content) -> bool
+PseudoDynamic.Terraform.Plugin.TerraformValue
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>.AsNull.get -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>.AsUnknown.get -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>.Equals(PseudoDynamic.Terraform.Plugin.TerraformValue<T>? other) -> bool
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>.IsNull.get -> bool
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>.IsUnknown.get -> bool
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>.TerraformValue() -> void
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>.TerraformValue(T value) -> void
+PseudoDynamic.Terraform.Plugin.TerraformValue<T>.Value.get -> T
+PseudoDynamic.Terraform.Plugin.TerraformValueExtensions
+static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerDependencyInjectionExtensions.AddTerraformPluginServer(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5! serverSpecification) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerDependencyInjectionExtensions.AddTerraformPluginServer(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6! serverSpecification) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerWebHostBuilderExtensions.UseTerraformPluginServer<THostBuilder>(this THostBuilder builder, PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5! serverSpecification) -> THostBuilder
+static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerWebHostBuilderExtensions.UseTerraformPluginServer<THostBuilder>(this THostBuilder builder, PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6! serverSpecification) -> THostBuilder
+static PseudoDynamic.Terraform.Plugin.Sdk.ProviderFeatureDependencyInjectionExtensions.SetProvider<Provider, Schema>(this PseudoDynamic.Terraform.Plugin.Sdk.IProviderFeature! providerFeature) -> void
+static PseudoDynamic.Terraform.Plugin.Sdk.ProviderFeatureDependencyInjectionExtensions.SetProvider<Provider>(this PseudoDynamic.Terraform.Plugin.Sdk.IProviderFeature! providerFeature, Provider? provider = null) -> void
+static PseudoDynamic.Terraform.Plugin.TerraformValue.OfNull<T>() -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.TerraformValue.OfNull<T>(bool isUnknown) -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.TerraformValue.OfUnknown<T>() -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.TerraformValue.OfValue<T>(T value) -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.TerraformValue.OfValue<T>(T value, bool isUnknown) -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.TerraformValue<T>.implicit operator PseudoDynamic.Terraform.Plugin.TerraformValue<T>!(T value) -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.TerraformValueExtensions.IsNull<T>(this PseudoDynamic.Terraform.Plugin.ITerraformValue<T>? terraformValue, out T value) -> bool
+static PseudoDynamic.Terraform.Plugin.TerraformValueExtensions.IsNullOrUnknown<T>(this PseudoDynamic.Terraform.Plugin.ITerraformValue<T>? terraformValue, out T value) -> bool
+static PseudoDynamic.Terraform.Plugin.TerraformValueExtensions.IsUnknown<T>(this PseudoDynamic.Terraform.Plugin.ITerraformValue<T>? terraformValue) -> bool
+static PseudoDynamic.Terraform.Plugin.TerraformValueExtensions.TryGetValue<T>(this PseudoDynamic.Terraform.Plugin.TerraformValue<T>? terraformValue, out T value) -> bool
+static readonly PseudoDynamic.Terraform.Plugin.TerraformValue<T>.Null -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+static readonly PseudoDynamic.Terraform.Plugin.TerraformValue<T>.Unknown -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema, ProviderMetaSchema>.Read(PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IReadContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema, ProviderMetaSchema>.ValidateConfig(PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IValidateConfigContext<Schema!>! context) -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.Provider<Schema>.Configure(PseudoDynamic.Terraform.Plugin.Sdk.Provider.IConfigureContext<Schema!>! context) -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.Provider<Schema>.ValidateConfig(PseudoDynamic.Terraform.Plugin.Sdk.Provider.IValidateConfigContext<Schema!>! context) -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.Apply(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IApplyContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.ImportState() -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.MigrateState(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IMigrateStateContext! context) -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.Plan(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.ReviseState(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IReviseStateContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!
+virtual PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.ValidateConfig(PseudoDynamic.Terraform.Plugin.Sdk.Resource.IValidateConfigContext<Schema!>! context) -> System.Threading.Tasks.Task!

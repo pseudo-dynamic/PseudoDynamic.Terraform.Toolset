@@ -1,6 +1,6 @@
 ﻿namespace PseudoDynamic.Terraform.Plugin.Protocols.Consolidated
 {
-    internal class ApplyResourceChange
+    internal static class ApplyResourceChange
     {
         public class Request
         {

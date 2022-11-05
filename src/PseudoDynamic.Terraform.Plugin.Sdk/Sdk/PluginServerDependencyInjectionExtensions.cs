@@ -11,14 +11,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </summary>
         /// <param name="services"></param>
         /// <remarks>
-        /// <para>
-        /// A call to <see cref="ProviderFeatureServiceCollectionExtensions.AddTerraformProvider(IServiceCollection, string)"/> is required.
-        /// </para>
-        /// <para>
-        /// Calls of <see cref="KestrelServerOptions.Listen(System.Net.EndPoint)"/> and similiar must occur AFTER <see cref="AddTerraformPluginServer"/>
+        /// Calls of <see cref="KestrelServerOptions.Listen(System.Net.EndPoint)"/> and similiar must occur AFTER <see cref="AddTerraformPluginServer(IServiceCollection)"/>
         /// because defaults specified through <see cref="KestrelServerOptions.ConfigureEndpointDefaults(Action{ListenOptions})"/> only applies on *newly*
         /// created listen options. Otherwise you need to ensure to use <see cref="HttpProtocols.Http2"/> for these Kestrel server listen options.
-        /// </para>
         /// </remarks>
         internal static IServiceCollection AddTerraformPluginServer(this IServiceCollection services)
         {

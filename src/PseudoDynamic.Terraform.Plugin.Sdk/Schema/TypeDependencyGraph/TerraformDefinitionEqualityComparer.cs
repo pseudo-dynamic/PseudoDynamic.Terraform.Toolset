@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal class TerraformDefinitionEqualityComparer : EqualityComparer<TerraformDefinition>
     {

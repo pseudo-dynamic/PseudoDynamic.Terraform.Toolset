@@ -9,8 +9,7 @@ var providerName = "registry.terraform.io/pseudo-dynamic/debug";
 
 var webHost = new WebHostBuilder()
     .UseTerraformPluginServer(IPluginServerSpecification.NewProtocolV5()
-        .UseProvider<ProviderMetaSchema>(providerName, provider =>
-        {
+        .UseProvider<ProviderMetaSchema>(providerName, provider => {
             provider.SetProvider<ProviderImpl>();
             provider.AddResource<ResourceImpl>();
             provider.AddDataSource<DataSourceImpl>();
@@ -22,30 +21,30 @@ await webHost.RunAsync();
 [Object]
 class Object
 {
-    public string String { get; set; }
+    public string String { get; set; } = null!;
     public int Number { get; set; }
     public bool Bool { get; set; }
 
     [Object]
     public class WithRanges : Object
     {
-        public IList<Object> List { get; set; }
-        public ISet<Object> Set { get; set; }
-        public IDictionary<string, string> Map { get; set; }
+        public IList<Object> List { get; set; } = null!;
+        public ISet<Object> Set { get; set; } = null!;
+        public IDictionary<string, string> Map { get; set; } = null!;
 
         public class WithNestedBlocks : WithRanges
         {
             [NestedBlock]
-            public WithRanges SingleNested { get; set; }
+            public WithRanges SingleNested { get; set; } = null!;
 
             [NestedBlock]
-            public IList<WithRanges> ListNested { get; set; }
+            public IList<WithRanges> ListNested { get; set; } = null!;
 
             [NestedBlock]
-            public ISet<WithRanges> SetNested { get; set; }
+            public ISet<WithRanges> SetNested { get; set; } = null!;
 
             [NestedBlock]
-            public IDictionary<string, WithRanges> MapNested { get; set; }
+            public IDictionary<string, WithRanges> MapNested { get; set; } = null!;
         }
     }
 }
@@ -161,8 +160,7 @@ static class Assertions
 
     public static void AssertObjectWithRangesAndNestedBlocks(Object.WithRanges.WithNestedBlocks? schema)
     {
-        if (schema is null)
-        {
+        if (schema is null) {
             return;
         }
 

@@ -4,7 +4,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal class VisitContextType
     {
-        internal static Builder New([CallerMemberName] string? id = null) => new Builder(id);
+        internal static Builder OfMemberName([CallerMemberName] string? id = null) => new Builder(id);
 
         /// <summary>
         /// Currently visiting context is about a schema.
@@ -19,12 +19,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// <summary>
         /// Currently visiting context is about a property.
         /// </summary>
-        public static readonly VisitContextType Property = New().Inherits(PropertySegment);
+        public static readonly VisitContextType Property = OfMemberName().Inherits(PropertySegment);
 
         /// <summary>
         /// Currently visiting context is about a property generic argument.
         /// </summary>
-        public static readonly VisitContextType PropertyGenericSegment = New().Inherits(PropertySegment);
+        public static readonly VisitContextType PropertyGenericSegment = OfMemberName().Inherits(PropertySegment);
 
         public string Id { get; }
 
@@ -48,7 +48,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         }
 
         public VisitContextType Inherits(params VisitContextType[] types) =>
-            New(Id).Inherits(types);
+            OfMemberName(Id).Inherits(types);
 
         public override string ToString() => _inheritedTypes.Count == 0
             ? Id
@@ -72,6 +72,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 
             return false;
         }
+
+        public override int GetHashCode() =>
+            HashCode.Combine(Id);
 
         public static bool operator ==(VisitContextType a, VisitContextType b) =>
             a.Equals(b);

@@ -8,6 +8,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         /// 
         /// </summary>
         /// <param name="complexType"></param>
+        /// <param name="affectedType"></param>
         /// <remarks>
         /// Pure struct type cycle is permitted at compiler-level, so we don't need to test this.
         /// </remarks>

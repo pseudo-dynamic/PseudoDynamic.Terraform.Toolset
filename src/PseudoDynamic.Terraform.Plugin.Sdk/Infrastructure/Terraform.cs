@@ -2,7 +2,7 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 {
-    internal class Terraform
+    internal static class Terraform
     {
         internal const string TfReattachProvidersVariableName = "TF_REATTACH_PROVIDERS";
         internal const string TfCliConfigFileVariableName = "TF_CLI_CONFIG_FILE";

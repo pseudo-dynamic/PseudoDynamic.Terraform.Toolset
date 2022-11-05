@@ -8,13 +8,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 
         public override bool Equals(BlockNode? x, BlockNode? y)
         {
-            if (x is null && y is null)
-            {
+            if (x is null && y is null) {
                 return true;
             }
 
-            if (x is null || y is null)
-            {
+            if (x is null || y is null) {
                 return false;
             }
 

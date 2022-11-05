@@ -25,8 +25,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaVersion));
 
-            var expectedBlock = new BlockDefinition(typeof(Blocks.NestedSchemaVersion))
-            {
+            var expectedBlock = new BlockDefinition(typeof(Blocks.NestedSchemaVersion)) {
                 Blocks = new[] {
                     new NestedBlockAttributeDefinition(typeof(Blocks.SchemaVersion),"block", new BlockDefinition(typeof(Blocks.SchemaVersion)) { Version = 2 })
                 }
@@ -40,8 +39,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         {
             var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaOverridenVersion));
 
-            var expectedBlock = new BlockDefinition(typeof(Blocks.NestedSchemaOverridenVersion))
-            {
+            var expectedBlock = new BlockDefinition(typeof(Blocks.NestedSchemaOverridenVersion)) {
                 Blocks = new[] {
                     new NestedBlockAttributeDefinition(typeof(Blocks.SchemaVersion), "block", new BlockDefinition(typeof(Blocks.SchemaVersion)) { Version = 3 })
                 }

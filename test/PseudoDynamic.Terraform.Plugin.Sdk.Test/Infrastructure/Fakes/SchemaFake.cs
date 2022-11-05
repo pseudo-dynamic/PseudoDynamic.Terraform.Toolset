@@ -14,21 +14,14 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
         {
             var typeOfT = typeof(T);
 
-            if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out var genericTypeArguments))
-            {
+            if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out var genericTypeArguments)) {
                 return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.MakeGenericTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
-            }
-            else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(ISet<>), out _, out genericTypeArguments))
-            {
+            } else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(ISet<>), out _, out genericTypeArguments)) {
                 return (IEqualityComparer<T>)GenericSetEqualityComparerAccessor.MakeGenericTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
-            }
-            else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IDictionary<,>), out _, out genericTypeArguments))
-            {
+            } else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IDictionary<,>), out _, out genericTypeArguments)) {
                 var keyValuePairType = GenericKeyValuePairAccessor.MakeGenericTypeAccessor(genericTypeArguments).Type;
                 return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.MakeGenericTypeAccessor(keyValuePairType).CreateInstance(x => x.GetPublicInstanceActivator);
-            }
-            else
-            {
+            } else {
                 return EqualityComparer<T>.Default;
             }
         }
@@ -37,23 +30,17 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 
         public T Value { get; }
 
-        public Block Schema
-        {
-            get
-            {
+        public Block Schema {
+            get {
                 var schema = _schema;
 
-                if (schema is not null)
-                {
+                if (schema is not null) {
                     return schema;
                 }
 
-                if (IsNestedBlock)
-                {
+                if (IsNestedBlock) {
                     schema = new NestedBlock(Value, _equalityComparer);
-                }
-                else
-                {
+                } else {
                     schema = new Block(Value, _equalityComparer);
                 }
 

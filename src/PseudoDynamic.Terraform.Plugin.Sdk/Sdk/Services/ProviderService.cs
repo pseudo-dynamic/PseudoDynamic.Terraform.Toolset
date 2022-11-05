@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
+﻿using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType

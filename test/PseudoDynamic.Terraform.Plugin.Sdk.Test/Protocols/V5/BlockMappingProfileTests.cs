@@ -7,8 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {
     public class BlockMappingProfileTests
     {
-        private static IMapper Mapper = new MapperConfiguration(config =>
-        {
+        private static IMapper Mapper = new MapperConfiguration(config => {
             config.AddProfile<MappingProfileBase>();
             config.AddProfile<BlockMappingProfile>();
         }).CreateMapper();
@@ -29,14 +28,12 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
         {
             public SchemaBlockData()
             {
-                Add(new Schema.Types.Block()
-                {
+                Add(new Schema.Types.Block() {
                     Description = "goofy",
                     DescriptionKind = StringKind.Markdown,
                     Deprecated = true,
                     Version = 2
-                }, BlockDefinition.Uncomputed with
-                {
+                }, BlockDefinition.Uncomputed with {
                     Description = "goofy",
                     DescriptionKind = DescriptionKind.Markdown,
                     IsDeprecated = true,
@@ -45,8 +42,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 
                 var stringList = MonoRangeDefinition.List<IList<string>>(PrimitiveDefinition.String);
 
-                Add(new Schema.Types.Block()
-                {
+                Add(new Schema.Types.Block() {
                     Version = 1,
                     Attributes = {
                         {
@@ -57,15 +53,13 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                             }
                         }
                     }
-                }, BlockDefinition.Uncomputed with
-                {
+                }, BlockDefinition.Uncomputed with {
                     Attributes = new[] {
                         BlockAttributeDefinition.Uncomputed("list", stringList)
                     }
                 });
 
-                Add(new Schema.Types.Block()
-                {
+                Add(new Schema.Types.Block() {
                     Version = 1,
                     BlockTypes = {
                         {
@@ -78,8 +72,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                             }
                         }
                     }
-                }, BlockDefinition.Uncomputed with
-                {
+                }, BlockDefinition.Uncomputed with {
                     Blocks = new[] {
                         NestedBlockAttributeDefinition.Uncomputed("list", MonoRangeDefinition.ListUncomputed(BlockDefinition.Uncomputed))
                     }

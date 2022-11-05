@@ -11,8 +11,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// <summary>
         /// Makes the Terraform provider available by enabling gRPC, registering required
         /// services and giving you the chance to register resources and data sources.
+        /// </summary>
         /// <param name="services"></param>
-        /// <param name="providerName">Fully-qualified Terraform provider name in form of <![CDATA[<domain-name>/<namespace>/<provider-name>]]> (e.g. registry.terraform.io/pseudo-dynamic/value)</param>
         internal static IServiceCollection AddTerraformProvider(this IServiceCollection services)
         {
             // plugin server

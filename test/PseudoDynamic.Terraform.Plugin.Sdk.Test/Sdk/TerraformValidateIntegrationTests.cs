@@ -1,8 +1,8 @@
-﻿using Moq;
+﻿using System.Numerics;
+using Moq;
 using PseudoDynamic.Terraform.Plugin.Infrastructure;
 using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
 using PseudoDynamic.Terraform.Plugin.Sdk.Services;
-using System.Numerics;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.CollectionFactories;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
@@ -17,38 +17,54 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public static IEnumerable<object?[]> Produce_terraform_validatable_config_schemas()
         {
             // unknown
-            foreach (var resource in Resources(default(string), "config_string_unknown", isUnknown: true)) yield return resource;
-            foreach (var resource in Resources<ITerraformValue>(TerraformValue.OfUnknown<object>(), "config_string_unknown", isUnknown: true, notWrappable: true)) yield return resource;
+            foreach (var resource in Resources(default(string), "config_string_unknown", isUnknown: true))
+                yield return resource;
+            foreach (var resource in Resources<ITerraformValue>(TerraformValue.OfUnknown<object>(), "config_string_unknown", isUnknown: true, notWrappable: true))
+                yield return resource;
 
             // string
-            foreach (var resource in Resources("Hello from Terraform!", "config_string")) yield return resource;
+            foreach (var resource in Resources("Hello from Terraform!", "config_string"))
+                yield return resource;
 
             // number
-            foreach (var resource in Resources(int.MaxValue, "config_int32_max")) yield return resource;
-            foreach (var resource in Resources(long.MaxValue, "config_int64_max")) yield return resource;
-            foreach (var resource in Resources(new BigInteger(Enumerable.Range(0, 16).Select(x => byte.MaxValue).ToArray(), isUnsigned: true), "config_int128_max")) yield return resource;
-            foreach (var resource in Resources(float.MaxValue, "config_float_max")) yield return resource;
-            foreach (var resource in Resources(double.MaxValue, "config_double_max")) yield return resource;
+            foreach (var resource in Resources(int.MaxValue, "config_int32_max"))
+                yield return resource;
+            foreach (var resource in Resources(long.MaxValue, "config_int64_max"))
+                yield return resource;
+            foreach (var resource in Resources(new BigInteger(Enumerable.Range(0, 16).Select(x => byte.MaxValue).ToArray(), isUnsigned: true), "config_int128_max"))
+                yield return resource;
+            foreach (var resource in Resources(float.MaxValue, "config_float_max"))
+                yield return resource;
+            foreach (var resource in Resources(double.MaxValue, "config_double_max"))
+                yield return resource;
 
             // bool
-            foreach (var resource in Resources(true, "config_bool")) yield return resource;
+            foreach (var resource in Resources(true, "config_bool"))
+                yield return resource;
 
             // list
-            foreach (var resource in Resources(List("first", "second"), "config_list")) yield return resource;
+            foreach (var resource in Resources(List("first", "second"), "config_list"))
+                yield return resource;
 
             // set
-            foreach (var resource in Resources(Set("tf_second_csharp_first", "tf_first_csharp_second"), "config_set")) yield return resource;
+            foreach (var resource in Resources(Set("tf_second_csharp_first", "tf_first_csharp_second"), "config_set"))
+                yield return resource;
 
             // map
-            foreach (var resource in Resources(Map(("zero", "example")), "config_map")) yield return resource;
+            foreach (var resource in Resources(Map(("zero", "example")), "config_map"))
+                yield return resource;
 
             // object
-            foreach (var resource in Resources(new SchemaFake<string>.Object("disney world"), "config_object")) yield return resource;
-            foreach (var resource in Resources(SchemaFake<string>.Object.HavingList("disney", "world"), "config_object_having_list")) yield return resource;
-            foreach (var resource in Resources(SchemaFake<string>.Object.RangeList("first", "second"), "config_object_list")) yield return resource;
+            foreach (var resource in Resources(new SchemaFake<string>.Object("disney world"), "config_object"))
+                yield return resource;
+            foreach (var resource in Resources(SchemaFake<string>.Object.HavingList("disney", "world"), "config_object_having_list"))
+                yield return resource;
+            foreach (var resource in Resources(SchemaFake<string>.Object.RangeList("first", "second"), "config_object_list"))
+                yield return resource;
 
             // nested block
-            foreach (var resource in Resources(new SchemaFake<string>.Block("nested"), "config_nested_block", isNestedBlock: true)) yield return resource;
+            foreach (var resource in Resources(new SchemaFake<string>.Block("nested"), "config_nested_block", isNestedBlock: true))
+                yield return resource;
 
             foreach (var resource in Resources(
                 SchemaFake<string>.Block.RangeList("first_nested", "second_nested"),
@@ -82,7 +98,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             {
                 var filePattern = $"{fileName}.tf";
                 yield return new object[] { new SchemaFake<T>(value, equalityComparer) { IsNestedBlock = isNestedBlock, }.Schema, filePattern };
-                if (!notWrappable) yield return new object[] { new SchemaFake<T>.TerraformValueFake(TerraformValue.OfValue<T>(value, isUnknown), equalityComparer) { IsNestedBlock = isNestedBlock }.Schema, filePattern };
+                if (!notWrappable)
+                    yield return new object[] { new SchemaFake<T>.TerraformValueFake(TerraformValue.OfValue<T>(value, isUnknown), equalityComparer) { IsNestedBlock = isNestedBlock }.Schema, filePattern };
             }
         }
 

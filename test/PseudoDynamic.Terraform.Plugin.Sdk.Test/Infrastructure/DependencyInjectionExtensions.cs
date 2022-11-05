@@ -12,8 +12,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             var providerContext = serviceProvider.GetRequiredService<IProviderServer>();
             var providerName = providerContext.FullyQualifiedProviderName;
 
-            return new TerraformCommand.WorkingDirectoryCloning(options =>
-            {
+            return new TerraformCommand.WorkingDirectoryCloning(options => {
                 options.WithReattachingProvider(providerName, providerContext.TerraformReattachProvider);
                 configureOptions?.Invoke(options);
             });

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
+﻿namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
     internal class TerraformDynamicDecoder : ITerraformDynamicDecoder
     {

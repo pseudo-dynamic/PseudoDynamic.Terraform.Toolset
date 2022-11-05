@@ -1,6 +1,6 @@
-﻿using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
+﻿using System.Numerics;
+using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
-using System.Numerics;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.CollectionFactories;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
@@ -66,7 +66,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             public SchemasGeneratorBase()
             {
                 // dynamic
-                Add<object>(default(string));
+                Add<object>(default(string)!);
                 Add<ITerraformValue>(TerraformValue.OfUnknown<object>(), notWrappable: true);
 
                 // number
@@ -120,15 +120,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             protected void Add<T>(T value, bool isNested = false, bool notWrappable = false)
                 where T : notnull
             {
-                if (!OnlyWrappedOrOnlyNonWrapped)
-                {
+                if (!OnlyWrappedOrOnlyNonWrapped) {
                     var schema = new SchemaFake<T>(value) { IsNestedBlock = isNested }.Schema;
                     CurrentDynamicType = new SchemaFake<object>(value) { IsNestedBlock = isNested }.Schema.GetType();
                     Add(schema, schema.GetType());
                 }
 
-                if (OnlyWrappedOrOnlyNonWrapped && !notWrappable)
-                {
+                if (OnlyWrappedOrOnlyNonWrapped && !notWrappable) {
                     var schema = new SchemaFake<T>.TerraformValueFake(TerraformValue.OfValue(value)) { IsNestedBlock = isNested }.Schema;
                     CurrentDynamicType = new SchemaFake<object>.TerraformValueFake(TerraformValue.OfValue((object)value)) { IsNestedBlock = isNested }.Schema.GetType();
                     Add(schema, schema.GetType());

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using MessagePack;
+﻿using MessagePack;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 

@@ -21,7 +21,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public string SnakeCaseProviderName => _snakeCaseProviderName ??= SnakeCaseConvention.Default.Format(ProviderName);
 
         internal TerraformReattachProvider TerraformReattachProvider =>
-            _terraformReattachProvider ?? new TerraformReattachProvider(_pluginServer.PluginProtocol, new TerraformReattachProviderAddress($"{_pluginServer.ServerAddress.Host}:{_pluginServer.ServerAddress.Port}"));
+            _terraformReattachProvider ??= new TerraformReattachProvider(_pluginServer.PluginProtocol, new TerraformReattachProviderAddress($"{_pluginServer.ServerAddress.Host}:{_pluginServer.ServerAddress.Port}"));
 
         TerraformReattachProvider IProviderServer.TerraformReattachProvider => TerraformReattachProvider;
 

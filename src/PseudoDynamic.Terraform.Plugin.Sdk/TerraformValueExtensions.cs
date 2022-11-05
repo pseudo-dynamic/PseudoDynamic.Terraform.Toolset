@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace PseudoDynamic.Terraform.Plugin
+﻿namespace PseudoDynamic.Terraform.Plugin
 {
     /// <summary>
     /// Contains extension methods for <see cref="ITerraformValue{T}"/>.

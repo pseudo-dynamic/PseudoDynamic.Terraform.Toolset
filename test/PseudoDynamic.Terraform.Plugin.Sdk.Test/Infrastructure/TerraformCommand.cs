@@ -15,7 +15,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         public string? WorkingDirectory { get; init; }
         public IReadOnlyDictionary<string, string> EnvironmentVariables { get; }
         public IReadOnlyDictionary<string, TerraformReattachProvider>? TerraformReattachProviders { get; }
-        public string TfCliConfigFile { get; }
+        public string? TfCliConfigFile { get; }
 
         private TerraformProcessStartInfo? _preparedProcessStartInfo;
 
@@ -35,25 +35,21 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         {
             var processStartInfo = _preparedProcessStartInfo;
 
-            if (processStartInfo != null)
-            {
+            if (processStartInfo != null) {
                 return processStartInfo;
             }
 
             var environmentVariables = new Dictionary<string, string>(EnvironmentVariables);
 
-            if (TerraformReattachProviders != null && TerraformReattachProviders.Count > 0)
-            {
+            if (TerraformReattachProviders != null && TerraformReattachProviders.Count > 0) {
                 environmentVariables.Add(TfReattachProvidersVariableName, SerializeTerraformReattachProviders(TerraformReattachProviders));
             }
 
-            if (TfCliConfigFile != null)
-            {
+            if (TfCliConfigFile != null) {
                 environmentVariables.Add(TfCliConfigFileVariableName, TfCliConfigFile);
             }
 
-            processStartInfo = new TerraformProcessStartInfo()
-            {
+            processStartInfo = new TerraformProcessStartInfo() {
                 WorkingDirectory = WorkingDirectory,
                 EnvironmentVariables = environmentVariables
             };
@@ -62,8 +58,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             return processStartInfo;
         }
 
-        private TerraformProcessStartInfo UpgradeStartInfo(string? args) => PrepareStartInfo() with
-        {
+        private TerraformProcessStartInfo UpgradeStartInfo(string? args) => PrepareStartInfo() with {
             Arguments = args
         };
 
@@ -88,22 +83,20 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         {
             IEnumerable<KeyValuePair<string, string>> EnvironmentVariables { get; }
             IEnumerable<KeyValuePair<string, TerraformReattachProvider>> TerraformReattachProviders { get; }
-            string TfCliConfigFile { get; }
+            string? TfCliConfigFile { get; }
         }
 
         public class TerraformCommandOptionsBase<DerivedOptions> : ITerraformCommandOptionsOptions
             where DerivedOptions : TerraformCommandOptionsBase<DerivedOptions>
         {
-            public IDictionary<string, string> EnvironmentVariables
-            {
+            public IDictionary<string, string> EnvironmentVariables {
                 get => _environmentVariables;
                 set => _environmentVariables = value ?? throw new ArgumentNullException(nameof(value));
             }
 
             IEnumerable<KeyValuePair<string, string>> ITerraformCommandOptionsOptions.EnvironmentVariables => EnvironmentVariables;
 
-            public IDictionary<string, TerraformReattachProvider> TerraformReattachProviders
-            {
+            public IDictionary<string, TerraformReattachProvider> TerraformReattachProviders {
                 get => _terraformReattachProviders;
                 set => _terraformReattachProviders = value ?? throw new ArgumentNullException(nameof(value));
             }
@@ -160,8 +153,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
             public string OriginalWorkingDirectory { get; }
 
-            public new string WorkingDirectory
-            {
+            public new string WorkingDirectory {
                 get => base.WorkingDirectory!;
                 private init => base.WorkingDirectory = value;
             }
@@ -174,8 +166,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             {
                 if (options.DeleteOnDispose
                     && options.DeleteOnlyTempDirectory
-                    && !Path.IsPathFullyQualified(options.TemporaryWorkingDirectory))
-                {
+                    && !Path.IsPathFullyQualified(options.TemporaryWorkingDirectory)) {
                     throw new ArgumentException("Temporary working directory must be fully qualified");
                 }
 
@@ -193,8 +184,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 Directory.CreateDirectory(workingDirectory);
                 var copyableFilePatterns = options.CopyableFilePatterns;
 
-                foreach (var file in copyableFilePatterns.AsParallel().SelectMany(filePattern => workingDirectoryInfo.EnumerateFiles(filePattern, SearchOption.AllDirectories)))
-                {
+                foreach (var file in copyableFilePatterns.AsParallel().SelectMany(filePattern => workingDirectoryInfo.EnumerateFiles(filePattern, SearchOption.AllDirectories))) {
                     var relativeDirectory = file.DirectoryName!.Remove(0, workingDirectory.Length);
                     var mirroringDirectory = options.TemporaryWorkingDirectory + relativeDirectory;
                     Directory.CreateDirectory(mirroringDirectory); // May be redudant but we don't care
@@ -217,20 +207,16 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
             protected virtual void Dispose(bool disposing)
             {
-                if (_isDisposed)
-                {
+                if (_isDisposed) {
                     return;
                 }
 
-                if (disposing && _options.DeleteOnDispose)
-                {
+                if (disposing && _options.DeleteOnDispose) {
                     var gitDirectory = _options.TemporaryWorkingDirectory;
 
                     if (Directory.Exists(gitDirectory)
-                        && (!_options.DeleteOnlyTempDirectory || ContainsBasePath(gitDirectory, Path.GetTempPath())))
-                    {
-                        foreach (var filePath in Directory.EnumerateFiles(gitDirectory, "*", SearchOption.AllDirectories))
-                        {
+                        && (!_options.DeleteOnlyTempDirectory || ContainsBasePath(gitDirectory, Path.GetTempPath()))) {
+                        foreach (var filePath in Directory.EnumerateFiles(gitDirectory, "*", SearchOption.AllDirectories)) {
                             File.SetAttributes(filePath, FileAttributes.Normal);
                         }
 
@@ -257,14 +243,12 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             {
                 private static readonly string[] TerraformFilePattern = new[] { "*.tf" };
 
-                public string? WorkingDirectory
-                {
+                public string? WorkingDirectory {
                     get => workingDirectory ?? AppContext.BaseDirectory;
                     set => workingDirectory = value;
                 }
 
-                public string[] CopyableFilePatterns
-                {
+                public string[] CopyableFilePatterns {
                     get => copyableFilePatterns;
                     set => copyableFilePatterns = value ?? throw new ArgumentNullException(nameof(value));
                 }

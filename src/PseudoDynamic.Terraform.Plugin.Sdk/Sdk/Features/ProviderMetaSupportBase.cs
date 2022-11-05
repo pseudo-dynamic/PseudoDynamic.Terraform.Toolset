@@ -24,13 +24,17 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Features
             where Schema : class =>
             ProviderFeature.AddResource(typeof(Resource), typeof(Schema), ProviderMetaSchemaType, resource);
 
-        public void AddResource<Resource>(Resource? resource = null)
+        public void AddResource<Resource>(Resource? resource)
             where Resource : DesignTimeTerraformService, IDesignTimeTerraformService<object>.IResource<ProviderMetaSchema>
         {
             var resourceType = typeof(Resource);
             var schematype = DesignTimeTerraformService.GetSchemaType(resourceType);
             ProviderFeature.AddResource(resourceType, schematype, ProviderMetaSchemaType, resource);
         }
+
+        public void AddResource<Resource>()
+            where Resource : DesignTimeTerraformService, IDesignTimeTerraformService<object>.IResource<ProviderMetaSchema> =>
+            AddResource(default(Resource));
 
         #endregion
 
@@ -46,13 +50,17 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Features
             where Schema : class =>
             ProviderFeature.AddDataSource(typeof(DataSource), typeof(Schema), ProviderMetaSchemaType, dataSource);
 
-        public void AddDataSource<DataSource>(DataSource? dataSource = null)
+        public void AddDataSource<DataSource>(DataSource? dataSource)
             where DataSource : DesignTimeTerraformService, IDesignTimeTerraformService<object>.IDataSource<ProviderMetaSchema>
         {
             var dataSourceType = typeof(DataSource);
             var schematype = DesignTimeTerraformService.GetSchemaType(dataSourceType);
             ProviderFeature.AddDataSource(dataSourceType, schematype, ProviderMetaSchemaType, dataSource);
         }
+
+        public void AddDataSource<DataSource>()
+            where DataSource : DesignTimeTerraformService, IDesignTimeTerraformService<object>.IDataSource<ProviderMetaSchema> =>
+            AddDataSource(default(DataSource));
 
         #endregion
     }

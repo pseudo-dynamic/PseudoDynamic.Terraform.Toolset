@@ -38,7 +38,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
 
             public string Last => _jsonBlockTypes.Peek();
 
-            Stack<string> _jsonBlockTypes = new Stack<string>();
+            private readonly Stack<string> _jsonBlockTypes = new Stack<string>();
 
             private void PushBlockType(string blockType) =>
                 _jsonBlockTypes.Push(blockType);

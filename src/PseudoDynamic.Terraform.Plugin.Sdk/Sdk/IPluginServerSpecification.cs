@@ -49,9 +49,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             /// <summary>
             /// 
             /// </summary>
+            /// <param name="providerName">
             /// The provider name. If you use the TF_REATTACH_PROVIDERS feature, please try to provide a fully-qualified provider name
             /// in the form of <![CDATA["registry.terraform.io/<organization>/<provider-name>"]]>, otherwise Terraform may complain
             /// "This configuration requires provider <![CDATA[registry.terraform.io/<organization>/<provider-name>]]>".
+            /// </param>
             /// <param name="configureProvider"></param>
             public ProtocolV5 UseProvider(string providerName, Action<ProviderFeatures<object>> configureProvider) =>
                 SetProvider(providerName, configureProvider, static services => new ProviderFeatures<object>(services), providerMetaSchemaType: null);
@@ -89,9 +91,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             /// <summary>
             /// 
             /// </summary>
+            /// <param name="providerName">
             /// The provider name. If you use the TF_REATTACH_PROVIDERS feature, please try to provide a fully-qualified provider name
             /// in the form of <![CDATA["registry.terraform.io/<organization>/<provider-name>"]]>, otherwise Terraform may complain
             /// "This configuration requires provider <![CDATA[registry.terraform.io/<organization>/<provider-name>]]>".
+            /// </param>
             /// <param name="configureProvider"></param>
             public ProtocolV6 UseProvider(string providerName, Action<ProviderFeatures<object>> configureProvider) =>
                 SetProvider(providerName, configureProvider, static services => new ProviderFeatures<object>(services), providerMetaSchemaType: null);
