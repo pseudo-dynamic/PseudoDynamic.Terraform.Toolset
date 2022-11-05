@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Buffers;
+using System.Diagnostics;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
@@ -38,7 +39,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         public SimpleProcessStartInfo(string executable) =>
             Executable = executable ?? throw new ArgumentNullException(nameof(executable));
 
-        public ProcessStartInfo CreateProcessStartInfo()
+        internal ProcessStartInfo CreateProcessStartInfo()
         {
             var executable = Executable;
             var arguments = Arguments;

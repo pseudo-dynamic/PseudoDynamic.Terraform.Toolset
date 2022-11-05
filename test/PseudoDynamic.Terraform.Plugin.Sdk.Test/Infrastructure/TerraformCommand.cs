@@ -1,4 +1,5 @@
 ﻿using PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics;
+using System.Text;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.Terraform;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
@@ -62,13 +63,9 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             Arguments = args
         };
 
-        //private string RunCommandThenReadOutput(string? args) => SimpleProcess.StartThenWaitForExitThenReadOutput(
-        //    UpgradeStartInfo(args),
-        //    shouldThrowOnNonZeroCode: true,
-        //    shouldStreamError: true);
-
-        private Task<string> RunCommandThenReadOutputAsync(string? args, CancellationToken cancellationToken) => SimpleProcess.StartThenWaitForExitThenReadOutputAsync(
+        private Task<string> RunCommandThenReadOutputAsync(string? args, CancellationToken cancellationToken) => AsyncSimpleProcess.StartThenWaitForExitThenReadOutputAsync(
             UpgradeStartInfo(args),
+            encoding: Encoding.UTF8,
             cancellationToken: cancellationToken);
 
         public Task<string> Init(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("init -no-color", cancellationToken);
