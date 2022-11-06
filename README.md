@@ -6,7 +6,7 @@ This is the main goal that this library should fullfill:
 
 - Write resources and data sources
 
-Please keep in mind, that this library is in the very early development stage and is anything but finished.
+Please keep in mind, that this library is in the very early development stage and is anything but finished. Please, [**consider to help**](https://github.com/pseudo-dynamic/PseudoDynamic.Terraform.Toolset/issues/7)! :relaxed:
 
 By saying this, let me give you a short list of protocol features that are or are not currently implemented:
 
