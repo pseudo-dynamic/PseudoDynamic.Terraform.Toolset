@@ -85,7 +85,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             [Block]
             public class Required
             {
-                public string String { get; set; }
+                public string String { get; set; } = null!;
             }
         }
 
@@ -94,13 +94,13 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             [Block]
             public class Optional
             {
-                public TerraformValue<string?> NullableString { get; set; }
+                public TerraformValue<string?> NullableString { get; set; } = null!;
             }
 
             [Block]
             public class Required
             {
-                public TerraformValue<string> String { get; set; }
+                public TerraformValue<string> String { get; set; } = null!;
             }
         }
     }

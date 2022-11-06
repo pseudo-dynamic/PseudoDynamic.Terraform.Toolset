@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {

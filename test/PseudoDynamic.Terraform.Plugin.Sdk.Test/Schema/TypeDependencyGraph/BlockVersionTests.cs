@@ -64,14 +64,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             public class NestedSchemaVersion
             {
                 [NestedBlock]
-                public SchemaVersion Block { get; set; }
+                public SchemaVersion Block { get; set; } = null!;
             }
 
             [Block]
             public class NestedSchemaOverridenVersion
             {
                 [NestedBlock(3)]
-                public SchemaVersion Block { get; set; }
+                public SchemaVersion Block { get; set; } = null!;
             }
         }
     }

@@ -1,5 +1,5 @@
-﻿using PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics;
-using System.Text;
+﻿using System.Text;
+using PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.Terraform;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
@@ -238,16 +238,16 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
             internal class WorkingDirectoryCloningOptions : TerraformCommandOptionsBase<WorkingDirectoryCloningOptions>
             {
-                private static readonly string[] TerraformFilePattern = new[] { "*.tf" };
+                private static readonly string[] _terraformFilePattern = new[] { "*.tf" };
 
                 public string? WorkingDirectory {
-                    get => workingDirectory ?? AppContext.BaseDirectory;
-                    set => workingDirectory = value;
+                    get => _workingDirectory ?? AppContext.BaseDirectory;
+                    set => _workingDirectory = value;
                 }
 
                 public string[] CopyableFilePatterns {
-                    get => copyableFilePatterns;
-                    set => copyableFilePatterns = value ?? throw new ArgumentNullException(nameof(value));
+                    get => _copyableFilePatterns;
+                    set => _copyableFilePatterns = value ?? throw new ArgumentNullException(nameof(value));
                 }
 
                 public string TemporaryWorkingDirectory { get; }
@@ -266,8 +266,8 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 /// </summary>
                 public bool DeleteOnlyTempDirectory { get; set; } = true;
 
-                private string? workingDirectory;
-                private string[] copyableFilePatterns = TerraformFilePattern;
+                private string? _workingDirectory;
+                private string[] _copyableFilePatterns = _terraformFilePattern;
 
                 public WorkingDirectoryCloningOptions() => TemporaryWorkingDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 

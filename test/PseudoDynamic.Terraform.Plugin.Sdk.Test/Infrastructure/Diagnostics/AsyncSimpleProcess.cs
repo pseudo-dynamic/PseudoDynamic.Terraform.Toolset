@@ -1,6 +1,6 @@
-﻿using DotNext.Buffers;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Text;
+using DotNext.Buffers;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {

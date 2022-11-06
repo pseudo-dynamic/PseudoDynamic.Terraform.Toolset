@@ -151,59 +151,59 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
             [Block]
             internal class HavingString
             {
-                public string String { get; set; }
+                public string String { get; set; } = null!;
             }
 
             [Block]
             internal class NestedBlock
             {
                 [NestedBlock]
-                public HavingString Block { get; set; }
+                public HavingString Block { get; set; } = null!;
             }
 
             [Block]
             internal class TerraformValueNestedBlock
             {
                 [NestedBlock]
-                public ITerraformValue<HavingString> Block { get; set; }
+                public ITerraformValue<HavingString> Block { get; set; } = null!;
             }
 
             [Block]
             internal class ListOfTerraformValueWrappedNestedBlocks
             {
                 [NestedBlock]
-                public IList<ITerraformValue<HavingString>> Block { get; set; }
+                public IList<ITerraformValue<HavingString>> Block { get; set; } = null!;
             }
 
             [Block]
             internal class ListOfBlocks
             {
                 [NestedBlock]
-                public IList<HavingString> List { get; set; }
+                public IList<HavingString> List { get; set; } = null!;
             }
 
             [Block]
             internal class ListOfStrings
             {
-                public IList<string> List { get; set; }
+                public IList<string> List { get; set; } = null!;
             }
 
             [Block]
             internal class ListOfObjects
             {
-                public IList<HavingString> List { get; set; }
+                public IList<HavingString> List { get; set; } = null!;
             }
 
             [Block]
             internal class MapOfObjects
             {
-                public IDictionary<string, HavingString> Dictionary { get; set; }
+                public IDictionary<string, HavingString> Dictionary { get; set; } = null!;
             }
 
 
             internal class InheritedStringBase
             {
-                public string String { get; set; }
+                public string String { get; set; } = null!;
 
                 internal class FloorOne : InheritedStringBase
                 {

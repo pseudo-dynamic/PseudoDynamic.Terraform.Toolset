@@ -9,14 +9,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         public void Node_producer_throws_exception_due_to_missing_block_attribute(Type schemaType)
         {
             var error = Assert.IsType<ArgumentException>(Record.Exception(() => new BlockNodeBuilder().BuildNode(schemaType)));
-            Assert.Contains("must be annotated", error.Message);
+            Assert.Contains("must be annotated", error.Message, StringComparison.InvariantCulture);
         }
 
         [Fact]
         public void Node_producer_throws_exception_due_to_open_generic_type()
         {
             var error = Assert.IsType<ArgumentException>(Record.Exception(() => new BlockNodeBuilder().BuildNode(typeof(GenericSchema<>))));
-            Assert.Contains("closed generic type", error.Message);
+            Assert.Contains("closed generic type", error.Message, StringComparison.InvariantCulture);
         }
 
         [Theory]
@@ -35,7 +35,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
             [Block]
             public class Property
             {
-                public NestedSchema Infinite { get; set; }
+                public NestedSchema Infinite { get; set; } = null!;
 
                 public class NestedSchema { }
             }
@@ -49,19 +49,19 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
             [Block]
             public class Property
             {
-                public Property Infinite { get; set; }
+                public Property Infinite { get; set; } = null!;
             }
 
             [Block]
             public class PropertyArgument
             {
-                public IList<PropertyArgument> Infinite { get; set; }
+                public IList<PropertyArgument> Infinite { get; set; } = null!;
             }
 
             [Block]
             public class Generic<T>
             {
-                public IList<Generic<T>> Infinite { get; set; }
+                public IList<Generic<T>> Infinite { get; set; } = null!;
             }
         }
     }

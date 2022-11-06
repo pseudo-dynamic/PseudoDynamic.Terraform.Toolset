@@ -50,7 +50,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
         }
 
         private readonly IEqualityComparer<T>? _equalityComparer;
-        private SchemaFake<T>.Block _schema;
+        private SchemaFake<T>.Block? _schema;
 
         public SchemaFake(T value, IEqualityComparer<T>? equalityComparer)
         {

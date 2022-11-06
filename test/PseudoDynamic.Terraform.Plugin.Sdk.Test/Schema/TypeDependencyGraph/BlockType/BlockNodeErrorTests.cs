@@ -18,11 +18,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         [Block]
         public class ListOfObjects
         {
-            public IList<MissingObjectAnnotatedObject> List { get; set; }
+            public IList<MissingObjectAnnotatedObject> List { get; set; } = null!;
 
             public class MissingObjectAnnotatedObject
             {
-                public string String { get; set; }
+                public string String { get; set; } = null!;
             }
         }
     }

@@ -2,7 +2,7 @@
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
-    public class TerraformaAcceptanceTests
+    public class TerraformAcceptanceTests
     {
         [Fact.Terraform]
         internal async Task Terraform_validate_passes()

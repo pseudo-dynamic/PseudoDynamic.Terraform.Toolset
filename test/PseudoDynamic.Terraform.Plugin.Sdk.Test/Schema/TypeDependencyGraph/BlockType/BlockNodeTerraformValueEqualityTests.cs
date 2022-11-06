@@ -30,7 +30,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         [Block]
         public class TerraformValueBlock
         {
-            public ITerraformValue<ZeroDepthBlock> Block { get; set; }
+            public ITerraformValue<ZeroDepthBlock> Block { get; set; } = null!;
         }
     }
 }

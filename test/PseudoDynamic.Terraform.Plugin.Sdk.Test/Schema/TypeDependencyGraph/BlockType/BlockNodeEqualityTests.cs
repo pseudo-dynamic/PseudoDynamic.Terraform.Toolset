@@ -85,49 +85,49 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         [Block]
         public class PropertyBlock
         {
-            public string String { get; set; }
+            public string String { get; set; } = null!;
         }
 
         [Block]
         public class NestedBlock
         {
-            public PropertyBlock Schema { get; set; }
+            public PropertyBlock Schema { get; set; } = null!;
         }
 
         [Block]
         public class PropertyArgumentBlock
         {
-            public IList<string> List { get; set; }
+            public IList<string> List { get; set; } = null!;
         }
 
         [Block]
         public class PropertyArgumentNestedBlock
         {
-            public IDictionary<string, PropertyBlock> Dictionary { get; set; }
+            public IDictionary<string, PropertyBlock> Dictionary { get; set; } = null!;
         }
 
         [Block]
         public class TerraformValueNestedBlock
         {
             [NestedBlock]
-            public TerraformValue<HavingString> Block { get; set; }
+            public TerraformValue<HavingString> Block { get; set; } = null!;
 
             [Block]
             public class HavingString
             {
-                public string String { get; set; }
+                public string String { get; set; } = null!;
             }
         }
 
         [Block]
         public class ListOfObjects
         {
-            public IList<Object> List { get; set; }
+            public IList<Object> List { get; set; } = null!;
 
             [Object]
             public class Object
             {
-                public string String { get; set; }
+                public string String { get; set; } = null!;
             }
         }
     }
