@@ -7,25 +7,25 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         [Fact]
         public void Block_schema_should_have_default_schema_Version()
         {
-            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.Default));
-            var expectedBlock = new BlockDefinition(typeof(Blocks.Default)) { Version = BlockDefinition.DefaultVersion };
+            BlockDefinition actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.Default));
+            BlockDefinition expectedBlock = new(typeof(Blocks.Default)) { Version = BlockDefinition.DefaultVersion };
             Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         [Fact]
         public void Block_schema_should_have_custom_schema_Version()
         {
-            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.SchemaVersion));
-            var expectedBlock = new BlockDefinition(typeof(Blocks.SchemaVersion)) { Version = 2 };
+            BlockDefinition actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.SchemaVersion));
+            BlockDefinition expectedBlock = new(typeof(Blocks.SchemaVersion)) { Version = 2 };
             Assert.Equal(expectedBlock, actualBlock, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 
         [Fact]
         public void Nested_block_schema_should_have_schema_version()
         {
-            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaVersion));
+            BlockDefinition actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaVersion));
 
-            var expectedBlock = new BlockDefinition(typeof(Blocks.NestedSchemaVersion)) {
+            BlockDefinition expectedBlock = new(typeof(Blocks.NestedSchemaVersion)) {
                 Blocks = new[] {
                     new NestedBlockAttributeDefinition(typeof(Blocks.SchemaVersion),"block", new BlockDefinition(typeof(Blocks.SchemaVersion)) { Version = 2 })
                 }
@@ -37,9 +37,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         [Fact]
         public void Nested_block_schema_should_have_overriden_schema_Version()
         {
-            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaOverridenVersion));
+            BlockDefinition actualBlock = BlockBuilder.Default.BuildBlock(typeof(Blocks.NestedSchemaOverridenVersion));
 
-            var expectedBlock = new BlockDefinition(typeof(Blocks.NestedSchemaOverridenVersion)) {
+            BlockDefinition expectedBlock = new(typeof(Blocks.NestedSchemaOverridenVersion)) {
                 Blocks = new[] {
                     new NestedBlockAttributeDefinition(typeof(Blocks.SchemaVersion), "block", new BlockDefinition(typeof(Blocks.SchemaVersion)) { Version = 3 })
                 }

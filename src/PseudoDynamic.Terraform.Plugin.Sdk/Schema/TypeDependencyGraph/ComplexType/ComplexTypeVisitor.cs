@@ -4,18 +4,18 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal class ComplexTypeVisitor
     {
-        internal static readonly ComplexTypeVisitor Default = new ComplexTypeVisitor();
+        internal static readonly ComplexTypeVisitor Default = new();
 
         private void VisitPropertySegment(IVisitPropertySegmentContext context)
         {
-            var visitTypeGenericArguments = context.NullabilityInfo.GenericTypeArguments;
+            Type[]? visitTypeGenericArguments = context.NullabilityInfo.GenericTypeArguments;
 
             if (visitTypeGenericArguments is null || visitTypeGenericArguments.Length == 0) {
                 return;
             }
 
             for (int i = 0; i < visitTypeGenericArguments.Length; i++) {
-                var genericArgument = visitTypeGenericArguments[i];
+                Type genericArgument = visitTypeGenericArguments[i];
                 RewriteThenVisit(new VisitPropertyGenericSegmentContext(context, genericArgument, i));
             }
         }
@@ -29,9 +29,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         protected virtual void VisitComplex(VisitContext context)
         {
             context.RememberVisitTypeBeingVisited();
-            var complexMetadata = context.ComplexTypeMetadata!;
+            ComplexTypeMetadata complexMetadata = context.ComplexTypeMetadata!;
 
-            foreach (var property in complexMetadata.SupportedProperties) {
+            foreach (System.Reflection.PropertyInfo property in complexMetadata.SupportedProperties) {
                 RewriteThenVisit(new VisitPropertyContext(context, property));
             }
         }

@@ -28,7 +28,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         private readonly IPluginServer _pluginServer;
         private readonly ILogger<ProviderContext> _logger;
         // We must delay validation exception until first incoming gRPC
-        private Lazy<string> _lazyFullyQualifiedProviderName;
+        private readonly Lazy<string> _lazyFullyQualifiedProviderName;
         private string? _providerName;
         private string? _snakeCaseProviderName;
         private TerraformReattachProvider? _terraformReattachProvider;
@@ -37,14 +37,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             _pluginServer = pluginServer;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            ProviderOptions unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _lazyFullyQualifiedProviderName = new(() => unwrappedOptions.FullyQualifiedProviderName);
             pluginServer.ServerStarted.Register(OnPluginServerStarted);
         }
 
         private void WriteTerraformDebugInstructions()
         {
-            var serializedTerraformReattachProviders = SerializeTerraformReattachProviders(new Dictionary<string, TerraformReattachProvider>() {
+            string serializedTerraformReattachProviders = SerializeTerraformReattachProviders(new Dictionary<string, TerraformReattachProvider>() {
                 { FullyQualifiedProviderName, TerraformReattachProvider }
             });
 

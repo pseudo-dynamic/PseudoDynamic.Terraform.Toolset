@@ -45,7 +45,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
         public async Task InitializeAsync()
         {
-            var host = new WebHostBuilder()
+            IWebHost host = new WebHostBuilder()
                 .UseTerraformPluginServerCore(this)
                 .ConfigureServices(services => {
                     services.AddOptions<ProviderOptions>().Configure(options => {

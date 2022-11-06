@@ -3,16 +3,16 @@
     internal record class MonoRangeDefinition : RangeDefinition, INestedValueProvider
     {
         internal static MonoRangeDefinition List<SourceType>(ValueDefinition item) =>
-            new MonoRangeDefinition(typeof(SourceType), TerraformTypeConstraint.List, item);
+            new(typeof(SourceType), TerraformTypeConstraint.List, item);
 
         internal static MonoRangeDefinition ListUncomputed(ValueDefinition item) =>
-            new MonoRangeDefinition(UncomputedSourceType, TerraformTypeConstraint.List, item);
+            new(UncomputedSourceType, TerraformTypeConstraint.List, item);
 
         internal static MonoRangeDefinition Set<SourceType>(ValueDefinition item) =>
-            new MonoRangeDefinition(typeof(SourceType), TerraformTypeConstraint.Set, item);
+            new(typeof(SourceType), TerraformTypeConstraint.Set, item);
 
         internal static MonoRangeDefinition SetUncomputed(ValueDefinition item) =>
-            new MonoRangeDefinition(UncomputedSourceType, TerraformTypeConstraint.Set, item);
+            new(UncomputedSourceType, TerraformTypeConstraint.Set, item);
 
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.MonoRange;
 

@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         [Fact]
         internal void Generic_encode_value_inferres_correct_content_type()
         {
-            var encoder = new ContentTypeEvaluatingEncoder();
+            ContentTypeEvaluatingEncoder encoder = new();
             encoder.EncodeValue(PrimitiveDefinition.Number, default(int));
             encoder.ContentType.Should().Be(typeof(int));
         }
@@ -18,7 +18,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         [Fact]
         internal void Generic_encode_value_can_handle_null()
         {
-            var encoder = new ContentTypeEvaluatingEncoder();
+            ContentTypeEvaluatingEncoder encoder = new();
             encoder.EncodeValue<object?>(DynamicDefinition.Uncomputed(), default);
             encoder.ContentType.Should().Be(typeof(object));
         }
@@ -26,8 +26,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         [Fact]
         internal void Non_generic_encode_value_inferres_correct_content_type()
         {
-            var encoder = new ContentTypeEvaluatingEncoder();
-            var number = 2;
+            ContentTypeEvaluatingEncoder encoder = new();
+            int number = 2;
             encoder.EncodeValue(PrimitiveDefinition.Number, (object?)number);
             encoder.ContentType.Should().Be(typeof(int));
         }
@@ -35,12 +35,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         [Fact]
         internal void Non_generic_encode_value_can_handle_null()
         {
-            var encoder = new ContentTypeEvaluatingEncoder();
+            ContentTypeEvaluatingEncoder encoder = new();
             encoder.EncodeValue(DynamicDefinition.Uncomputed(), default);
             encoder.ContentType.Should().Be(typeof(object));
         }
 
-        class ContentTypeEvaluatingEncoder : TerraformDynamicMessagePackEncoder
+        private class ContentTypeEvaluatingEncoder : TerraformDynamicMessagePackEncoder
         {
             public ContentTypeEvaluatingEncoder() : base(new SchemaBuilder())
             {

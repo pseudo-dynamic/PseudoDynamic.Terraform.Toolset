@@ -5,7 +5,7 @@
     /// </summary>
     internal record class ObjectDefinition : ComplexDefinition, IAttributeAccessor
     {
-        public static ObjectDefinition Uncomputed() => new ObjectDefinition(UncomputedSourceType);
+        public static ObjectDefinition Uncomputed() => new(UncomputedSourceType);
 
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.Object;
 
@@ -35,7 +35,7 @@
         {
             _indexedAttributes ??= ToDictionary(_attributes);
 
-            if (_indexedAttributes.TryGetValue(attributeName, out var attributeIndex)) {
+            if (_indexedAttributes.TryGetValue(attributeName, out int attributeIndex)) {
                 return _attributes[attributeIndex];
             }
 

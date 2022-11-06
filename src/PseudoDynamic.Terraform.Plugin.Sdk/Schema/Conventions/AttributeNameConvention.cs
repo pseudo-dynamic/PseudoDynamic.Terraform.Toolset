@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
     {
         private static string GetAttributeName(PropertyInfo attribute)
         {
-            var nameAttribute = attribute.GetCustomAttribute<NameAttribute>();
+            NameAttribute? nameAttribute = attribute.GetCustomAttribute<NameAttribute>();
 
             if (nameAttribute is not null) {
                 return nameAttribute.Name;
@@ -16,7 +16,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
             return attribute.Name;
         }
 
-        private INameConvention _nameConvention;
+        private readonly INameConvention _nameConvention;
 
         /// <summary>
         /// Creates an convention to format an attribute properly.

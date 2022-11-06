@@ -9,10 +9,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     {
         public ProviderService ProviderService {
             get {
-                var providerService = _providerService;
+                ProviderService? providerService = _providerService;
 
                 if (providerService == null) {
-                    var descriptor = _providerServiceDescriptor;
+                    ProviderServiceDescriptor? descriptor = _providerServiceDescriptor;
                     providerService = descriptor != null ? _providerServiceFactory.Build(descriptor) : _providerServiceFactory.BuildUnimplemented();
                     _providerService = providerService;
                 }
@@ -23,10 +23,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public BlockDefinition ProviderMetaSchema {
             get {
-                var schema = _providerMetaSchema;
+                BlockDefinition? schema = _providerMetaSchema;
 
                 if (schema == null) {
-                    var schemaType = _providerMetaSchemaType;
+                    Type? schemaType = _providerMetaSchemaType;
                     schema = schemaType != null ? _schemaBuilder.BuildBlock(schemaType) : BlockDefinition.Uncomputed;
                     _providerMetaSchema = schema;
                 }
@@ -37,12 +37,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public IReadOnlyDictionary<string, ProviderResourceService> ResourceServices {
             get {
-                var descriptors = _resourceServiceDescriptors;
+                IReadOnlyList<ResourceServiceDescriptor>? descriptors = _resourceServiceDescriptors;
 
                 if (descriptors != null) {
                     _resourceServiceDescriptors = null;
 
-                    foreach (var resourceDescriptor in descriptors) {
+                    foreach (ResourceServiceDescriptor resourceDescriptor in descriptors) {
                         _resourceServiceRegistry.Add(resourceDescriptor);
                     }
                 }
@@ -53,12 +53,12 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public IReadOnlyDictionary<string, ProviderDataSourceService> DataSourceServices {
             get {
-                var descriptors = _dataSourceServiceDescriptors;
+                IReadOnlyList<DataSourceServiceDescriptor>? descriptors = _dataSourceServiceDescriptors;
 
                 if (descriptors != null) {
                     _dataSourceServiceDescriptors = null;
 
-                    foreach (var dataSourceDescriptor in descriptors) {
+                    foreach (DataSourceServiceDescriptor dataSourceDescriptor in descriptors) {
                         _dataSourceServiceRegistry.Add(dataSourceDescriptor);
                     }
                 }
@@ -69,11 +69,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         private readonly SchemaBuilder _schemaBuilder;
         private readonly ProviderServiceFactory _providerServiceFactory;
-        private ProviderResourceServiceRegistry _resourceServiceRegistry;
-        private ProviderDataSourceServiceRegistry _dataSourceServiceRegistry;
+        private readonly ProviderResourceServiceRegistry _resourceServiceRegistry;
+        private readonly ProviderDataSourceServiceRegistry _dataSourceServiceRegistry;
         private ProviderService? _providerService;
-        private ProviderServiceDescriptor? _providerServiceDescriptor;
-        private Type? _providerMetaSchemaType;
+        private readonly ProviderServiceDescriptor? _providerServiceDescriptor;
+        private readonly Type? _providerMetaSchemaType;
         private BlockDefinition? _providerMetaSchema;
         private IReadOnlyList<ResourceServiceDescriptor>? _resourceServiceDescriptors;
         private IReadOnlyList<DataSourceServiceDescriptor>? _dataSourceServiceDescriptors;
@@ -89,7 +89,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             _providerServiceFactory = providerServiceFactory ?? throw new ArgumentNullException(nameof(providerServiceFactory));
             _resourceServiceRegistry = resourceServiceRegistry ?? throw new ArgumentNullException(nameof(resourceServiceRegistry));
             _dataSourceServiceRegistry = dataSourceServiceRegistry ?? throw new ArgumentNullException(nameof(dataSourceServiceRegistry));
-            var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            ProviderOptions unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
             // Service descriptors and schema evaluations must be deferred until first Terraform
             // initiated gRPC remote call to allow the user having a detailed error message on

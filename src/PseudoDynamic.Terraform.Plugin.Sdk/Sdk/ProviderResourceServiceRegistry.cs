@@ -4,7 +4,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     internal class ProviderResourceServiceRegistry : NamedTerraformServiceRegistry<ProviderResourceService>
     {
-        ResourceServiceFactory _resourceDefinitionFactory;
+        private readonly ResourceServiceFactory _resourceDefinitionFactory;
         private readonly IProviderServer _providerServer;
 
         public ProviderResourceServiceRegistry(ResourceServiceFactory resourceDefinitionFactory, IProviderServer providerServer)
@@ -15,9 +15,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         private ProviderResourceService UpgradeResource(ResourceServiceDescriptor resourceDescriptor)
         {
-            var resource = _resourceDefinitionFactory.Build(resourceDescriptor);
-            var resourceName = resource.Implementation.Name;
-            var fullResourceName = $"{_providerServer.SnakeCaseProviderName}_{resourceName}";
+            ResourceService resource = _resourceDefinitionFactory.Build(resourceDescriptor);
+            string resourceName = resource.Implementation.Name;
+            string fullResourceName = $"{_providerServer.SnakeCaseProviderName}_{resourceName}";
             return new ProviderResourceService(resource, fullResourceName);
         }
 

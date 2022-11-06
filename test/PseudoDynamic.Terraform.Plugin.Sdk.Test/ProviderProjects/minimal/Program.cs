@@ -3,12 +3,12 @@ using Moq;
 using PseudoDynamic.Terraform.Plugin.Schema;
 using PseudoDynamic.Terraform.Plugin.Sdk;
 
-var providerName = "pseudo-dynamic/debug";
+string providerName = "pseudo-dynamic/debug";
 
-var resource = new Mock<IResource<Schema>>();
+Mock<IResource<Schema>> resource = new();
 resource.SetupGet(x => x.Name).Returns("empty");
 
-var webHost = new WebHostBuilder()
+IWebHost webHost = new WebHostBuilder()
     .UseTerraformPluginServer(IPluginServerSpecification.NewProtocolV5()
         .UseProvider(providerName, provider => provider.AddResource<IResource<Schema>, Schema>(resource.Object)))
     .Build();

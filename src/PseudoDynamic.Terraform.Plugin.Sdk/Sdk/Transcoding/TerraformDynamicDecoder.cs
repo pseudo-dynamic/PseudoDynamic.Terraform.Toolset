@@ -10,7 +10,7 @@
         public bool TryDecode<Schema>(object? unknown, [NotNullWhen(true)] out Schema? content)
         {
             try {
-                var reports = new Reports();
+                Reports reports = new();
                 content = (Schema)_decoder.DecodeDynamic(unknown, typeof(Schema), new TerraformDynamicMessagePackDecoder.DecodingOptions())!;
                 return true;
             } catch {

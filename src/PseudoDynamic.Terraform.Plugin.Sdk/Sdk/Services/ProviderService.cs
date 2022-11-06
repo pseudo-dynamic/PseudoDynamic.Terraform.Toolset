@@ -5,7 +5,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
     internal record class ProviderService : TerraformService<IProvider?>
     {
         internal static ProviderService Unimplemented(BlockDefinition schema) =>
-            new ProviderService(schema);
+            new(schema);
 
         public override IProvider Implementation => base.Implementation;
 

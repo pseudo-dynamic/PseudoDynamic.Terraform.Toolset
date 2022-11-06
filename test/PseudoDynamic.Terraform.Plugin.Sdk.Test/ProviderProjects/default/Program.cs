@@ -5,9 +5,9 @@ using PseudoDynamic.Terraform.Plugin.Schema;
 using PseudoDynamic.Terraform.Plugin.Sdk;
 using static Assertions;
 
-var providerName = "registry.terraform.io/pseudo-dynamic/debug";
+string providerName = "registry.terraform.io/pseudo-dynamic/debug";
 
-var webHost = new WebHostBuilder()
+IWebHost webHost = new WebHostBuilder()
     .UseTerraformPluginServer(IPluginServerSpecification.NewProtocolV5()
         .UseProvider<ProviderMetaSchema>(providerName, provider => {
             provider.SetProvider<ProviderImpl>();
@@ -19,7 +19,7 @@ var webHost = new WebHostBuilder()
 await webHost.RunAsync();
 
 [Object]
-class Object
+internal class Object
 {
     public string String { get; set; } = null!;
     public int Number { get; set; }
@@ -50,11 +50,11 @@ class Object
 }
 
 [Block]
-class ProviderSchema : Object.WithRanges.WithNestedBlocks
+internal class ProviderSchema : Object.WithRanges.WithNestedBlocks
 {
 }
 
-class ProviderImpl : Provider<ProviderSchema>
+internal class ProviderImpl : Provider<ProviderSchema>
 {
     public override Task ValidateConfig(IValidateConfigContext<ProviderSchema> context)
     {
@@ -72,7 +72,7 @@ class ProviderImpl : Provider<ProviderSchema>
 }
 
 [Block]
-class ProviderMetaSchema : Object
+internal class ProviderMetaSchema : Object
 {
 }
 
@@ -134,7 +134,7 @@ internal class DataSourceImpl : DataSource<DataSourceSchema, ProviderMetaSchema>
     }
 }
 
-static class Assertions
+internal static class Assertions
 {
     public static void AssertObject(Object @object)
     {

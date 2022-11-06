@@ -4,7 +4,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {
     internal class BlockNodeContextEqualityComparer : EqualityComparer<BlockNode>
     {
-        public new static readonly BlockNodeContextEqualityComparer Default = new BlockNodeContextEqualityComparer();
+        public new static readonly BlockNodeContextEqualityComparer Default = new();
 
         public override bool Equals(BlockNode? x, BlockNode? y)
         {
@@ -23,7 +23,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 
         public override int GetHashCode([DisallowNull] BlockNode obj)
         {
-            var hashCode = new HashCode();
+            HashCode hashCode = new();
             hashCode.Add(obj.Context.ContextType);
             hashCode.Add(obj.Context.VisitType);
             return hashCode.ToHashCode();

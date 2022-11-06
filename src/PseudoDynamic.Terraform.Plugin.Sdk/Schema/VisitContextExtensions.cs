@@ -8,21 +8,21 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
         internal static TerraformTypeConstraint DetermineExplicitTypeConstraint<TContext>(this TContext context)
             where TContext : IVisitPropertySegmentContext
         {
-            var property = context.Property;
-            var valueType = context.VisitType;
+            PropertyInfo property = context.Property;
+            Type valueType = context.VisitType;
 
-            var implicitTypeConstraints = context.ImplicitTypeConstraints;
+            IReadOnlySet<TerraformTypeConstraint> implicitTypeConstraints = context.ImplicitTypeConstraints;
 
             if (implicitTypeConstraints.Contains(TerraformTypeConstraint.Dynamic)) {
                 return TerraformTypeConstraint.Dynamic;
             }
 
-            var valueAttribute = property.GetCustomAttribute<ValueAttribute>(inherit: true);
+            ValueAttribute? valueAttribute = property.GetCustomAttribute<ValueAttribute>(inherit: true);
             TerraformTypeConstraint typeConstraintResult;
 
             if (valueAttribute is not null) {
-                var explicitTypeConstraint = valueAttribute.TypeConstraint;
-                var isExplicitComplex = explicitTypeConstraint.IsComplex();
+                TerraformTypeConstraint explicitTypeConstraint = valueAttribute.TypeConstraint;
+                bool isExplicitComplex = explicitTypeConstraint.IsComplex();
 
                 if (isExplicitComplex || implicitTypeConstraints.Contains(explicitTypeConstraint)) {
                     typeConstraintResult = explicitTypeConstraint;

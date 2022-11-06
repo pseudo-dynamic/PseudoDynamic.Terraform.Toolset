@@ -8,14 +8,14 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         [InlineData(new object[] { typeof(NonAnnotatedBlocks.Default) })]
         public void Node_producer_throws_exception_due_to_missing_block_attribute(Type schemaType)
         {
-            var error = Assert.IsType<ArgumentException>(Record.Exception(() => new BlockNodeBuilder().BuildNode(schemaType)));
+            ArgumentException error = Assert.IsType<ArgumentException>(Record.Exception(() => new BlockNodeBuilder().BuildNode(schemaType)));
             Assert.Contains("must be annotated", error.Message, StringComparison.InvariantCulture);
         }
 
         [Fact]
         public void Node_producer_throws_exception_due_to_open_generic_type()
         {
-            var error = Assert.IsType<ArgumentException>(Record.Exception(() => new BlockNodeBuilder().BuildNode(typeof(GenericSchema<>))));
+            ArgumentException error = Assert.IsType<ArgumentException>(Record.Exception(() => new BlockNodeBuilder().BuildNode(typeof(GenericSchema<>))));
             Assert.Contains("closed generic type", error.Message, StringComparison.InvariantCulture);
         }
 

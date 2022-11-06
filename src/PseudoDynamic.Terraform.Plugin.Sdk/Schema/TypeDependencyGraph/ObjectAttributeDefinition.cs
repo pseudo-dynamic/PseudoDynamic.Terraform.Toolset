@@ -3,7 +3,7 @@
     internal record class ObjectAttributeDefinition : AttributeDefinition
     {
         public static ObjectAttributeDefinition Uncomputed(string name, ValueDefinition value) =>
-            new ObjectAttributeDefinition(UncomputedSourceType, name, value);
+            new(UncomputedSourceType, name, value);
 
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.ObjectAttribute;
 

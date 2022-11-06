@@ -4,7 +4,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {
     public class ProviderMappingProfileTests
     {
-        private static IMapper Mapper = new MapperConfiguration(config => {
+        private static readonly IMapper Mapper = new MapperConfiguration(config => {
             config.AddProfile<MappingProfileBase>();
             config.AddProfile<BlockMappingProfile>();
             config.AddProfile<ProviderMappingProfile>();

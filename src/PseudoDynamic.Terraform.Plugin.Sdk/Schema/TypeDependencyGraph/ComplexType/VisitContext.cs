@@ -4,7 +4,6 @@ using Namotion.Reflection;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
-
     /// <summary>
     /// The context originated from a visitation.
     /// </summary>
@@ -28,7 +27,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             }
 
             internal init {
-                var visitType = _visitType;
+                Type? visitType = _visitType;
                 _visitType = value;
 
                 if (visitType != value) {
@@ -59,7 +58,7 @@ Visit type = {VisitType.FullName}");
 
         public IReadOnlySet<TerraformTypeConstraint> ImplicitTypeConstraints {
             get {
-                var implicitTypeConstraints = _implicitTypeConstraints;
+                IReadOnlySet<TerraformTypeConstraint>? implicitTypeConstraints = _implicitTypeConstraints;
 
                 if (implicitTypeConstraints is not null) {
                     return implicitTypeConstraints;

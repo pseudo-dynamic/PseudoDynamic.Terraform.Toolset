@@ -4,7 +4,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
 {
     internal class VisitContextType
     {
-        internal static Builder OfMemberName([CallerMemberName] string? id = null) => new Builder(id);
+        internal static Builder OfMemberName([CallerMemberName] string? id = null) => new(id);
 
         /// <summary>
         /// Currently visiting context is about a schema.
@@ -64,7 +64,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
                 return true;
             }
 
-            foreach (var inheritedType in _inheritedTypes) {
+            foreach (VisitContextType inheritedType in _inheritedTypes) {
                 if (inheritedType.Equals(otherType)) {
                     return true;
                 }
@@ -97,7 +97,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             }
 
             public static implicit operator VisitContextType(Builder builder) =>
-                new VisitContextType(builder._id, builder._inheritedTypes);
+                new(builder._id, builder._inheritedTypes);
         }
     }
 }

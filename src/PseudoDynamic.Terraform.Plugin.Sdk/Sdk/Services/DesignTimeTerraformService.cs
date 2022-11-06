@@ -16,7 +16,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 
         internal static Type GetSchemaType(Type terraformServiceType)
         {
-            if (!terraformServiceType.IsImplementingGenericTypeDefinition(GenericTypeDefinition, out _, out var genericTypeArguments)) {
+            if (!terraformServiceType.IsImplementingGenericTypeDefinition(GenericTypeDefinition, out _, out Type[]? genericTypeArguments)) {
                 throw new InvalidOperationException($"Type {terraformServiceType} was expected to implement {GenericTypeDefinition}");
             }
 

@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
 {
     public class BlockMappingProfileTests
     {
-        private static IMapper Mapper = new MapperConfiguration(config => {
+        private static readonly IMapper Mapper = new MapperConfiguration(config => {
             config.AddProfile<MappingProfileBase>();
             config.AddProfile<BlockMappingProfile>();
         }).CreateMapper();
@@ -20,7 +20,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
         [ClassData(typeof(SchemaBlockData))]
         internal void Block_definition_maps_to_schema_block(Schema.Types.Block expectedSchemaBlock, BlockDefinition blockDefinition)
         {
-            var actualSchemaBlock = Mapper.Map<BlockDefinition, Schema.Types.Block>(blockDefinition);
+            Schema.Types.Block actualSchemaBlock = Mapper.Map<BlockDefinition, Schema.Types.Block>(blockDefinition);
             Assert.Equal(expectedSchemaBlock, actualSchemaBlock);
         }
 
@@ -40,7 +40,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                     Version = 2
                 });
 
-                var stringList = MonoRangeDefinition.List<IList<string>>(PrimitiveDefinition.String);
+                MonoRangeDefinition stringList = MonoRangeDefinition.List<IList<string>>(PrimitiveDefinition.String);
 
                 Add(new Schema.Types.Block() {
                     Version = 1,

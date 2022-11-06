@@ -6,7 +6,7 @@
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class BlockAttribute : ComplexAttribute
     {
-        private int _version = -1;
+        private readonly int _version = -1;
 
         /// <summary>
         /// Creates an instance of this type.

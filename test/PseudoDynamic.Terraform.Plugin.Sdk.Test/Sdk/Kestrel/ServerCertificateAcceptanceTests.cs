@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
         [Fact.Terraform]
         internal async Task Terraform_validate_works_with_custom_certificate()
         {
-            using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("minimal"));
+            using TerraformCommand.WorkingDirectoryCloning terraform = new(options => options.ForProviderProject("minimal"));
             await terraform.ValidateAsync();
         }
     }

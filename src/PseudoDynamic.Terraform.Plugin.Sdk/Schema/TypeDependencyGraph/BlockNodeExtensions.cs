@@ -19,7 +19,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         private static void EnsureNodesNotHavingNestedTerraformValue(this BlockNode node)
         {
             if (node.Any(childNode => childNode.Context.ContextType == BlockVisitContextType.TerraformValue)) {
-                var errorMessage = node.Context.ContextType == BlockVisitContextType.TerraformValue
+                string errorMessage = node.Context.ContextType == BlockVisitContextType.TerraformValue
                     ? $"In the dependency graph of {node.Context.VisitType.FullName} is another nested terraform value not allowed"
                     : $"In the dependency graph of {node.Context.VisitType.FullName} is a nested terraform value not allowed";
 
@@ -52,7 +52,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         public static IReadOnlyList<TypeWrapping> TryUnwrap(this BlockNode<IVisitPropertySegmentContext> node, out BlockNode<IVisitPropertySegmentContext> unwrappedNode)
         {
-            var typeWrappings = new List<TypeWrapping>();
+            List<TypeWrapping> typeWrappings = new();
 
             if (node.TryUnwrapTerraformValue(out unwrappedNode)) {
                 typeWrappings.Add(TypeWrapping.TerraformValue);

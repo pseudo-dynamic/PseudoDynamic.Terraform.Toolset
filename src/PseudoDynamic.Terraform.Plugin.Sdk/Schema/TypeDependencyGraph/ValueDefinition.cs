@@ -4,7 +4,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {
     internal abstract record class ValueDefinition : TerraformDefinition
     {
-        private static readonly ListEqualityComparer<TypeWrapping> TypeWrappingListEqualityComparer = new ListEqualityComparer<TypeWrapping>();
+        private static readonly ListEqualityComparer<TypeWrapping> TypeWrappingListEqualityComparer = new();
 
         /// <summary>
         /// If differing from <see cref="TerraformDefinition.SourceType"/>

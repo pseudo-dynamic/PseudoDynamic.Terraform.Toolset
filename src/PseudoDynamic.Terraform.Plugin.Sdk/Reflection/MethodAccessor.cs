@@ -6,13 +6,13 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
     {
         public MethodInfo Method { get; }
 
-        private Dictionary<Type, MethodInfo> _methodByOneTypeArgument = new();
+        private readonly Dictionary<Type, MethodInfo> _methodByOneTypeArgument = new();
 
         public MethodAccessor(MethodInfo method) => Method = method;
 
         public MethodInfo MakeGenericMethod(Type typeArgument)
         {
-            if (_methodByOneTypeArgument.TryGetValue(typeArgument, out var method)) {
+            if (_methodByOneTypeArgument.TryGetValue(typeArgument, out MethodInfo? method)) {
                 return method;
             }
 

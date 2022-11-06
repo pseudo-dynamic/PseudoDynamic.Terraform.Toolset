@@ -17,22 +17,22 @@ namespace PseudoDynamic.Terraform.Plugin
         /// <summary>
         /// Representing a Terraform null.
         /// </summary>
-        public static readonly TerraformValue<T> Null = new TerraformValue<T>();
+        public static readonly TerraformValue<T> Null = new();
 
         /// <summary>
         /// Representing a Terraform unknown.
         /// </summary>
-        public static readonly TerraformValue<T> Unknown = new TerraformValue<T>() { IsUnknown = true };
+        public static readonly TerraformValue<T> Unknown = new() { IsUnknown = true };
 
         /// <summary>
         /// The value.
         /// </summary>
         public T Value {
             get {
-                var isNullable = _isNullable;
-                var value = _value;
+                bool? isNullable = _isNullable;
+                T? value = _value;
 
-                if (isNullable.HasValue && !isNullable.Value && Equals(value, default)) {
+                if (isNullable == false && Equals(value, default)) {
                     throw new TerraformValueException("The value type indicates non-nullability but value is null");
                 }
 
@@ -103,7 +103,7 @@ namespace PseudoDynamic.Terraform.Plugin
         public TerraformValue<T> AsUnknown => Unknown;
         ITerraformValue<T> ITerraformValue<T>.AsUnknown => AsUnknown;
 
-        private bool? _isNullable;
+        private readonly bool? _isNullable;
         private bool _isNotNull;
         private T? _value;
         private bool _isUnknown;
@@ -165,6 +165,6 @@ namespace PseudoDynamic.Terraform.Plugin
             _isUnknown);
 
         public static implicit operator TerraformValue<T>(T value) =>
-            new TerraformValue<T>(value);
+            new(value);
     }
 }

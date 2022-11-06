@@ -3,7 +3,7 @@
     internal record class NestedBlockAttributeDefinition : BlockAttributeDefinitionBase
     {
         public static NestedBlockAttributeDefinition Uncomputed(string name, ValueDefinition value) =>
-            new NestedBlockAttributeDefinition(UncomputedSourceType, name, value);
+            new(UncomputedSourceType, name, value);
 
         public const int DefaultMinimumItems = 0;
         public const int DefaultMaximumItems = 0;

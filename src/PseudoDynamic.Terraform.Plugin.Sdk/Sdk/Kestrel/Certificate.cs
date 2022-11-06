@@ -17,23 +17,23 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
 {
     internal static class Certificate
     {
-        private readonly static SecureRandom secureRandom = new SecureRandom(new CryptoApiRandomGenerator());
+        private readonly static SecureRandom secureRandom = new(new CryptoApiRandomGenerator());
 
         internal static X509Certificate2 GenerateSelfSignedCertificate(
             Org.BouncyCastle.X509.X509Certificate bouncyCastleX509,
             AsymmetricKeyParameter subjectPrivate)
         {
-            var x509 = new X509Certificate2(bouncyCastleX509.GetEncoded(), default(string), X509KeyStorageFlags.Exportable);
-            var subjectPrivateInfo = PrivateKeyInfoFactory.CreatePrivateKeyInfo(subjectPrivate);
-            var subjectPrivateAsn = (Asn1Sequence)Asn1Object.FromByteArray(subjectPrivateInfo.ParsePrivateKey().GetDerEncoded());
+            X509Certificate2 x509 = new(bouncyCastleX509.GetEncoded(), default(string), X509KeyStorageFlags.Exportable);
+            PrivateKeyInfo subjectPrivateInfo = PrivateKeyInfoFactory.CreatePrivateKeyInfo(subjectPrivate);
+            Asn1Sequence subjectPrivateAsn = (Asn1Sequence)Asn1Object.FromByteArray(subjectPrivateInfo.ParsePrivateKey().GetDerEncoded());
 
             if (subjectPrivateAsn.Count != 9) {
                 throw new PemException("Invalid RSA private key");
             }
 
-            var subjectPrivateRsa = RsaPrivateKeyStructure.GetInstance(subjectPrivateAsn);
+            RsaPrivateKeyStructure subjectPrivateRsa = RsaPrivateKeyStructure.GetInstance(subjectPrivateAsn);
 
-            var subjectPrivateRsaCertParameters = new RsaPrivateCrtKeyParameters(
+            RsaPrivateCrtKeyParameters subjectPrivateRsaCertParameters = new(
                 subjectPrivateRsa.Modulus,
                 subjectPrivateRsa.PublicExponent,
                 subjectPrivateRsa.PrivateExponent,
@@ -43,13 +43,13 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
                 subjectPrivateRsa.Exponent2,
                 subjectPrivateRsa.Coefficient);
 
-            var subjectPrivateRsaParameters = DotNetUtilities.ToRSAParameters(subjectPrivateRsaCertParameters);
+            RSAParameters subjectPrivateRsaParameters = DotNetUtilities.ToRSAParameters(subjectPrivateRsaCertParameters);
 
-            var rsa = RSA.Create();
+            RSA rsa = RSA.Create();
             rsa.ImportParameters(subjectPrivateRsaParameters);
 
             // https://github.com/dotnet/runtime/issues/23749
-            var exportableCertificate = x509.CopyWithPrivateKey(rsa);
+            X509Certificate2 exportableCertificate = x509.CopyWithPrivateKey(rsa);
             return new X509Certificate2(exportableCertificate.Export(X509ContentType.Pkcs12));
         }
 
@@ -57,8 +57,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
         {
             internal static AsymmetricCipherKeyPair GenerateRsaKeyPair(int length)
             {
-                var keygenParam = new KeyGenerationParameters(secureRandom, length);
-                var keyGenerator = new RsaKeyPairGenerator();
+                KeyGenerationParameters keygenParam = new(secureRandom, length);
+                RsaKeyPairGenerator keyGenerator = new();
                 keyGenerator.Init(keygenParam);
                 return keyGenerator.GenerateKeyPair();
             }
@@ -70,8 +70,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
                 AsymmetricKeyParameter subjectPublic,
                 GeneralNames? subjectAltName)
             {
-                var signatureFactory = new Asn1SignatureFactory(PkcsObjectIdentifiers.Sha256WithRsaEncryption.ToString(), issuerPrivate);
-                var certificateGenerator = new Org.BouncyCastle.X509.X509V3CertificateGenerator();
+                Asn1SignatureFactory signatureFactory = new(PkcsObjectIdentifiers.Sha256WithRsaEncryption.ToString(), issuerPrivate);
+                Org.BouncyCastle.X509.X509V3CertificateGenerator certificateGenerator = new();
                 certificateGenerator.SetIssuerDN(issuer);
                 certificateGenerator.SetSubjectDN(subject);
 
@@ -79,10 +79,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
                     certificateGenerator.AddExtension(X509Extensions.SubjectAlternativeName, critical: false, subjectAltName);
                 }
 
-                var randomSerialNumber = new BigInteger(sizeInBits: 128, secureRandom); // 128 bit
+                BigInteger randomSerialNumber = new(sizeInBits: 128, secureRandom); // 128 bit
                 certificateGenerator.SetSerialNumber(randomSerialNumber);
 
-                var now = DateTime.UtcNow;
+                DateTime now = DateTime.UtcNow;
                 certificateGenerator.SetNotBefore(now);
                 certificateGenerator.SetNotAfter(now.AddYears(1));
 
@@ -93,10 +93,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
             internal static bool ValidateSelfSignedCertificate(Org.BouncyCastle.X509.X509Certificate certificate, ICipherParameters publicKey)
             {
                 certificate.CheckValidity(DateTime.UtcNow);
-                var tbsCertificate = certificate.GetTbsCertificate();
-                var signature = certificate.GetSignature();
+                byte[] tbsCertificate = certificate.GetTbsCertificate();
+                byte[] signature = certificate.GetSignature();
 
-                var signer = SignerUtilities.GetSigner(certificate.SigAlgName);
+                ISigner signer = SignerUtilities.GetSigner(certificate.SigAlgName);
                 signer.Init(false, publicKey);
                 signer.BlockUpdate(tbsCertificate, 0, tbsCertificate.Length);
                 return signer.VerifySignature(signature);

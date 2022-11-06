@@ -12,11 +12,11 @@ namespace PseudoDynamic.Terraform.Plugin
         internal static readonly Type InterfaceGenericTypeDefinition = typeof(ITerraformValue<>);
         internal static readonly Type BaseInterfaceType = typeof(ITerraformValue);
 
-        private static readonly GenericTypeAccessor TerraformValueAccessor = new GenericTypeAccessor(ClassGenericTypeDefinition);
+        private static readonly GenericTypeAccessor TerraformValueAccessor = new(ClassGenericTypeDefinition);
 
         internal static object CreateInstance(Type typeArgument, bool isNullable, object? value, bool isNull, bool isUnknown)
         {
-            var constructorArguments = new[] { isNullable, value, isNull, isUnknown };
+            object?[] constructorArguments = new[] { isNullable, value, isNull, isUnknown };
 
             return TerraformValueAccessor
                 .MakeGenericTypeAccessor(typeArgument)
@@ -42,7 +42,7 @@ namespace PseudoDynamic.Terraform.Plugin
         /// <param name="value"></param>
         /// <returns>A non-null instance.</returns>
         public static TerraformValue<T> OfValue<T>(T value) =>
-            new TerraformValue<T>(value);
+            new(value);
 
         /// <summary>
         /// Representing a Terraform null.

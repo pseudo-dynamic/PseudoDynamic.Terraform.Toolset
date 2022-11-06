@@ -3,7 +3,7 @@
     internal record class TupleDefinition : RangeDefinition
     {
         public static TupleDefinition Uncomputed() =>
-            new TupleDefinition(UncomputedSourceType);
+            new(UncomputedSourceType);
 
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.Tuple;
 

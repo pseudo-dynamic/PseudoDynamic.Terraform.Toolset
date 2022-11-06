@@ -14,7 +14,7 @@
         public bool IsSameDepthCapturingEnabled => _queueSameDepth;
 
         private bool _queueSameDepth;
-        private Queue<T> _sameDepthCaptured = new Queue<T>();
+        private readonly Queue<T> _sameDepthCaptured = new();
 
         public bool EnableSameDepthCapturing(bool enable = true) => _queueSameDepth = enable;
 
@@ -26,7 +26,7 @@
             visitSameDepth(visitSameDepthArgument);
             EnableSameDepthCapturing(false);
 
-            var capturedContexts = new List<T>(_sameDepthCaptured);
+            List<T> capturedContexts = new(_sameDepthCaptured);
             _sameDepthCaptured.Clear();
             return capturedContexts;
         }

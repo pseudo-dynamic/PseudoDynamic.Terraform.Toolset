@@ -9,8 +9,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         private List<TerraformDefinition>? _preloadableDefinitions;
         private TerraformDefinition? _loadableDefinition;
         private int _alreadyPreloaded;
-        private ConcurrentDictionary<(TerraformTypeConstraint TypeConstraint, Type SourceType), ValueDefinition> _knownDefinitions = new();
-        private ValueDefinitionCollectingVisitor _visitor;
+        private readonly ConcurrentDictionary<(TerraformTypeConstraint TypeConstraint, Type SourceType), ValueDefinition> _knownDefinitions = new();
+        private readonly ValueDefinitionCollectingVisitor _visitor;
 
         public SchemaBuilder() => _visitor = new ValueDefinitionCollectingVisitor(this);
 
@@ -29,7 +29,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         private void PreloadOnce()
         {
             if (Interlocked.CompareExchange(ref _alreadyPreloaded, 1, 0) == 0) {
-                var unprocessedDefinitions = Interlocked.Exchange(ref _preloadableDefinitions, null);
+                List<TerraformDefinition>? unprocessedDefinitions = Interlocked.Exchange(ref _preloadableDefinitions, null);
 
                 if (unprocessedDefinitions != null) {
                     unprocessedDefinitions.AsParallel().ForAll(ComputeDynamicDefinitions);
@@ -41,7 +41,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             PreloadOnce();
 
-            var unprocessedDefinition = Interlocked.Exchange(ref _loadableDefinition, null);
+            TerraformDefinition? unprocessedDefinition = Interlocked.Exchange(ref _loadableDefinition, null);
 
             if (unprocessedDefinition != null) {
                 ComputeDynamicDefinitions(unprocessedDefinition);
@@ -53,7 +53,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private bool ResolveCache(Type knownType, [NotNullWhen(true)] out ValueDefinition? value)
         {
-            var implicitTypeConstraints = TerraformTypeConstraintEvaluator.Default.Evaluate(knownType);
+            IReadOnlySet<TerraformTypeConstraint> implicitTypeConstraints = TerraformTypeConstraintEvaluator.Default.Evaluate(knownType);
 
             if (implicitTypeConstraints.Count == 1 && _knownDefinitions.TryGetValue((implicitTypeConstraints.Single(), knownType), out value)) {
                 return true;
@@ -67,11 +67,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             Preload();
 
-            if (ResolveCache(knownType, out var cache)) {
+            if (ResolveCache(knownType, out ValueDefinition? cache)) {
                 return cache;
             }
 
-            var resolvedDefinition = BlockBuilder.Default.BuildDynamic(dynamic, knownType);
+            ValueDefinition resolvedDefinition = BlockBuilder.Default.BuildDynamic(dynamic, knownType);
             _loadableDefinition = resolvedDefinition;
             ReplaceKnownDefinition(resolvedDefinition);
             return resolvedDefinition;
@@ -79,14 +79,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         internal BlockDefinition BuildBlock(Type schemaType)
         {
-            var schema = BlockBuilder.Default.BuildBlock(schemaType);
+            BlockDefinition schema = BlockBuilder.Default.BuildBlock(schemaType);
             AddPreloadable(schema);
             return schema;
         }
 
         private class ValueDefinitionCollectingVisitor : TerraformDefinitionVisitor
         {
-            private SchemaBuilder _registry;
+            private readonly SchemaBuilder _registry;
 
             public ValueDefinitionCollectingVisitor(SchemaBuilder registry) =>
                 _registry = registry;

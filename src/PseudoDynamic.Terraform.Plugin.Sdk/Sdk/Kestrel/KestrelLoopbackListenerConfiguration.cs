@@ -14,11 +14,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
 
         private static X509Certificate2 CreateSelfSignedCertificate()
         {
-            var rsaKeyPair = Certificate.BouncyCastle.GenerateRsaKeyPair(2048);
-            var issuer = new X509Name("CN=127.0.0.1");
-            var subject = new X509Name("CN=pseudo-dynamic");
-            var subjectAltName = new GeneralNames(new GeneralName(GeneralName.DnsName, "localhost"));
-            var bouncyCastleCertificate = Certificate.BouncyCastle.GenerateSelfSignedCertificate(issuer, subject, rsaKeyPair.Private, rsaKeyPair.Public, subjectAltName);
+            Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair rsaKeyPair = Certificate.BouncyCastle.GenerateRsaKeyPair(2048);
+            X509Name issuer = new("CN=127.0.0.1");
+            X509Name subject = new("CN=pseudo-dynamic");
+            GeneralNames subjectAltName = new(new GeneralName(GeneralName.DnsName, "localhost"));
+            Org.BouncyCastle.X509.X509Certificate bouncyCastleCertificate = Certificate.BouncyCastle.GenerateSelfSignedCertificate(issuer, subject, rsaKeyPair.Private, rsaKeyPair.Public, subjectAltName);
             return Certificate.GenerateSelfSignedCertificate(bouncyCastleCertificate, rsaKeyPair.Private);
         }
 
@@ -39,24 +39,22 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Kestrel
 
         public void PostConfigure(string _, KestrelServerOptions options)
         {
-            var pluginServerOptions = _serviceProvider.GetService<IOptions<PluginServerOptions>>()?.Value
-                ?? throw new InvalidOperationException($"Expected non-null plugin server options");
+            PluginServerOptions pluginServerOptions = _serviceProvider.GetService<IOptions<PluginServerOptions>>()?.Value
+                ?? throw new InvalidOperationException("Expected non-null plugin server options");
 
-            var ipAddress = IPAddress.Loopback;
+            IPAddress ipAddress = IPAddress.Loopback;
             const int randomPort = 0;
 
             if (pluginServerOptions.IsDebuggable) {
                 options.Listen(ipAddress, randomPort, options => options.Protocols = HttpProtocols.Http2);
             } else {
-                var selfSignedCertificate = GetSelfSignedCertificate();
+                X509Certificate2 selfSignedCertificate = GetSelfSignedCertificate();
 
                 if (pluginServerOptions.ClientCertificate?.Thumbprint != selfSignedCertificate.Thumbprint) {
                     throw new InvalidOperationException("Do not set the client certificate of the plugin server options manually when using UseTerraformPluginServer()");
                 }
 
-                options.Listen(ipAddress, randomPort, listen => listen.UseHttps(http => {
-                    http.ServerCertificate = selfSignedCertificate;
-                }));
+                options.Listen(ipAddress, randomPort, listen => listen.UseHttps(http => http.ServerCertificate = selfSignedCertificate));
             }
         }
     }

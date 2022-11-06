@@ -11,8 +11,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
         }
 
         public ProviderService Build(ProviderServiceDescriptor descriptor) =>
-            new ProviderService(
-                BuildSchema(descriptor.SchemaType),
+            new(BuildSchema(descriptor.SchemaType),
                 CreateImplementation<IProvider>(descriptor));
 
         public ProviderService BuildUnimplemented() =>

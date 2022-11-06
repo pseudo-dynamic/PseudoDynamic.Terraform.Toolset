@@ -23,7 +23,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
         /// <param name="subject">For example "resource" or "data source".</param>
         protected void EnsureServiceImplementsGenericTypeDefinition(Type typeDefinition, Type[] havingGenericTypeArguments, string subject)
         {
-            if (!ImplementationType.IsImplementingGenericTypeDefinition(typeDefinition, out _, out var genericTypeArguments)) {
+            if (!ImplementationType.IsImplementingGenericTypeDefinition(typeDefinition, out _, out Type[]? genericTypeArguments)) {
                 throw new ArgumentException($"The {subject} type {ImplementationType.FullName} should implement {typeDefinition.FullName}", nameof(ImplementationType));
             }
 

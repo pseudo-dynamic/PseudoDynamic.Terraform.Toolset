@@ -7,8 +7,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
     {
         protected static IReadOnlyDictionary<string, int> ToDictionary(IReadOnlyList<AttributeDefinition> attributes)
         {
-            var attributesCount = attributes.Count;
-            var dictionary = new Dictionary<string, int>();
+            int attributesCount = attributes.Count;
+            Dictionary<string, int> dictionary = new();
 
             for (int i = 0; i < attributesCount; i++) {
                 dictionary.Add(attributes[i].Name, i);
@@ -30,10 +30,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected void PreventAttributeDuplicates<T>(IEnumerable<AttributeDefinition> attributes, Func<(string AttributeName, T AdditionalData), string> getErrorMessage, T? additionalData = default)
         {
-            var attributeNameSet = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+            HashSet<string> attributeNameSet = new(StringComparer.InvariantCultureIgnoreCase);
 
-            foreach (var attribute in attributes) {
-                var attributeName = attribute.Name;
+            foreach (AttributeDefinition attribute in attributes) {
+                string attributeName = attribute.Name;
 
                 if (attributeNameSet.Contains(attributeName)) {
                     throw new BlockException(getErrorMessage((attributeName, additionalData!)));

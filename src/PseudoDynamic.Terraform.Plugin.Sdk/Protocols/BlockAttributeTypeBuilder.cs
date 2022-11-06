@@ -8,14 +8,14 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
     /// </summary>
     internal class BlockAttributeTypeBuilder
     {
-        public readonly static BlockAttributeTypeBuilder Default = new BlockAttributeTypeBuilder();
+        public readonly static BlockAttributeTypeBuilder Default = new();
 
         public string BuildJsonType(TerraformDefinition definition)
         {
-            var visitor = new TypeStackingVisitor();
-            var stack = TerraformDefinitionCollector.Default.Stack(definition);
+            TypeStackingVisitor visitor = new();
+            Stack<TerraformDefinition> stack = TerraformDefinitionCollector.Default.Stack(definition);
 
-            while (stack.TryPop(out var poppedDefinition)) {
+            while (stack.TryPop(out TerraformDefinition? poppedDefinition)) {
                 visitor.Visit(poppedDefinition);
             }
 
@@ -26,7 +26,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
         {
             private static List<T> PopRangeReversed<T>(Stack<T> stack, int count)
             {
-                var result = new List<T>(count);
+                List<T> result = new(count);
 
                 while (count-- > 0 && stack.Count > 0) {
                     result.Add(stack.Pop());
@@ -38,7 +38,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
 
             public string Last => _jsonBlockTypes.Peek();
 
-            private readonly Stack<string> _jsonBlockTypes = new Stack<string>();
+            private readonly Stack<string> _jsonBlockTypes = new();
 
             private void PushBlockType(string blockType) =>
                 _jsonBlockTypes.Push(blockType);
@@ -69,8 +69,8 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
 
             protected internal override void VisitObject(ObjectDefinition definition)
             {
-                var orderedBlockTypes = PopBlockTypesReversed(definition.Attributes.Count);
-                var concatenatedBlockTypes = string.Join(",", orderedBlockTypes);
+                IEnumerable<string> orderedBlockTypes = PopBlockTypesReversed(definition.Attributes.Count);
+                string concatenatedBlockTypes = string.Join(",", orderedBlockTypes);
                 PushBlockType($$"""[{{definition.TypeConstraint.GetBlockAttributeTypeJsonString()}},{{{concatenatedBlockTypes}}}]""");
             }
 

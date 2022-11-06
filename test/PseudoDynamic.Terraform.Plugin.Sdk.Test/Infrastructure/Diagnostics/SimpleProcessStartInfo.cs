@@ -40,9 +40,9 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 
         internal ProcessStartInfo CreateProcessStartInfo()
         {
-            var executable = Executable;
-            var arguments = Arguments;
-            var workingDirectory = WorkingDirectory ?? string.Empty;
+            string executable = Executable;
+            string? arguments = Arguments;
+            string workingDirectory = WorkingDirectory ?? string.Empty;
             ProcessStartInfo processStartInfo;
 
             if (arguments == null) {
@@ -56,7 +56,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
             }
 
             if (EnvironmentVariables is not null) {
-                foreach (var environmentVariable in EnvironmentVariables) {
+                foreach (KeyValuePair<string, string> environmentVariable in EnvironmentVariables) {
                     processStartInfo.EnvironmentVariables.Add(environmentVariable.Key, environmentVariable.Value);
                 }
             }

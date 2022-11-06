@@ -2,7 +2,7 @@
 {
     internal class ProviderDataSourceServiceRegistry : NamedTerraformServiceRegistry<ProviderDataSourceService>
     {
-        DataSourceServiceFactory _dataSourceDefinitionFactory;
+        private readonly DataSourceServiceFactory _dataSourceDefinitionFactory;
         private readonly IProviderServer _providerServer;
 
         public ProviderDataSourceServiceRegistry(DataSourceServiceFactory dataSourceDefinitionFactory, IProviderServer providerServer)
@@ -13,9 +13,9 @@
 
         private ProviderDataSourceService UpgradeDataSource(DataSourceServiceDescriptor dataSourceDescriptor)
         {
-            var dataSource = _dataSourceDefinitionFactory.Build(dataSourceDescriptor);
-            var dataSourceName = dataSource.Implementation.Name;
-            var fullDataSourceName = $"{_providerServer.SnakeCaseProviderName}_{dataSourceName}";
+            DataSourceService dataSource = _dataSourceDefinitionFactory.Build(dataSourceDescriptor);
+            string dataSourceName = dataSource.Implementation.Name;
+            string fullDataSourceName = $"{_providerServer.SnakeCaseProviderName}_{dataSourceName}";
             return new ProviderDataSourceService(dataSource, fullDataSourceName);
         }
 

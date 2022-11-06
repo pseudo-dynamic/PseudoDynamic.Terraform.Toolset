@@ -20,12 +20,12 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         [MemberData(nameof(Generate_block_nodes))]
         internal void Block_builder_builds_nullable_types(Type schemaType, BlockNode expectedNode)
         {
-            var actualNode = new BlockNodeBuilder().BuildNode(schemaType);
+            BlockNode actualNode = new BlockNodeBuilder().BuildNode(schemaType);
             Assert.Equal(expectedNode, actualNode, BlockNodeContextEqualityComparer.Default);
         }
 
         [Block]
-        class Block
+        private class Block
         {
             public int? NullableNumber { get; set; }
         }

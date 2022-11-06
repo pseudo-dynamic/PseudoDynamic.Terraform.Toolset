@@ -17,7 +17,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
         [NotNull]
         public virtual TImplementation Implementation => _implementation ?? throw new InvalidOperationException("Implementation is not set");
 
-        TImplementation? _implementation;
+        private readonly TImplementation? _implementation;
 
         /// <summary>
         /// A constructor that does not initialize <see cref="Implementation"/>.

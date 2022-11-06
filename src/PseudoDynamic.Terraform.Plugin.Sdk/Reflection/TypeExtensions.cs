@@ -8,7 +8,7 @@
             [NotNullWhen(true)] out Type? genericType,
             [NotNullWhen(true)] out Type[]? genericTypeArguments)
         {
-            foreach (var interfaceType in type.GetInterfaces()) {
+            foreach (Type interfaceType in type.GetInterfaces()) {
                 if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == genericTypeDefinition) {
                     genericType = interfaceType;
                     genericTypeArguments = interfaceType.GenericTypeArguments;
@@ -22,7 +22,7 @@
                 return true;
             }
 
-            var baseType = type.BaseType;
+            Type? baseType = type.BaseType;
 
             if (baseType == null) {
                 genericType = null;

@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
         }
 
         public ResourceService Build(ResourceServiceDescriptor descriptor) =>
-            new ResourceService(
+            new(
                 BuildSchema(descriptor.SchemaType),
                 CreateImplementation<IResource>(descriptor));
     }

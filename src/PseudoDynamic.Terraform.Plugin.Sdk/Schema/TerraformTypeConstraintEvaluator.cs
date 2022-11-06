@@ -4,7 +4,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     internal class TerraformTypeConstraintEvaluator
     {
-        public static readonly TerraformTypeConstraintEvaluator Default = new TerraformTypeConstraintEvaluator();
+        public static readonly TerraformTypeConstraintEvaluator Default = new();
 
         private TerraformTypeConstraint? EvaluateNonObjectTypeCode(TypeCode typeCode) => typeCode switch {
             TypeCode.SByte or TypeCode.Byte
@@ -52,7 +52,6 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
 
         private TerraformTypeConstraint? EvaluateInterfaceTypeDefinition(Type typeDefinition)
         {
-
             if (typeDefinition == typeof(IList<>)) {
                 return TerraformTypeConstraint.List;
             }
@@ -70,8 +69,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
 
         public IReadOnlySet<TerraformTypeConstraint> Evaluate(Type type)
         {
-            var typeConstraints = new HashSet<TerraformTypeConstraint>();
-            var typeCode = Type.GetTypeCode(type);
+            HashSet<TerraformTypeConstraint> typeConstraints = new();
+            TypeCode typeCode = Type.GetTypeCode(type);
 
             if (typeCode == TypeCode.Object) {
                 if (type.IsValueType) {
@@ -86,7 +85,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
                     }
                 } else if (type.IsClass) {
                     // If we find predestinated generic classes ..
-                    var genericClassTypeDefinitionEvaluation = type.IsGenericType
+                    TerraformTypeConstraint? genericClassTypeDefinitionEvaluation = type.IsGenericType
                         ? EvaluateClassTypeDefinition(type.GetGenericTypeDefinition())
                         : default;
 

@@ -6,7 +6,7 @@
     internal record class BlockAttributeDefinition : BlockAttributeDefinitionBase
     {
         public static BlockAttributeDefinition Uncomputed(string name, ValueDefinition value) =>
-            new BlockAttributeDefinition(UncomputedSourceType, name, value);
+            new(UncomputedSourceType, name, value);
 
         public override TerraformDefinitionType DefinitionType => TerraformDefinitionType.BlockAttribute;
 

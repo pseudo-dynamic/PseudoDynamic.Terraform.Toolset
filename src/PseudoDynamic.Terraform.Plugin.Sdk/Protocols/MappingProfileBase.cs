@@ -22,7 +22,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
             {
                 destination ??= new RepeatedField<TDestination>();
 
-                foreach (var item in source) {
+                foreach (TSource? item in source) {
                     destination.Add(context.Mapper.Map<TDestination>(item));
                 }
 

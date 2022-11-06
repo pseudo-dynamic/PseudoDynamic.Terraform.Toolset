@@ -8,7 +8,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         [Fact.Terraform]
         public async Task Asynchronous_terraform_plan_prints_error_message()
         {
-            var terraform = new TerraformCommand(static options => { });
+            TerraformCommand terraform = new(static options => { });
 
             await terraform.Awaiting(command => command.PlanAsync()).Should()
                 .ThrowAsync<BadExitCodeException>()
@@ -18,7 +18,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
         [Fact.Terraform]
         public void Synchronous_terraform_plan_prints_error_message()
         {
-            var terraform = new TerraformCommand(static options => { });
+            TerraformCommand terraform = new(static options => { });
 
             terraform.Invoking(command => command.Plan()).Should()
                 .Throw<BadExitCodeException>()

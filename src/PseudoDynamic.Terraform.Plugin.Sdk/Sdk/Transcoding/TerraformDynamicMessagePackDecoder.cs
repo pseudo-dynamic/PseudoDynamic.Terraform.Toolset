@@ -12,11 +12,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
     internal sealed class TerraformDynamicMessagePackDecoder
     {
-        private readonly static GenericTypeAccessor ListAccessor = new GenericTypeAccessor(typeof(List<>));
-        private readonly static GenericTypeAccessor SetAccessor = new GenericTypeAccessor(typeof(HashSet<>));
-        private readonly static GenericTypeAccessor DictionaryAccessor = new GenericTypeAccessor(typeof(Dictionary<,>));
+        private readonly static GenericTypeAccessor ListAccessor = new(typeof(List<>));
+        private readonly static GenericTypeAccessor SetAccessor = new(typeof(HashSet<>));
+        private readonly static GenericTypeAccessor DictionaryAccessor = new(typeof(Dictionary<,>));
 
-        private IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _serviceProvider;
         private readonly SchemaBuilder _schemaBuilder;
 
         public TerraformDynamicMessagePackDecoder(IServiceProvider serviceProvider, SchemaBuilder resolver)
@@ -27,8 +27,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private TerraformDynamic DecodeDynamic(ref MessagePackReader reader, DynamicDefinition definition)
         {
-            var raw = reader.ReadRaw();
-            var bytes = new byte[raw.Length];
+            System.Buffers.ReadOnlySequence<byte> raw = reader.ReadRaw();
+            byte[] bytes = new byte[raw.Length];
             raw.CopyTo(bytes, out _);
             return new TerraformDynamic(definition, bytes, TerraformDynamicEncoding.MessagePack);
         }
@@ -37,7 +37,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private object DecodeNumber(ref MessagePackReader reader, ValueDefinition definition)
         {
-            if (TryReadUtf8(ref reader, out var utf8Number)) {
+            if (TryReadUtf8(ref reader, out string? utf8Number)) {
                 if (definition.SourceType == typeof(BigInteger)) {
                     return BigInteger.Parse(utf8Number);
                 } else {
@@ -90,7 +90,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             static bool TryReadUtf8(ref MessagePackReader reader, [NotNullWhen(true)] out string? utf8String)
             {
                 if (reader.NextMessagePackType == MessagePackType.String) {
-                    var bytes = reader.ReadStringSequence();
+                    System.Buffers.ReadOnlySequence<byte>? bytes = reader.ReadStringSequence();
 
                     utf8String = bytes.HasValue
                         ? Encoding.UTF8.GetString(bytes.Value)
@@ -108,14 +108,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private object DecodeList(ref MessagePackReader reader, MonoRangeDefinition definition, DecodingOptions options)
         {
-            var itemCount = reader.ReadArrayHeader();
+            int itemCount = reader.ReadArrayHeader();
 
-            var listAccessor = ListAccessor.MakeGenericTypeAccessor(definition.Item.OuterType);
-            var items = listAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
-            var addItem = listAccessor.GetMethodCaller(nameof(IList<object>.Add));
+            Reflection.TypeAccessor listAccessor = ListAccessor.MakeGenericTypeAccessor(definition.Item.OuterType);
+            object items = listAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
+            Concurrent.FastReflection.NetStandard.MethodCaller<object, object> addItem = listAccessor.GetMethodCaller(nameof(IList<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
-                var item = DecodeValueWithContext(ref reader, definition.Item, options).Value;
+                object? item = DecodeValueWithContext(ref reader, definition.Item, options).Value;
                 addItem.Invoke(items, new[] { item });
             }
 
@@ -124,14 +124,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private object DecodeSet(ref MessagePackReader reader, MonoRangeDefinition definition, DecodingOptions options)
         {
-            var itemCount = reader.ReadArrayHeader();
+            int itemCount = reader.ReadArrayHeader();
 
-            var setAccessor = SetAccessor.MakeGenericTypeAccessor(definition.Item.OuterType);
-            var items = setAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
-            var addItem = setAccessor.GetMethodCaller(nameof(ISet<object>.Add));
+            Reflection.TypeAccessor setAccessor = SetAccessor.MakeGenericTypeAccessor(definition.Item.OuterType);
+            object items = setAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
+            Concurrent.FastReflection.NetStandard.MethodCaller<object, object> addItem = setAccessor.GetMethodCaller(nameof(ISet<object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
-                var item = DecodeValueWithContext(ref reader, definition.Item, options).Value;
+                object? item = DecodeValueWithContext(ref reader, definition.Item, options).Value;
                 addItem.Invoke(items, new[] { item });
             }
 
@@ -140,16 +140,16 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private object DecodeMap(ref MessagePackReader reader, MapDefinition definition, DecodingOptions options)
         {
-            var itemCount = reader.ReadMapHeader();
+            int itemCount = reader.ReadMapHeader();
 
-            var mapAccessor = DictionaryAccessor.MakeGenericTypeAccessor(definition.Key.OuterType, definition.Value.OuterType);
-            var items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
-            var addItem = mapAccessor.GetMethodCaller(nameof(IDictionary<object, object>.Add));
+            Reflection.TypeAccessor mapAccessor = DictionaryAccessor.MakeGenericTypeAccessor(definition.Key.OuterType, definition.Value.OuterType);
+            object items = mapAccessor.CreateInstance(static x => x.GetPublicInstanceActivator);
+            Concurrent.FastReflection.NetStandard.MethodCaller<object, object> addItem = mapAccessor.GetMethodCaller(nameof(IDictionary<object, object>.Add));
 
             for (int i = 0; i < itemCount; i++) {
                 // CONSIDER: allow key type other than string
-                var key = reader.ReadString();
-                var value = DecodeValueWithContext(ref reader, definition.Value, options).Value;
+                string key = reader.ReadString();
+                object? value = DecodeValueWithContext(ref reader, definition.Value, options).Value;
                 addItem.Invoke(items, new[] { key, value });
             }
 
@@ -165,34 +165,34 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         /// <returns>The instantiated instance.</returns>
         private object ActivateComplex(ComplexDefinition definition, IReadOnlyDictionary<string, object?> attributes)
         {
-            var reflectionMetadata = definition.ComplexReflectionMetadata;
-            var constructorParametersCount = reflectionMetadata.ConstructorParameters.Count;
-            var constructorArguments = new object?[constructorParametersCount];
-            var constructorSupportedPropertiesCount = reflectionMetadata.ConstructorSupportedProperties.Count;
-            var missingConstructorArgumentIndexes = new HashSet<int>(Enumerable.Range(0, constructorParametersCount));
+            ComplexReflectionMetadata reflectionMetadata = definition.ComplexReflectionMetadata;
+            int constructorParametersCount = reflectionMetadata.ConstructorParameters.Count;
+            object?[] constructorArguments = new object?[constructorParametersCount];
+            int constructorSupportedPropertiesCount = reflectionMetadata.ConstructorSupportedProperties.Count;
+            HashSet<int> missingConstructorArgumentIndexes = new(Enumerable.Range(0, constructorParametersCount));
 
             for (int i = 0; i < constructorSupportedPropertiesCount; i++) {
-                var (constructorSupportedParameter, constructorSupportedProperty) = reflectionMetadata.ConstructorSupportedProperties[i];
-                var constructorSupportedParameterPosition = constructorSupportedParameter.Position;
+                (System.Reflection.ParameterInfo constructorSupportedParameter, System.Reflection.PropertyInfo constructorSupportedProperty) = reflectionMetadata.ConstructorSupportedProperties[i];
+                int constructorSupportedParameterPosition = constructorSupportedParameter.Position;
                 missingConstructorArgumentIndexes.Remove(constructorSupportedParameterPosition);
-                var attributeName = reflectionMetadata.PropertyNameAttributeNameMapping[constructorSupportedProperty.Name];
+                string attributeName = reflectionMetadata.PropertyNameAttributeNameMapping[constructorSupportedProperty.Name];
                 constructorArguments[constructorSupportedParameterPosition] = attributes[attributeName];
             }
 
-            foreach (var missingConstructorArgumentIndex in missingConstructorArgumentIndexes) {
-                var constructorParameter = reflectionMetadata.ConstructorParameters[missingConstructorArgumentIndex];
+            foreach (int missingConstructorArgumentIndex in missingConstructorArgumentIndexes) {
+                System.Reflection.ParameterInfo constructorParameter = reflectionMetadata.ConstructorParameters[missingConstructorArgumentIndex];
                 constructorArguments[missingConstructorArgumentIndex] = _serviceProvider.GetRequiredService(constructorParameter.ParameterType);
             }
 
-            var instance = reflectionMetadata.PrimaryConstructor.Invoke(constructorArguments);
+            object instance = reflectionMetadata.PrimaryConstructor.Invoke(constructorArguments);
 
             if (reflectionMetadata.NonConstructorSupportedProperties.Count > 0) {
-                var instanceAccessor = ObjectAccessor.Create(instance);
+                ObjectAccessor instanceAccessor = ObjectAccessor.Create(instance);
 
-                foreach (var nonConstructorSupportedProperty in reflectionMetadata.NonConstructorSupportedProperties) {
-                    var propertyName = nonConstructorSupportedProperty.Name;
-                    var attributeName = reflectionMetadata.PropertyNameAttributeNameMapping[propertyName];
-                    var propertyValue = attributes[attributeName];
+                foreach (System.Reflection.PropertyInfo nonConstructorSupportedProperty in reflectionMetadata.NonConstructorSupportedProperties) {
+                    string propertyName = nonConstructorSupportedProperty.Name;
+                    string attributeName = reflectionMetadata.PropertyNameAttributeNameMapping[propertyName];
+                    object? propertyValue = attributes[attributeName];
 
                     if (nonConstructorSupportedProperty.PropertyType.IsValueType && propertyValue is null) {
                         continue;
@@ -215,14 +215,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 throw new NotImplementedException($"Complex definition does not implement {typeof(IAttributeAccessor).FullName}");
             }
 
-            var parsedAttributes = new Dictionary<string, object?>();
-            var attributesCount = reader.ReadMapHeader();
+            Dictionary<string, object?> parsedAttributes = new();
+            int attributesCount = reader.ReadMapHeader();
 
             for (int i = 0; i < attributesCount; i++) {
-                var attributeName = reader.ReadString();
-                var attribute = abstractAttributeAccessor.GetAttribute(attributeName);
-                var attributeRequired = attribute.IsRequired;
-                var attributeValueResult = DecodeValueWithContext(ref reader, attribute.Value, options, attributeRequired);
+                string attributeName = reader.ReadString();
+                AttributeDefinition attribute = abstractAttributeAccessor.GetAttribute(attributeName);
+                bool attributeRequired = attribute.IsRequired;
+                ValueResult attributeValueResult = DecodeValueWithContext(ref reader, attribute.Value, options, attributeRequired);
 
                 if (!attributeValueResult.IsUnknown && attributeRequired && attributeValueResult.IsNull) {
                     options.Reports.Error($"The attribute \"{attributeName}\" is required and must not be null");
@@ -261,7 +261,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 isNull = true;
                 isUnknown = false;
             } else if (reader.NextMessagePackType == MessagePackType.Extension) {
-                var extension = reader.ReadExtensionFormat();
+                ExtensionResult extension = reader.ReadExtensionFormat();
                 value2 = null;
                 isNull = true;
                 isUnknown = extension.TypeCode == 0;
@@ -281,8 +281,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         public object? DecodeDynamic(object? unknown, Type knownType, DecodingOptions options)
         {
             if (unknown is TerraformDynamic terraformDynamic) {
-                var value = _schemaBuilder.BuildDynamic(terraformDynamic.Definition, knownType);
-                var reader = new MessagePackReader(terraformDynamic.Memory);
+                ValueDefinition value = _schemaBuilder.BuildDynamic(terraformDynamic.Definition, knownType);
+                MessagePackReader reader = new(terraformDynamic.Memory);
                 return DecodeValueWithContext(ref reader, value, options);
             }
 
@@ -312,7 +312,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         /// <param name="options"></param>
         public object? DecodeNullableBlock(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)
         {
-            var reader = new MessagePackReader(memory);
+            MessagePackReader reader = new(memory);
             return DecodeNullableBlock(ref reader, block, options);
         }
 
@@ -339,7 +339,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         /// <param name="options"></param>
         public object DecodeBlock(ReadOnlyMemory<byte> memory, BlockDefinition block, DecodingOptions options)
         {
-            var reader = new MessagePackReader(memory);
+            MessagePackReader reader = new(memory);
             return DecodeBlock(ref reader, block, options);
         }
 

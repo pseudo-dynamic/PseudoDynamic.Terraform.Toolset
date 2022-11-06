@@ -77,11 +77,15 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             Schema Plan { get; set; }
         }
 
-        public interface ICreateContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IConfigContext<Schema>, IPlanContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
+        public interface IChangeContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IConfigContext<Schema>, IPlanContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
         {
         }
 
-        public interface IUpdateContext<Schema, out ProviderMetaSchema> : IBaseContext, IShapingContext, IConfigContext<Schema>, IStateContext<Schema>, IPlanContext<Schema>, IProviderMetaContext<ProviderMetaSchema>
+        public interface ICreateContext<Schema, out ProviderMetaSchema> : IChangeContext<Schema, ProviderMetaSchema>
+        {
+        }
+
+        public interface IUpdateContext<Schema, out ProviderMetaSchema> : IChangeContext<Schema, ProviderMetaSchema>, IStateContext<Schema>
         {
         }
 

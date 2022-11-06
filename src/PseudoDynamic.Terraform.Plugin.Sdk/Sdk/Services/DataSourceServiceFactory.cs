@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
         }
 
         public DataSourceService Build(DataSourceServiceDescriptor descriptor) =>
-            new DataSourceService(
+            new(
                 BuildSchema(descriptor.SchemaType),
                 CreateImplementation<IDataSource>(descriptor));
     }

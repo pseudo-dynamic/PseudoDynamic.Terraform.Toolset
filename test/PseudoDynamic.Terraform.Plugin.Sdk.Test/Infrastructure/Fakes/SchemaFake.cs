@@ -6,20 +6,20 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 {
     internal class SchemaFake<T>
     {
-        public static readonly GenericTypeAccessor GenericListEqualityComparerAccessor = new GenericTypeAccessor(typeof(ListEqualityComparer<>));
-        public static readonly GenericTypeAccessor GenericSetEqualityComparerAccessor = new GenericTypeAccessor(typeof(SetEqualityComparer<>));
-        public static readonly GenericTypeAccessor GenericKeyValuePairAccessor = new GenericTypeAccessor(typeof(KeyValuePair<,>));
+        public static readonly GenericTypeAccessor GenericListEqualityComparerAccessor = new(typeof(ListEqualityComparer<>));
+        public static readonly GenericTypeAccessor GenericSetEqualityComparerAccessor = new(typeof(SetEqualityComparer<>));
+        public static readonly GenericTypeAccessor GenericKeyValuePairAccessor = new(typeof(KeyValuePair<,>));
 
-        static IEqualityComparer<T> GetDefaultEqualityComparer()
+        private static IEqualityComparer<T> GetDefaultEqualityComparer()
         {
-            var typeOfT = typeof(T);
+            Type typeOfT = typeof(T);
 
-            if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out var genericTypeArguments)) {
+            if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out Type[]? genericTypeArguments)) {
                 return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.MakeGenericTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
             } else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(ISet<>), out _, out genericTypeArguments)) {
                 return (IEqualityComparer<T>)GenericSetEqualityComparerAccessor.MakeGenericTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
             } else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IDictionary<,>), out _, out genericTypeArguments)) {
-                var keyValuePairType = GenericKeyValuePairAccessor.MakeGenericTypeAccessor(genericTypeArguments).Type;
+                Type keyValuePairType = GenericKeyValuePairAccessor.MakeGenericTypeAccessor(genericTypeArguments).Type;
                 return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.MakeGenericTypeAccessor(keyValuePairType).CreateInstance(x => x.GetPublicInstanceActivator);
             } else {
                 return EqualityComparer<T>.Default;
@@ -32,7 +32,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 
         public Block Schema {
             get {
-                var schema = _schema;
+                SchemaFake<T>.Block? schema = _schema;
 
                 if (schema is not null) {
                     return schema;
@@ -66,13 +66,13 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
         internal class Block : ISchemaFake
         {
             public static Block OfValue(T value) =>
-                new Block(value);
+                new(value);
 
             public static SchemaFake<IList<T>>.Block HavingList(params T[] values) =>
-                new SchemaFake<IList<T>>.Block(values.ToList(), new ListEqualityComparer<T>());
+                new(values.ToList(), new ListEqualityComparer<T>());
 
             public static SchemaFake<ISet<T>>.Block HavingSet(params T[] values) =>
-                new SchemaFake<ISet<T>>.Block(values.ToHashSet(), new SetEqualityComparer<T>());
+                new(values.ToHashSet(), new SetEqualityComparer<T>());
 
             public static IList<Block> RangeList(params T[] values) =>
                 values.Select(OfValue).ToList();
@@ -111,13 +111,13 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
         public class Object : Block
         {
             public new static Object OfValue(T value) =>
-                new Object(value);
+                new(value);
 
             public new static SchemaFake<IList<T>>.Object HavingList(params T[] values) =>
-                new SchemaFake<IList<T>>.Object(values.ToList(), new ListEqualityComparer<T>());
+                new(values.ToList(), new ListEqualityComparer<T>());
 
             public new static SchemaFake<ISet<T>>.Object HavingSet(params T[] values) =>
-                new SchemaFake<ISet<T>>.Object(values.ToHashSet(), new SetEqualityComparer<T>());
+                new(values.ToHashSet(), new SetEqualityComparer<T>());
 
             public new static IList<Object> RangeList(params T[] values) =>
                 values.Select(OfValue).ToList();
@@ -137,13 +137,13 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
         public class NestedBlock : Block
         {
             public new static NestedBlock OfValue(T value) =>
-                new NestedBlock(value);
+                new(value);
 
             public new static SchemaFake<IList<T>>.NestedBlock HavingList(params T[] values) =>
-                new SchemaFake<IList<T>>.NestedBlock(values.ToList(), new ListEqualityComparer<T>());
+                new(values.ToList(), new ListEqualityComparer<T>());
 
             public new static SchemaFake<ISet<T>>.NestedBlock HavingSet(params T[] values) =>
-                new SchemaFake<ISet<T>>.NestedBlock(values.ToHashSet(), new SetEqualityComparer<T>());
+                new(values.ToHashSet(), new SetEqualityComparer<T>());
 
             public new static IList<NestedBlock> RangeList(params T[] values) =>
                 values.Select(OfValue).ToList();

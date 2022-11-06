@@ -24,22 +24,22 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
         public void Visitor_should_not_throw_type_dependency_circle_error(Type complexType) =>
             ComplexTypeVisitor.Default.Invoking(x => x.RewriteThenVisitComplex(complexType)).Should().NotThrow();
 
-        class SelfReferenceClass
+        private class SelfReferenceClass
         {
             public SelfReferenceClass? Invalid { get; set; }
         }
 
-        class HavingSelfReferenceStruct
+        private class HavingSelfReferenceStruct
         {
             public SelfReferenceStruct Invalid { get; set; }
         }
 
-        class HavingSelfReferenceStructToo
+        private class HavingSelfReferenceStructToo
         {
             public SelfReferenceStruct Invalid { get; set; }
         }
 
-        struct SelfReferenceStruct
+        private struct SelfReferenceStruct
         {
             public SelfReferenceStruct()
             {
@@ -48,7 +48,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             public HavingSelfReferenceStructToo? Invalid { get; set; }
         }
 
-        class Parent
+        private class Parent
         {
             public Child? ChildOne { get; set; }
             public Child? ChildTwo { get; set; }

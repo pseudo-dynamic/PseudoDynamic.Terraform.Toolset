@@ -5,7 +5,7 @@
     /// </summary>
     internal record class BlockDefinition : ComplexDefinition, IAttributeAccessor
     {
-        internal static readonly BlockDefinition Uncomputed = new BlockDefinition(new BlockDefinition(UncomputedSourceType));
+        internal static readonly BlockDefinition Uncomputed = new(new BlockDefinition(UncomputedSourceType));
 
         internal const int DefaultVersion = 1;
 
@@ -68,8 +68,8 @@
 
         private void PreventAttributeDuplicates(IReadOnlyList<AttributeDefinition> attributes, IReadOnlyList<AttributeDefinition> blocks)
         {
-            var attributesCount = attributes.Count;
-            var blocksCount = blocks.Count;
+            int attributesCount = attributes.Count;
+            int blocksCount = blocks.Count;
 
             if (attributesCount == 0 && blocksCount == 0) {
                 return;
@@ -95,7 +95,7 @@
         {
             _indexedAttributes ??= ToDictionary(_attributes);
 
-            if (_indexedAttributes.TryGetValue(attributeName, out var attributeIndex)) {
+            if (_indexedAttributes.TryGetValue(attributeName, out int attributeIndex)) {
                 return _attributes[attributeIndex];
             }
 
@@ -109,8 +109,8 @@
 
             static IReadOnlyDictionary<string, int> ToDictionary(IReadOnlyList<AttributeDefinition> attributes)
             {
-                var attributesCount = attributes.Count;
-                var dictionary = new Dictionary<string, int>();
+                int attributesCount = attributes.Count;
+                Dictionary<string, int> dictionary = new();
 
                 for (int i = 0; i < attributes.Count; i++) {
                     dictionary.Add(attributes[i].Name, i);

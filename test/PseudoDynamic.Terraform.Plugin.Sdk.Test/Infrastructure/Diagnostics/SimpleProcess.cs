@@ -9,16 +9,16 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
     /// <summary>
     /// A simple process trying to replace the bootstrap code of a native instance of <see cref="Process"/>.
     /// </summary>
-    public class SimpleProcess : ISimpleProcess, IAsyncSimpleProcess
+    public sealed class SimpleProcess : ISimpleProcess, IAsyncSimpleProcess
     {
         private static async Task ReadStreamAsync(Stream source, IBufferWriter<byte> destination, CancellationToken cancellationToken)
         {
-            using var memoryOwner = MemoryPool<byte>.Shared.Rent(1024 * 4);
-            var lastWrittenBytesCount = -1;
+            using IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(1024 * 4);
+            int lastWrittenBytesCount = -1;
 
             while (!(cancellationToken.IsCancellationRequested && lastWrittenBytesCount == 0)) {
                 lastWrittenBytesCount = await source.ReadAsync(memoryOwner.Memory).ConfigureAwait(false);
-                destination.Write(memoryOwner.Memory.Span.Slice(0, lastWrittenBytesCount));
+                destination.Write(memoryOwner.Memory.Span[..lastWrittenBytesCount]);
             }
         }
 
@@ -37,14 +37,14 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
           CancellationToken cancellationToken = default)
         {
             encoding ??= Encoding.UTF8;
-            using var outputBuffer = new SparseBufferWriter<byte>();
-            using var errorBuffer = new SparseBufferWriter<byte>();
+            using SparseBufferWriter<byte> outputBuffer = new();
+            using SparseBufferWriter<byte> errorBuffer = new();
 
-            using var process = new SimpleProcess(startInfo, outputBuffer, errorBuffer, cancellationToken);
-            var exitCode = process.WaitForExit();
+            using SimpleProcess process = new(startInfo, outputBuffer, errorBuffer, cancellationToken);
+            int exitCode = process.WaitForExit();
 
             if (exitCode != expectedExitCode) {
-                var error = encoding.GetString(errorBuffer.ToReadOnlySequence());
+                string error = encoding.GetString(errorBuffer.ToReadOnlySequence());
                 throw new BadExitCodeException(error) { ExitCode = exitCode };
             }
 
@@ -66,14 +66,14 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
           CancellationToken cancellationToken = default)
         {
             encoding ??= Encoding.UTF8;
-            using var outputBuffer = new SparseBufferWriter<byte>();
-            using var errorBuffer = new SparseBufferWriter<byte>();
+            using SparseBufferWriter<byte> outputBuffer = new();
+            using SparseBufferWriter<byte> errorBuffer = new();
 
-            using var process = new SimpleProcess(startInfo, outputBuffer, errorBuffer, cancellationToken);
-            var exitCode = await process.WaitForExitAsync().ConfigureAwait(false);
+            using SimpleProcess process = new(startInfo, outputBuffer, errorBuffer, cancellationToken);
+            int exitCode = await process.WaitForExitAsync().ConfigureAwait(false);
 
             if (exitCode != expectedExitCode) {
-                var error = encoding.GetString(errorBuffer.ToReadOnlySequence());
+                string error = encoding.GetString(errorBuffer.ToReadOnlySequence());
                 throw new BadExitCodeException(error) { ExitCode = exitCode };
             }
 
@@ -100,12 +100,13 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         internal Task? ReadOutputTask { get; private set; }
         internal Task? ReadErrorTask { get; private set; }
 
-        private CancellationTokenSource _processExitedTokenSource;
+        private readonly CancellationTokenSource _processExitedTokenSource;
         private readonly SimpleProcessStartInfo _processStartInfo;
         private readonly IBufferWriter<byte>? _outputBuffer;
         private readonly IBufferWriter<byte>? _errorBuffer;
         private Process? _process;
-        private object _startProcessLock = new();
+        private bool _isDisposed;
+        private readonly object _startProcessLock = new();
 
         /// <summary>
         /// Creates an instance of this type.
@@ -131,14 +132,14 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 
         internal void CreateProcess(out Process process)
         {
-            var currentProcess = _process;
+            Process? currentProcess = _process;
 
             if (currentProcess is not null) {
                 process = currentProcess;
                 return;
             }
 
-            var newProcess = new Process() { StartInfo = _processStartInfo.CreateProcessStartInfo() };
+            Process newProcess = new() { StartInfo = _processStartInfo.CreateProcessStartInfo() };
 
             if (Interlocked.CompareExchange(ref _process, newProcess, null) == null) {
                 process = newProcess;
@@ -164,12 +165,12 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
                 }
 
                 process.EnableRaisingEvents = true;
-                EventHandler? onProcessExited = default;
-                onProcessExited = (object? sender, EventArgs e) => {
-                    process.Exited -= onProcessExited;
+                void OnProcessExited(object? sender, EventArgs e)
+                {
+                    process.Exited -= OnProcessExited;
                     _processExitedTokenSource.Cancel();
-                };
-                process.Exited += onProcessExited;
+                }
+                process.Exited += OnProcessExited;
 
                 IsProcessStartedSuccessfully = process.Start();
                 IsProcessStarted = true;
@@ -187,7 +188,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         /// <inheritdoc/>
         public bool Start()
         {
-            CreateProcess(out var process);
+            CreateProcess(out Process? process);
             StartProcess(process);
             return IsProcessStartedSuccessfully;
         }
@@ -195,7 +196,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         /// <inheritdoc/>
         public int WaitForExit()
         {
-            CreateProcess(out var process);
+            CreateProcess(out Process? process);
             StartProcess(process);
             process.WaitForExit();
             // This makes the assumption, that every await uses
@@ -207,7 +208,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         /// <inheritdoc/>
         public async Task<int> WaitForExitAsync()
         {
-            CreateProcess(out var process);
+            CreateProcess(out Process? process);
             StartProcess(process);
 
             await Task.WhenAll(
@@ -219,14 +220,25 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
             return process.ExitCode;
         }
 
+        private void Dispose(bool disposing)
+        {
+            if (_isDisposed) {
+                return;
+            }
+
+            if (disposing) {
+                _process?.Dispose();
+                _processExitedTokenSource.Dispose();
+            }
+
+            _isDisposed = true;
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_process is not null) {
-                _process.Dispose();
-            }
-
-            _processExitedTokenSource.Dispose();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

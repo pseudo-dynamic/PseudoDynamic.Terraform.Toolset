@@ -24,7 +24,7 @@
 
         protected internal virtual void VisitObject(ObjectDefinition definition)
         {
-            foreach (var attribute in definition.Attributes) {
+            foreach (ObjectAttributeDefinition attribute in definition.Attributes) {
                 Visit(attribute);
             }
         }
@@ -38,11 +38,11 @@
 
         protected internal virtual void VisitBlock(BlockDefinition definition)
         {
-            foreach (var attribute in definition.Attributes) {
+            foreach (BlockAttributeDefinition attribute in definition.Attributes) {
                 Visit(attribute);
             }
 
-            foreach (var block in definition.Blocks) {
+            foreach (NestedBlockAttributeDefinition block in definition.Blocks) {
                 Visit(block);
             }
         }
