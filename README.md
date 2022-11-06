@@ -307,3 +307,18 @@ The problem with the **second approach** is, that you are forced to overwrite th
 You got me. Did I told you that I do this in my free time? Currently there is no automation to publish a Terraform provider. Since now I have no idea what the Terraform provider registry is expecting and what not. Depending on this, it may take a while until a neat publish integration will exist.
 
 An alternative is to use the provider locally by using any of the method, that is described here: https://developer.hashicorp.com/terraform/cli/config/config-file#provider-installation
+
+## Development
+
+You want to participate in the development of PseudoDynamic.Terraform.Toolset? Then please ensure having
+
+- Visual Studio 2022
+- .NET 6.0 SDK
+
+For running tests you also need
+
+- Terraform v1.2.8+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
