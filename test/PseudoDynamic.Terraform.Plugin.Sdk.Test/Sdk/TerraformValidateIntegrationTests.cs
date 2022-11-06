@@ -117,8 +117,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             _pluginHostFixture.Provider.ReplaceResource(new ResourceServiceDescriptor(typeof(IResource<Schema>), typeof(Schema), typeof(object)) { Implementation = resourceMock.Object });
 
             using var terraform = _pluginHostFixture.CreateTerraformCommand("TerraformProjects/resource-validate", filePattern);
-            await terraform.Init();
-            await terraform.Validate();
+            await terraform.InitAsync();
+            await terraform.ValidateAsync();
 
             resourceMock.Verify();
             Assert.Equal(expectedConfig, actualContext?.Config);

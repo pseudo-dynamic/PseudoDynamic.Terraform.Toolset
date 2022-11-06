@@ -1,13 +1,15 @@
 ﻿using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using DotNext.Buffers;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 {
     /// <summary>
     /// A simple process trying to replace the bootstrap code of a native instance of <see cref="Process"/>.
     /// </summary>
-    public class SimpleProcess : ISimpleProcess
+    public class SimpleProcess : ISimpleProcess, IAsyncSimpleProcess
     {
         private static async Task ReadStreamAsync(Stream source, IBufferWriter<byte> destination, CancellationToken cancellationToken)
         {
@@ -18,6 +20,64 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
                 lastWrittenBytesCount = await source.ReadAsync(memoryOwner.Memory).ConfigureAwait(false);
                 destination.Write(memoryOwner.Memory.Span.Slice(0, lastWrittenBytesCount));
             }
+        }
+
+        /// <summary>
+        /// Starts the process, waits for the exit and provdes the output the process has made.
+        /// </summary>
+        /// <param name="startInfo"></param>
+        /// <param name="expectedExitCode"></param>
+        /// <param name="encoding">The to be used encoding for output or error incoming bytes.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>The read output.</returns>
+        public static string StartThenWaitForExitThenReadOutput(
+          SimpleProcessStartInfo startInfo,
+          int expectedExitCode = 0,
+          Encoding? encoding = null,
+          CancellationToken cancellationToken = default)
+        {
+            encoding ??= Encoding.UTF8;
+            using var outputBuffer = new SparseBufferWriter<byte>();
+            using var errorBuffer = new SparseBufferWriter<byte>();
+
+            using var process = new SimpleProcess(startInfo, outputBuffer, errorBuffer, cancellationToken);
+            var exitCode = process.WaitForExit();
+
+            if (exitCode != expectedExitCode) {
+                var error = encoding.GetString(errorBuffer.ToReadOnlySequence());
+                throw new BadExitCodeException(error) { ExitCode = exitCode };
+            }
+
+            return encoding.GetString(outputBuffer.ToReadOnlySequence());
+        }
+
+        /// <summary>
+        /// Starts the process, waits for the exit and provdes the output the process has made.
+        /// </summary>
+        /// <param name="startInfo"></param>
+        /// <param name="expectedExitCode"></param>
+        /// <param name="encoding">The to be used encoding for output or error incoming bytes.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>The read output.</returns>
+        public static async Task<string> StartThenWaitForExitThenReadOutputAsync(
+          SimpleProcessStartInfo startInfo,
+          int expectedExitCode = 0,
+          Encoding? encoding = null,
+          CancellationToken cancellationToken = default)
+        {
+            encoding ??= Encoding.UTF8;
+            using var outputBuffer = new SparseBufferWriter<byte>();
+            using var errorBuffer = new SparseBufferWriter<byte>();
+
+            using var process = new SimpleProcess(startInfo, outputBuffer, errorBuffer, cancellationToken);
+            var exitCode = await process.WaitForExitAsync().ConfigureAwait(false);
+
+            if (exitCode != expectedExitCode) {
+                var error = encoding.GetString(errorBuffer.ToReadOnlySequence());
+                throw new BadExitCodeException(error) { ExitCode = exitCode };
+            }
+
+            return encoding.GetString(outputBuffer.ToReadOnlySequence());
         }
 
         /// <summary>
@@ -93,6 +153,11 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
         [MemberNotNull(nameof(ReadOutputTask), nameof(ReadErrorTask))]
         internal void StartProcess(Process process)
         {
+            // Try non-lock version
+            if (IsProcessStarted) {
+                return;
+            }
+
             lock (_startProcessLock) {
                 if (IsProcessStarted) {
                     return;
@@ -102,7 +167,6 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
                 EventHandler? onProcessExited = default;
                 onProcessExited = (object? sender, EventArgs e) => {
                     process.Exited -= onProcessExited;
-                    //_ = Task.Delay(TimeSpan.FromSeconds(5)).ContinueWith(task => { _processExitedTokenSource.Cancel(); });
                     _processExitedTokenSource.Cancel();
                 };
                 process.Exited += onProcessExited;
@@ -134,6 +198,23 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
             CreateProcess(out var process);
             StartProcess(process);
             process.WaitForExit();
+            // This makes the assumption, that every await uses
+            // ConfigureAwait(continueOnCapturedContext: false)
+            Task.WaitAll(ReadErrorTask, ReadErrorTask);
+            return process.ExitCode;
+        }
+
+        /// <inheritdoc/>
+        public async Task<int> WaitForExitAsync()
+        {
+            CreateProcess(out var process);
+            StartProcess(process);
+
+            await Task.WhenAll(
+                    process.WaitForExitAsync(UserRequestedCancellationToken),
+                    ReadOutputTask,
+                    ReadErrorTask)
+                .ConfigureAwait(false);
 
             return process.ExitCode;
         }

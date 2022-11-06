@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
 
-namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
-{
-    internal interface IAsyncSimpleProcess : IDisposable
-    {
-        /// <inheritdoc cref="Process.Start()" />
-        bool Start();
+namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics;
 
-        /// <inheritdoc cref="Process.WaitForExitAsync(CancellationToken)" />
-        Task<int> WaitForExitAsync();
-    }
+internal interface IAsyncSimpleProcess
+{
+    /// <inheritdoc cref="Process.Start()" />
+    bool Start();
+
+    /// <inheritdoc cref="Process.WaitForExitAsync(CancellationToken)" />
+    Task<int> WaitForExitAsync();
 }

@@ -8,21 +8,21 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         internal async Task Terraform_validate_passes()
         {
             using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("default"));
-            await terraform.Validate();
+            await terraform.ValidateAsync();
         }
 
         [Fact.Terraform]
         internal async Task Terraform_plan_passes()
         {
             using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("default"));
-            await terraform.Plan();
+            await terraform.PlanAsync();
         }
 
         [Fact.Terraform]
         internal async Task Terraform_apply_passes()
         {
             using var terraform = new TerraformCommand.WorkingDirectoryCloning(options => options.ForProviderProject("default"));
-            await terraform.Apply();
+            await terraform.ApplyAsync();
         }
     }
 }

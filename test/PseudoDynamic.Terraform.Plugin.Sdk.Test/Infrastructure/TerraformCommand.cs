@@ -63,18 +63,31 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             Arguments = args
         };
 
-        private Task<string> RunCommandThenReadOutputAsync(string? args, CancellationToken cancellationToken) => AsyncSimpleProcess.StartThenWaitForExitThenReadOutputAsync(
+        private string RunCommandThenReadOutput(string? args, CancellationToken cancellationToken) => SimpleProcess.StartThenWaitForExitThenReadOutput(
             UpgradeStartInfo(args),
             encoding: Encoding.UTF8,
             cancellationToken: cancellationToken);
 
-        public Task<string> Init(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("init -no-color", cancellationToken);
+        private Task<string> RunCommandThenReadOutputAsync(string? args, CancellationToken cancellationToken) => SimpleProcess.StartThenWaitForExitThenReadOutputAsync(
+            UpgradeStartInfo(args),
+            encoding: Encoding.UTF8,
+            cancellationToken: cancellationToken);
 
-        public Task<string> Validate(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("validate -no-color", cancellationToken);
+        public string Init(CancellationToken cancellationToken = default) => RunCommandThenReadOutput("init -no-color", cancellationToken);
 
-        public Task<string> Plan(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("plan -no-color -input=false -lock=false -out=terraform.plan", cancellationToken);
+        public Task<string> InitAsync(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("init -no-color", cancellationToken);
 
-        public Task<string> Apply(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("apply -no-color -input=false -lock=false -auto-approve", cancellationToken);
+        public string Validate(CancellationToken cancellationToken = default) => RunCommandThenReadOutput("validate -no-color", cancellationToken);
+
+        public Task<string> ValidateAsync(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("validate -no-color", cancellationToken);
+
+        public string Plan(CancellationToken cancellationToken = default) => RunCommandThenReadOutput("plan -no-color -input=false -lock=false -out=terraform.plan", cancellationToken);
+
+        public Task<string> PlanAsync(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("plan -no-color -input=false -lock=false -out=terraform.plan", cancellationToken);
+
+        public string Apply(CancellationToken cancellationToken = default) => RunCommandThenReadOutput("apply -no-color -input=false -lock=false -auto-approve", cancellationToken);
+
+        public Task<string> ApplyAsync(CancellationToken cancellationToken = default) => RunCommandThenReadOutputAsync("apply -no-color -input=false -lock=false -auto-approve", cancellationToken);
 
         internal interface ITerraformCommandOptionsOptions
         {
