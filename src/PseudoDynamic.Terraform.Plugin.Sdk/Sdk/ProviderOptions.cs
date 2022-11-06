@@ -23,7 +23,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         public string FullyQualifiedProviderName {
             get {
-                string? providerName = _fullyQualifiedProviderName;
+                var providerName = _fullyQualifiedProviderName;
                 ValidateProviderName(providerName);
                 return providerName;
             }

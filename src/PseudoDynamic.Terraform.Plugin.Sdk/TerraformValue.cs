@@ -16,7 +16,7 @@ namespace PseudoDynamic.Terraform.Plugin
 
         internal static object CreateInstance(Type typeArgument, bool isNullable, object? value, bool isNull, bool isUnknown)
         {
-            object?[] constructorArguments = new[] { isNullable, value, isNull, isUnknown };
+            var constructorArguments = new[] { isNullable, value, isNull, isUnknown };
 
             return TerraformValueAccessor
                 .MakeGenericTypeAccessor(typeArgument)

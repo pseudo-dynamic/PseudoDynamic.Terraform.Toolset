@@ -33,7 +33,7 @@
         <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.9" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
         <PackageReference Include="Moq" Version="4.18.2" />
-        <PackageReference Include="Teronis.DotNet.EditorConfig.Test" Version="0.3.0-alpha.2">
+        <PackageReference Include="Teronis.DotNet.EditorConfig.Test" Version="0.3.0-alpha.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.Conventions
     {
         private static string GetAttributeName(PropertyInfo attribute)
         {
-            NameAttribute? nameAttribute = attribute.GetCustomAttribute<NameAttribute>();
+            var nameAttribute = attribute.GetCustomAttribute<NameAttribute>();
 
             if (nameAttribute is not null) {
                 return nameAttribute.Name;

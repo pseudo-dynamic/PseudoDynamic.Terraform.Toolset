@@ -102,9 +102,9 @@ tab_width = 4
 ###############################
 
 # var preferences
-csharp_style_var_elsewhere = false:silent
-csharp_style_var_for_built_in_types = false:silent
-csharp_style_var_when_type_is_apparent = false:silent
+csharp_style_var_elsewhere = true:warning
+csharp_style_var_for_built_in_types = true:warning
+csharp_style_var_when_type_is_apparent = true:warning
 
 # Expression-bodied members
 csharp_style_expression_bodied_accessors = true:silent
@@ -210,5 +210,8 @@ csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimenta
 csharp_style_prefer_pattern_matching = true:silent
 csharp_style_prefer_not_pattern = true:suggestion
 csharp_style_prefer_extended_property_pattern = true:suggestion
+dotnet_diagnostic.RCS1010.severity = suggestion
+dotnet_diagnostic.RCS1176.severity = suggestion
+dotnet_diagnostic.RCS1177.severity = suggestion
 
 # Add here new options

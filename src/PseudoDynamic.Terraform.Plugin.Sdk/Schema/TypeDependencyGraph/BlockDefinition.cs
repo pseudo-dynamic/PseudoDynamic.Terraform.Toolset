@@ -68,15 +68,15 @@
 
         private void PreventAttributeDuplicates(IReadOnlyList<AttributeDefinition> attributes, IReadOnlyList<AttributeDefinition> blocks)
         {
-            int attributesCount = attributes.Count;
-            int blocksCount = blocks.Count;
+            var attributesCount = attributes.Count;
+            var blocksCount = blocks.Count;
 
             if (attributesCount == 0 && blocksCount == 0) {
                 return;
             }
 
-            bool havingAttributes = attributesCount > 0;
-            bool havingBlocks = blocksCount > 0;
+            var havingAttributes = attributesCount > 0;
+            var havingBlocks = blocksCount > 0;
 
             if (havingAttributes) {
                 PreventAttributeDuplicates(attributes, nameof(Attributes));
@@ -95,7 +95,7 @@
         {
             _indexedAttributes ??= ToDictionary(_attributes);
 
-            if (_indexedAttributes.TryGetValue(attributeName, out int attributeIndex)) {
+            if (_indexedAttributes.TryGetValue(attributeName, out var attributeIndex)) {
                 return _attributes[attributeIndex];
             }
 
@@ -109,10 +109,10 @@
 
             static IReadOnlyDictionary<string, int> ToDictionary(IReadOnlyList<AttributeDefinition> attributes)
             {
-                int attributesCount = attributes.Count;
-                Dictionary<string, int> dictionary = new();
+                var attributesCount = attributes.Count;
+                var dictionary = new Dictionary<string, int>();
 
-                for (int i = 0; i < attributes.Count; i++) {
+                for (var i = 0; i < attributesCount; i++) {
                     dictionary.Add(attributes[i].Name, i);
                 }
 

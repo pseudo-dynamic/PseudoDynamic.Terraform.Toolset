@@ -5,9 +5,9 @@ using PseudoDynamic.Terraform.Plugin.Schema;
 using PseudoDynamic.Terraform.Plugin.Sdk;
 using static Assertions;
 
-string providerName = "registry.terraform.io/pseudo-dynamic/debug";
+var providerName = "registry.terraform.io/pseudo-dynamic/debug";
 
-IWebHost webHost = new WebHostBuilder()
+var webHost = new WebHostBuilder()
     .UseTerraformPluginServer(IPluginServerSpecification.NewProtocolV5()
         .UseProvider<ProviderMetaSchema>(providerName, provider => {
             provider.SetProvider<ProviderImpl>();

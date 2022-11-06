@@ -6,7 +6,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         where Schema : class
         where ProviderMetaSchema : class
     {
-        internal new static readonly ProviderAdapter.DataSourceGenericAdapter<Schema, ProviderMetaSchema> DataSourceAdapter;
+        internal static new readonly ProviderAdapter.DataSourceGenericAdapter<Schema, ProviderMetaSchema> DataSourceAdapter;
 
         ProviderAdapter.IDataSourceAdapter IDataSource.DataSourceAdapter => DataSourceAdapter;
 

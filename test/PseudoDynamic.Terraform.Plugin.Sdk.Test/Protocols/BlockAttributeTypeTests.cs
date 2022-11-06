@@ -8,7 +8,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
         [ClassData(typeof(BlockAttributeTypeData))]
         internal void Definition_matches_built_block_attribute_type(string expectedBlockAttributeType, TerraformDefinition definition)
         {
-            string actualBlockAttributeType = BlockAttributeTypeBuilder.Default.BuildJsonType(definition);
+            var actualBlockAttributeType = BlockAttributeTypeBuilder.Default.BuildJsonType(definition);
             Assert.Equal(expectedBlockAttributeType, actualBlockAttributeType);
         }
 

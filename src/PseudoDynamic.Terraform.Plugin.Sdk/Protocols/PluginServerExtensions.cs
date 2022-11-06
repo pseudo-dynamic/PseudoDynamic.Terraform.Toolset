@@ -23,7 +23,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
                 if (context.Request.Method == HttpMethod.Post.Method
                     && context.Request.ContentType == "application/grpc"
                     && context.Request.Path == "/plugin.GRPCController/Shutdown") {
-                    IHostApplicationLifetime server = context.RequestServices.GetRequiredService<IHostApplicationLifetime>();
+                    var server = context.RequestServices.GetRequiredService<IHostApplicationLifetime>();
                     server.StopApplication();
                 }
             });
@@ -38,8 +38,8 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols
         /// <exception cref="NotSupportedException"></exception>
         public static IEndpointRouteBuilder MapTerraformPlugin(this IEndpointRouteBuilder builder)
         {
-            IPluginServer pluginServer = builder.ServiceProvider.GetRequiredService<IPluginServer>();
-            PluginProtocol pluginProtocol = pluginServer.PluginProtocol;
+            var pluginServer = builder.ServiceProvider.GetRequiredService<IPluginServer>();
+            var pluginProtocol = pluginServer.PluginProtocol;
 
             if (pluginProtocol == PluginProtocol.V5) {
                 builder.MapTerraformPluginProtocolV5();

@@ -29,7 +29,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         private void PreloadOnce()
         {
             if (Interlocked.CompareExchange(ref _alreadyPreloaded, 1, 0) == 0) {
-                List<TerraformDefinition>? unprocessedDefinitions = Interlocked.Exchange(ref _preloadableDefinitions, null);
+                var unprocessedDefinitions = Interlocked.Exchange(ref _preloadableDefinitions, null);
 
                 if (unprocessedDefinitions != null) {
                     unprocessedDefinitions.AsParallel().ForAll(ComputeDynamicDefinitions);
@@ -41,7 +41,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             PreloadOnce();
 
-            TerraformDefinition? unprocessedDefinition = Interlocked.Exchange(ref _loadableDefinition, null);
+            var unprocessedDefinition = Interlocked.Exchange(ref _loadableDefinition, null);
 
             if (unprocessedDefinition != null) {
                 ComputeDynamicDefinitions(unprocessedDefinition);
@@ -53,7 +53,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private bool ResolveCache(Type knownType, [NotNullWhen(true)] out ValueDefinition? value)
         {
-            IReadOnlySet<TerraformTypeConstraint> implicitTypeConstraints = TerraformTypeConstraintEvaluator.Default.Evaluate(knownType);
+            var implicitTypeConstraints = TerraformTypeConstraintEvaluator.Default.Evaluate(knownType);
 
             if (implicitTypeConstraints.Count == 1 && _knownDefinitions.TryGetValue((implicitTypeConstraints.Single(), knownType), out value)) {
                 return true;
@@ -67,11 +67,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             Preload();
 
-            if (ResolveCache(knownType, out ValueDefinition? cache)) {
+            if (ResolveCache(knownType, out var cache)) {
                 return cache;
             }
 
-            ValueDefinition resolvedDefinition = BlockBuilder.Default.BuildDynamic(dynamic, knownType);
+            var resolvedDefinition = BlockBuilder.Default.BuildDynamic(dynamic, knownType);
             _loadableDefinition = resolvedDefinition;
             ReplaceKnownDefinition(resolvedDefinition);
             return resolvedDefinition;
@@ -79,7 +79,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         internal BlockDefinition BuildBlock(Type schemaType)
         {
-            BlockDefinition schema = BlockBuilder.Default.BuildBlock(schemaType);
+            var schema = BlockBuilder.Default.BuildBlock(schemaType);
             AddPreloadable(schema);
             return schema;
         }

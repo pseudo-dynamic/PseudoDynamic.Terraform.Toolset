@@ -14,7 +14,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 
         protected void Add(TTerraformService terraformService)
         {
-            string serviceName = terraformService.Name;
+            var serviceName = terraformService.Name;
 
             if (ContainsKey(serviceName)) {
                 throw new DuplicateNameException($"The resource type name \"{serviceName}\" is already taken");

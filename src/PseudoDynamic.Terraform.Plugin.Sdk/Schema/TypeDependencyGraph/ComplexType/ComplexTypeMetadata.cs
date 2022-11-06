@@ -13,9 +13,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
                 throw new ArgumentException($"Expected context of type {VisitContextType.Complex.Id} but it was {context.ContextType}");
             }
 
-            Type visitType = context.VisitType;
+            var visitType = context.VisitType;
 
-            ConstructorInfo[] allConstructors = visitType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var allConstructors = visitType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             ConstructorInfo primaryConstructor;
 
             if (allConstructors.Length == 0) {
@@ -26,30 +26,30 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
                 primaryConstructor = allConstructors.Single(x => x.GetCustomAttribute<BlockConstructorAttribute>(inherit: false) != null);
             }
 
-            PropertyInfo[] allReadableProperties = visitType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            var allReadableProperties = visitType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(x => x.GetGetMethod(nonPublic: false) != null
                             && x.GetCustomAttribute<AttributeIgnoreAttribute>(inherit: false) == null)
                 .ToArray();
 
-            ParameterInfo[] constructorParameters = primaryConstructor.GetParameters();
+            var constructorParameters = primaryConstructor.GetParameters();
 
-            Dictionary<string, ParameterInfo> indexedConstructorParameters = constructorParameters
+            var indexedConstructorParameters = constructorParameters
                 .ToDictionary(x => x.Name!, StringComparer.InvariantCultureIgnoreCase);
 
-            List<(ParameterInfo Parameter, PropertyInfo Property)> constructorSupportedProperties = allReadableProperties
+            var constructorSupportedProperties = allReadableProperties
                 .Where(x => indexedConstructorParameters.ContainsKey(x.Name))
                 .Select(x => (Parameter: indexedConstructorParameters[x.Name], Property: x))
                 .ToList();
 
-            List<PropertyInfo> nonConstructorSupportedProperties = allReadableProperties
+            var nonConstructorSupportedProperties = allReadableProperties
                 .Except(constructorSupportedProperties.Select(x => x.Property))
                 .Where(x => x.GetSetMethod(nonPublic: false) != null)
                 .ToList();
 
-            int constructorSupportedPropertiesCount = constructorSupportedProperties.Count;
-            PropertyInfo[] supportedProperties = new PropertyInfo[constructorSupportedPropertiesCount + nonConstructorSupportedProperties.Count];
+            var constructorSupportedPropertiesCount = constructorSupportedProperties.Count;
+            var supportedProperties = new PropertyInfo[constructorSupportedPropertiesCount + nonConstructorSupportedProperties.Count];
 
-            for (int i = 0; i < constructorSupportedPropertiesCount; i++) {
+            for (var i = 0; i < constructorSupportedPropertiesCount; i++) {
                 supportedProperties[i] = constructorSupportedProperties[i].Property;
             }
 

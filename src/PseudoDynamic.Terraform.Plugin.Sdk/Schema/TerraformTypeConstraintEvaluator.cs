@@ -69,8 +69,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
 
         public IReadOnlySet<TerraformTypeConstraint> Evaluate(Type type)
         {
-            HashSet<TerraformTypeConstraint> typeConstraints = new();
-            TypeCode typeCode = Type.GetTypeCode(type);
+            var typeConstraints = new HashSet<TerraformTypeConstraint>();
+            var typeCode = Type.GetTypeCode(type);
 
             if (typeCode == TypeCode.Object) {
                 if (type.IsValueType) {
@@ -85,7 +85,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema
                     }
                 } else if (type.IsClass) {
                     // If we find predestinated generic classes ..
-                    TerraformTypeConstraint? genericClassTypeDefinitionEvaluation = type.IsGenericType
+                    var genericClassTypeDefinitionEvaluation = type.IsGenericType
                         ? EvaluateClassTypeDefinition(type.GetGenericTypeDefinition())
                         : default;
 

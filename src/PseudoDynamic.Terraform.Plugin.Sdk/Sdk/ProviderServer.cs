@@ -37,14 +37,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         {
             _pluginServer = pluginServer;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            ProviderOptions unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _lazyFullyQualifiedProviderName = new(() => unwrappedOptions.FullyQualifiedProviderName);
             pluginServer.ServerStarted.Register(OnPluginServerStarted);
         }
 
         private void WriteTerraformDebugInstructions()
         {
-            string serializedTerraformReattachProviders = SerializeTerraformReattachProviders(new Dictionary<string, TerraformReattachProvider>() {
+            var serializedTerraformReattachProviders = SerializeTerraformReattachProviders(new Dictionary<string, TerraformReattachProvider>() {
                 { FullyQualifiedProviderName, TerraformReattachProvider }
             });
 

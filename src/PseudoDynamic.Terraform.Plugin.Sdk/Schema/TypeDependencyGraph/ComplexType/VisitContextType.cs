@@ -64,7 +64,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
                 return true;
             }
 
-            foreach (VisitContextType inheritedType in _inheritedTypes) {
+            foreach (var inheritedType in _inheritedTypes) {
                 if (inheritedType.Equals(otherType)) {
                     return true;
                 }

@@ -28,21 +28,21 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         internal delegate void EncodeDelegate<TDefinition, TContent>(TerraformDynamicMessagePackEncoder encoder, ref MessagePackWriter writer, TDefinition value, [AllowNull] TContent content);
 
-        private static readonly Type BigIntegerType = typeof(BigInteger);
-        private static readonly TypeAccessor EncoderTypeAccessor = new(typeof(TerraformDynamicMessagePackEncoder));
-        private readonly static GenericTypeAccessor CollectionEncoderAccessor = new(typeof(CollectionEncoder<>));
-        private readonly static GenericTypeAccessor DictionaryEncoderAccessor = new(typeof(DictionaryEncoder<,>));
+        private static readonly Type _bigIntegerType = typeof(BigInteger);
+        private static readonly TypeAccessor _encoderTypeAccessor = new(typeof(TerraformDynamicMessagePackEncoder));
+        private static readonly GenericTypeAccessor _collectionEncoderAccessor = new(typeof(CollectionEncoder<>));
+        private static readonly GenericTypeAccessor _dictionaryEncoderAccessor = new(typeof(DictionaryEncoder<,>));
 
         private static void EncodeValue<T>(TerraformDynamicMessagePackEncoder encoder, ref MessagePackWriter writer, ValueDefinition value, [AllowNull] T content) =>
             encoder.EncodeValue(ref writer, value, content);
 
         private static ReadOnlyMemory<byte> EncodeUsingSparseBuffer<TDefinition, TContent>(TerraformDynamicMessagePackEncoder encoder, TDefinition value, TContent content, EncodeDelegate<TDefinition, TContent> encode)
         {
-            using SparseBufferWriter<byte> bufferWriter = new(); // TODO: estimate proper defaults
-            MessagePackWriter writer = new(bufferWriter);
+            using var bufferWriter = new SparseBufferWriter<byte>(); // TODO: estimate proper defaults
+            var writer = new MessagePackWriter(bufferWriter);
             encode(encoder, ref writer, value, content);
             writer.Flush();
-            byte[] buffer = new byte[bufferWriter.WrittenCount];
+            var buffer = new byte[bufferWriter.WrittenCount];
             bufferWriter.CopyTo(buffer);
             return buffer;
         }
@@ -67,7 +67,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 return;
             }
 
-            ValueDefinition resolvedDefinition = _schemaBuilder.BuildDynamic(definition, content.GetType());
+            var resolvedDefinition = _schemaBuilder.BuildDynamic(definition, content.GetType());
             EncodeValue(ref writer, resolvedDefinition, content);
         }
 
@@ -76,7 +76,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private void EncodeNumber<T>(ref MessagePackWriter writer, ValueDefinition value, T content)
         {
-            Type sourceType = value.SourceType;
+            var sourceType = value.SourceType;
 
             switch (Type.GetTypeCode(value.SourceType)) {
                 case TypeCode.Byte:
@@ -110,8 +110,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                     writer.Write(Unsafe.As<T, double>(ref content));
                     break;
                 case TypeCode.Object:
-                    if (sourceType == BigIntegerType) {
-                        ref BigInteger bigInteger = ref Unsafe.As<T, BigInteger>(ref content);
+                    if (sourceType == _bigIntegerType) {
+                        ref var bigInteger = ref Unsafe.As<T, BigInteger>(ref content);
                         // Write number as number in base 10 notation
                         writer.Write(bigInteger.ToString());
                     } else {
@@ -130,7 +130,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 
         private void EncodeMonoRange<T>(ref MessagePackWriter writer, MonoRangeDefinition range, T content)
         {
-            ICollectionEncoder collectionEncoder = (ICollectionEncoder)CollectionEncoderAccessor
+            var collectionEncoder = (ICollectionEncoder)_collectionEncoderAccessor
                 .MakeGenericTypeAccessor(range.Item.SourceType)
                 .CreateInstance(x => x.GetPublicInstanceActivator, content);
 
@@ -141,14 +141,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             writer.WriteArrayHeader(collection.Count);
 
-            foreach (TElement? element in collection) {
+            foreach (var element in collection) {
                 EncodeValue(ref writer, item, element);
             }
         }
 
         private void EncodeMap(ref MessagePackWriter writer, MapDefinition dictionary, object content)
         {
-            IDictionaryEncoder dictionaryEncoder = (IDictionaryEncoder)DictionaryEncoderAccessor
+            var dictionaryEncoder = (IDictionaryEncoder)_dictionaryEncoderAccessor
                 .MakeGenericTypeAccessor(dictionary.Key.SourceType, dictionary.Value.SourceType)
                 .CreateInstance(x => x.GetPublicInstanceActivator, content);
 
@@ -159,7 +159,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             writer.WriteMapHeader(collection.Count);
 
-            foreach (KeyValuePair<TKey, TValue> tuple in collection) {
+            foreach (var tuple in collection) {
                 EncodeValue(ref writer, key, tuple.Key);
                 EncodeValue(ref writer, value, tuple.Value);
             }
@@ -172,11 +172,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
             }
 
             writer.WriteMapHeader(abstractAttributeAccessor.Count);
-            FastMember.ObjectAccessor contentAccessor = FastMember.ObjectAccessor.Create(content);
+            var contentAccessor = FastMember.ObjectAccessor.Create(content);
 
-            foreach (AttributeDefinition attribute in abstractAttributeAccessor.GetEnumerator()) {
+            foreach (var attribute in abstractAttributeAccessor.GetEnumerator()) {
                 writer.Write(attribute.Name);
-                object? contentAccessedObject = contentAccessor[attribute.AttributeReflectionMetadata.Property.Name];
+                var contentAccessedObject = contentAccessor[attribute.AttributeReflectionMetadata.Property.Name];
 
                 EncodeValueDelegateCompiler.RequestCompiledEncodeValueDelegate(contentAccessedObject?.GetType() ?? typeof(object))
                         .Invoke(this, ref writer, attribute.Value, contentAccessedObject);
@@ -285,30 +285,30 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         {
             internal delegate void EncodeValueDelegate(TerraformDynamicMessagePackEncoder encoder, ref MessagePackWriter writer, ValueDefinition value, object? content);
 
-            private readonly static MethodAccessor EncodeValueMethod = EncoderTypeAccessor.GetMethodAccessor(static x => x.GetPrivateStaticMethod, nameof(EncodeValue));
+            private static readonly MethodAccessor _encodeValueMethod = _encoderTypeAccessor.GetMethodAccessor(static x => x.GetPrivateStaticMethod, nameof(EncodeValue));
 
             private static EncodeValueDelegate CompileEncodeValueDelegate(Type sourceType)
             {
-                System.Reflection.MethodInfo method = EncodeValueMethod.MakeGenericMethod(sourceType);
-                ParameterExpression param1 = Expression.Parameter(typeof(TerraformDynamicMessagePackEncoder), "encoder");
-                ParameterExpression param2 = Expression.Parameter(typeof(MessagePackWriter).MakeByRefType(), "writer");
-                ParameterExpression param3 = Expression.Parameter(typeof(ValueDefinition), "value");
-                ParameterExpression param4 = Expression.Parameter(typeof(object), "content");
+                var method = _encodeValueMethod.MakeGenericMethod(sourceType);
+                var param1 = Expression.Parameter(typeof(TerraformDynamicMessagePackEncoder), "encoder");
+                var param2 = Expression.Parameter(typeof(MessagePackWriter).MakeByRefType(), "writer");
+                var param3 = Expression.Parameter(typeof(ValueDefinition), "value");
+                var param4 = Expression.Parameter(typeof(object), "content");
 
-                MethodCallExpression body = Expression.Call(instance: null, method, param1, param2, param3, sourceType.IsValueType
+                var body = Expression.Call(instance: null, method, param1, param2, param3, sourceType.IsValueType
                     ? Expression.Unbox(param4, sourceType)
                     : Expression.Convert(param4, sourceType));
 
                 return Expression.Lambda<EncodeValueDelegate>(body, param1, param2, param3, param4).Compile();
             }
 
-            private static readonly Dictionary<Type, EncodeValueDelegate> EncodeValueCompiledDelegates = new();
+            private static readonly Dictionary<Type, EncodeValueDelegate> _encodeValueCompiledDelegates = new();
 
             internal static EncodeValueDelegate RequestCompiledEncodeValueDelegate(Type sourceType)
             {
-                if (!EncodeValueCompiledDelegates.TryGetValue(sourceType, out EncodeValueDelegate? encodeValueDelegate)) {
+                if (!_encodeValueCompiledDelegates.TryGetValue(sourceType, out var encodeValueDelegate)) {
                     encodeValueDelegate = CompileEncodeValueDelegate(sourceType);
-                    EncodeValueCompiledDelegates[sourceType] = encodeValueDelegate;
+                    _encodeValueCompiledDelegates[sourceType] = encodeValueDelegate;
                 }
 
                 return encodeValueDelegate;

@@ -12,7 +12,7 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
 
         public MethodInfo MakeGenericMethod(Type typeArgument)
         {
-            if (_methodByOneTypeArgument.TryGetValue(typeArgument, out MethodInfo? method)) {
+            if (_methodByOneTypeArgument.TryGetValue(typeArgument, out var method)) {
                 return method;
             }
 

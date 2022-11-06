@@ -29,8 +29,8 @@ namespace PseudoDynamic.Terraform.Plugin
         /// </summary>
         public T Value {
             get {
-                bool? isNullable = _isNullable;
-                T? value = _value;
+                var isNullable = _isNullable;
+                var value = _value;
 
                 if (isNullable == false && Equals(value, default)) {
                     throw new TerraformValueException("The value type indicates non-nullability but value is null");

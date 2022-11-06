@@ -12,14 +12,14 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 
         private static IEqualityComparer<T> GetDefaultEqualityComparer()
         {
-            Type typeOfT = typeof(T);
+            var typeOfT = typeof(T);
 
-            if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out Type[]? genericTypeArguments)) {
+            if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IList<>), out _, out var genericTypeArguments)) {
                 return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.MakeGenericTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
             } else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(ISet<>), out _, out genericTypeArguments)) {
                 return (IEqualityComparer<T>)GenericSetEqualityComparerAccessor.MakeGenericTypeAccessor(genericTypeArguments).CreateInstance(x => x.GetPublicInstanceActivator);
             } else if (typeOfT.IsImplementingGenericTypeDefinition(typeof(IDictionary<,>), out _, out genericTypeArguments)) {
-                Type keyValuePairType = GenericKeyValuePairAccessor.MakeGenericTypeAccessor(genericTypeArguments).Type;
+                var keyValuePairType = GenericKeyValuePairAccessor.MakeGenericTypeAccessor(genericTypeArguments).Type;
                 return (IEqualityComparer<T>)GenericListEqualityComparerAccessor.MakeGenericTypeAccessor(keyValuePairType).CreateInstance(x => x.GetPublicInstanceActivator);
             } else {
                 return EqualityComparer<T>.Default;
@@ -32,7 +32,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
 
         public Block Schema {
             get {
-                SchemaFake<T>.Block? schema = _schema;
+                var schema = _schema;
 
                 if (schema is not null) {
                     return schema;
@@ -110,16 +110,16 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
         [Object]
         public class Object : Block
         {
-            public new static Object OfValue(T value) =>
+            public static new Object OfValue(T value) =>
                 new(value);
 
-            public new static SchemaFake<IList<T>>.Object HavingList(params T[] values) =>
+            public static new SchemaFake<IList<T>>.Object HavingList(params T[] values) =>
                 new(values.ToList(), new ListEqualityComparer<T>());
 
-            public new static SchemaFake<ISet<T>>.Object HavingSet(params T[] values) =>
+            public static new SchemaFake<ISet<T>>.Object HavingSet(params T[] values) =>
                 new(values.ToHashSet(), new SetEqualityComparer<T>());
 
-            public new static IList<Object> RangeList(params T[] values) =>
+            public static new IList<Object> RangeList(params T[] values) =>
                 values.Select(OfValue).ToList();
 
             public override T Value => base.Value;
@@ -136,19 +136,19 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes
         [Block]
         public class NestedBlock : Block
         {
-            public new static NestedBlock OfValue(T value) =>
+            public static new NestedBlock OfValue(T value) =>
                 new(value);
 
-            public new static SchemaFake<IList<T>>.NestedBlock HavingList(params T[] values) =>
+            public static new SchemaFake<IList<T>>.NestedBlock HavingList(params T[] values) =>
                 new(values.ToList(), new ListEqualityComparer<T>());
 
-            public new static SchemaFake<ISet<T>>.NestedBlock HavingSet(params T[] values) =>
+            public static new SchemaFake<ISet<T>>.NestedBlock HavingSet(params T[] values) =>
                 new(values.ToHashSet(), new SetEqualityComparer<T>());
 
-            public new static IList<NestedBlock> RangeList(params T[] values) =>
+            public static new IList<NestedBlock> RangeList(params T[] values) =>
                 values.Select(OfValue).ToList();
 
-            public new static ISet<NestedBlock> RangeSet(params T[] values) =>
+            public static new ISet<NestedBlock> RangeSet(params T[] values) =>
                 values.Select(OfValue).ToHashSet();
 
             [NestedBlock]

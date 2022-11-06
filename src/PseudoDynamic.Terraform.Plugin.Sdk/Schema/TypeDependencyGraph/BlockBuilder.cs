@@ -22,19 +22,19 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected MonoRangeDefinition BuildList(BlockNode<IVisitPropertySegmentContext> node)
         {
-            ValueDefinition item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
+            var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
             return new MonoRangeDefinition(node.Context.VisitType, TerraformTypeConstraint.List, item);
         }
 
         protected MonoRangeDefinition BuildSet(BlockNode<IVisitPropertySegmentContext> node)
         {
-            ValueDefinition item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
+            var item = BuildValue(node.Single().AsContext<IVisitPropertySegmentContext>()).Value;
             return new MonoRangeDefinition(node.Context.VisitType, TerraformTypeConstraint.Set, item);
         }
 
         protected MapDefinition BuildMap(BlockNode<IVisitPropertySegmentContext> node)
         {
-            ValueDefinition value = BuildValue(node.ElementAt(1).AsContext<IVisitPropertySegmentContext>()).Value;
+            var value = BuildValue(node.ElementAt(1).AsContext<IVisitPropertySegmentContext>()).Value;
             return new MapDefinition(node.Context.VisitType, value);
         }
 
@@ -44,7 +44,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                 return true;
             }
 
-            NullabilityState nullability = node.Context.NullabilityInfo.ReadState;
+            var nullability = node.Context.NullabilityInfo.ReadState;
             return nullability == NullabilityState.Nullable;
         }
 
@@ -53,11 +53,11 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected ObjectAttributeDefinition BuildObjectAttribute(BlockNode<IVisitPropertySegmentContext> node)
         {
-            IVisitPropertySegmentContext context = node.Context;
-            string attributeName = _attributeNameConvention.Format(context.Property);
-            ValueResult valueResult = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
-            bool isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
-            AttributeReflectionMetadata reflectionMetadata = CreateAttributeReflectionMetadata(context);
+            var context = node.Context;
+            var attributeName = _attributeNameConvention.Format(context.Property);
+            var valueResult = BuildValue(node.AsContext<IVisitPropertySegmentContext>());
+            var isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
+            var reflectionMetadata = CreateAttributeReflectionMetadata(context);
 
             return new ObjectAttributeDefinition(context.VisitType, attributeName, valueResult.Value) {
                 IsOptional = isOptional,
@@ -67,8 +67,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         private ComplexReflectionMetadata CreateComplexReflectionMetadata(VisitContext context, IEnumerable<AttributeDefinition> attributes)
         {
-            ComplexTypeMetadata complexTypeMetadata = context.ComplexTypeMetadata!;
-            Dictionary<string, string> propertyNameAttributeNameMapping = attributes.ToDictionary(x => x.AttributeReflectionMetadata.Property.Name, x => x.Name);
+            var complexTypeMetadata = context.ComplexTypeMetadata!;
+            var propertyNameAttributeNameMapping = attributes.ToDictionary(x => x.AttributeReflectionMetadata.Property.Name, x => x.Name);
 
             return new ComplexReflectionMetadata(
                 complexTypeMetadata,
@@ -77,8 +77,8 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected ObjectDefinition BuildObject(BlockNode node)
         {
-            List<ObjectAttributeDefinition> attributes = node.Select(node => BuildObjectAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList();
-            ComplexReflectionMetadata reflectionMetadata = CreateComplexReflectionMetadata(node.Context, attributes);
+            var attributes = node.Select(node => BuildObjectAttribute(node.AsContext<IVisitPropertySegmentContext>())).ToList();
+            var reflectionMetadata = CreateComplexReflectionMetadata(node.Context, attributes);
 
             return new ObjectDefinition(node.Context.VisitType) {
                 Attributes = attributes,
@@ -88,23 +88,23 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected BlockAttributeDefinition BuildBlockAttribute(ValueResult valueResult)
         {
-            IVisitPropertySegmentContext context = valueResult.UnwrappedNode.Context;
-            PropertyInfo property = context.Property;
-            string attributeName = _attributeNameConvention.Format(property);
+            var context = valueResult.UnwrappedNode.Context;
+            var property = context.Property;
+            var attributeName = _attributeNameConvention.Format(property);
 
-            bool isComputed = context.GetContextualAttribute<ComputedAttribute>() is not null;
-            bool isSensitive = context.GetContextualAttribute<SensitiveAttribute>() is not null;
-            bool isDeprecated = context.GetContextualAttribute<DeprecatedAttribute>() is not null;
-            DescriptionKind descriptionKind = context.GetContextualAttribute<DescriptionKindAttribute>()?.DescriptionKind ?? default;
+            var isComputed = context.GetContextualAttribute<ComputedAttribute>() is not null;
+            var isSensitive = context.GetContextualAttribute<SensitiveAttribute>() is not null;
+            var isDeprecated = context.GetContextualAttribute<DeprecatedAttribute>() is not null;
+            var descriptionKind = context.GetContextualAttribute<DescriptionKindAttribute>()?.DescriptionKind ?? default;
 
-            string description = property.GetXmlDocsSummary(new XmlDocsOptions() {
+            var description = property.GetXmlDocsSummary(new XmlDocsOptions() {
                 FormattingMode = descriptionKind == DescriptionKind.Markdown
                     ? XmlDocsFormattingMode.Markdown
                     : XmlDocsFormattingMode.None
             });
 
-            bool isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
-            AttributeReflectionMetadata reflectionMetadata = CreateAttributeReflectionMetadata(context);
+            var isOptional = IsAttributeOptional(valueResult.UnwrappedNode);
+            var reflectionMetadata = CreateAttributeReflectionMetadata(context);
 
             return new BlockAttributeDefinition(context.VisitType, attributeName, valueResult.Value) {
                 IsComputed = isComputed,
@@ -119,10 +119,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected NestedBlockAttributeDefinition BuildNestedBlockAttribute(ValueResult valueResult)
         {
-            BlockAttributeDefinition blockAttribute = BuildBlockAttribute(valueResult);
-            NestedBlockAttribute? nestedBlockAttribute = valueResult.UnwrappedNode.Context.GetContextualAttribute<NestedBlockAttribute>();
-            int minimumItems = nestedBlockAttribute?.MinimumItems ?? NestedBlockAttributeDefinition.DefaultMinimumItems;
-            int maximumItems = nestedBlockAttribute?.MaximumItems ?? NestedBlockAttributeDefinition.DefaultMaximumItems;
+            var blockAttribute = BuildBlockAttribute(valueResult);
+            var nestedBlockAttribute = valueResult.UnwrappedNode.Context.GetContextualAttribute<NestedBlockAttribute>();
+            var minimumItems = nestedBlockAttribute?.MinimumItems ?? NestedBlockAttributeDefinition.DefaultMinimumItems;
+            var maximumItems = nestedBlockAttribute?.MaximumItems ?? NestedBlockAttributeDefinition.DefaultMaximumItems;
 
             return new NestedBlockAttributeDefinition(blockAttribute) {
                 MinimumItems = minimumItems,
@@ -132,43 +132,43 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected BlockDefinition BuildBlock(BlockNode node)
         {
-            VisitContext context = node.Context;
-            Type visitType = node.Context.VisitType;
+            var context = node.Context;
+            var visitType = node.Context.VisitType;
 
-            int? blockAttributeVersion = context.GetContextualAttribute<BlockAttribute>()?.GetVersion();
+            var blockAttributeVersion = context.GetContextualAttribute<BlockAttribute>()?.GetVersion();
 
             if (blockAttributeVersion == null && context.ContextType == VisitContextType.PropertySegment) {
                 blockAttributeVersion = context.GetVisitTypeAttribute<BlockAttribute>()?.GetVersion();
             }
 
-            int version = blockAttributeVersion ?? BlockDefinition.DefaultVersion;
-            bool isDeprecated = context.GetContextualAttribute<DeprecatedAttribute>() is not null;
-            DescriptionKind descriptionKind = context.GetContextualAttribute<DescriptionKindAttribute>()?.DescriptionKind ?? default;
+            var version = blockAttributeVersion ?? BlockDefinition.DefaultVersion;
+            var isDeprecated = context.GetContextualAttribute<DeprecatedAttribute>() is not null;
+            var descriptionKind = context.GetContextualAttribute<DescriptionKindAttribute>()?.DescriptionKind ?? default;
 
-            string description = visitType.GetXmlDocsSummary(new XmlDocsOptions() {
+            var description = visitType.GetXmlDocsSummary(new XmlDocsOptions() {
                 FormattingMode = descriptionKind == DescriptionKind.Markdown
                     ? XmlDocsFormattingMode.Markdown
                     : XmlDocsFormattingMode.None
             });
 
-            List<BlockNode<IVisitPropertySegmentContext>> childNodes = node
+            var childNodes = node
                 .Select(x => x.AsContext<IVisitPropertySegmentContext>())
                 .ToList();
 
-            List<ValueResult> childNodeValueResults = childNodes.ConvertAll(BuildValue)
+            var childNodeValueResults = childNodes.ConvertAll(BuildValue)
 ;
 
-            List<BlockAttributeDefinition> attributes = childNodeValueResults
+            var attributes = childNodeValueResults
                 .Where(x => !x.IsNestedBlock)
                 .Select(BuildBlockAttribute)
                 .ToList();
 
-            List<NestedBlockAttributeDefinition> blocks = childNodeValueResults
+            var blocks = childNodeValueResults
                 .Where(x => x.IsNestedBlock)
                 .Select(BuildNestedBlockAttribute)
                 .ToList();
 
-            ComplexReflectionMetadata reflectionMetadata = CreateComplexReflectionMetadata(node.Context, ((IEnumerable<AttributeDefinition>)attributes).Concat(blocks));
+            var reflectionMetadata = CreateComplexReflectionMetadata(node.Context, ((IEnumerable<AttributeDefinition>)attributes).Concat(blocks));
 
             return new BlockDefinition(visitType) {
                 Version = version,
@@ -194,18 +194,18 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 
         protected ValueResult BuildValue(BlockNode<IVisitPropertySegmentContext> node)
         {
-            IReadOnlyList<TypeWrapping> sourceTypeWrapping = node.TryUnwrap(out BlockNode<IVisitPropertySegmentContext>? unwrappedNode);
-            bool isWrappedByTerraformValue = sourceTypeWrapping.Contains(TypeWrapping.TerraformValue);
+            var sourceTypeWrapping = node.TryUnwrap(out var unwrappedNode);
+            var isWrappedByTerraformValue = sourceTypeWrapping.Contains(TypeWrapping.TerraformValue);
 
-            TerraformTypeConstraint explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint();
+            var explicitTypeConstraint = unwrappedNode.Context.DetermineExplicitTypeConstraint();
             bool isNestedBlock;
             ValueDefinition builtValue;
 
             // We can now allow to treat dynamic as block
             if (explicitTypeConstraint == TerraformTypeConstraint.Block) {
-                IReadOnlySet<TerraformTypeConstraint> implicitValueTypeConstraints = unwrappedNode.Context.ImplicitTypeConstraints;
+                var implicitValueTypeConstraints = unwrappedNode.Context.ImplicitTypeConstraints;
 
-                TerraformTypeConstraint? singleImplicitValueTypeConstraint = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
+                var singleImplicitValueTypeConstraint = node.Context.GetContextualAttribute<NestedBlockAttribute>()?.WrappedBy?.ToTypeConstraint()
                     ?? (implicitValueTypeConstraints.Count == 1
                         ? implicitValueTypeConstraints.Single()
                         : default(TerraformTypeConstraint?));
@@ -214,7 +214,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
                     throw new NestedBlockException();
                 }
 
-                IVisitPropertySegmentContext unwrappedContext = unwrappedNode.Context;
+                var unwrappedContext = unwrappedNode.Context;
 
                 if (singleImplicitValueTypeConstraint.Value.IsComplex()) {
                     builtValue = BuildBlock(unwrappedNode);
@@ -237,7 +237,7 @@ Property type = {unwrappedNode.Context.VisitType}");
                 isNestedBlock = false;
             }
 
-            ValueDefinition updatedValue = builtValue with {
+            var updatedValue = builtValue with {
                 OuterType = node.Context.VisitType,
                 SourceTypeWrapping = sourceTypeWrapping
             };
@@ -249,14 +249,14 @@ Property type = {unwrappedNode.Context.VisitType}");
 
         public ValueDefinition BuildDynamic(DynamicDefinition definition, Type knownType)
         {
-            VisitPropertyGenericSegmentContext newContext = VisitPropertyGenericSegmentContext.Custom(definition.DynamicNode.Context, knownType);
-            BlockNode<IVisitPropertySegmentContext> newNode = _nodeBuilder.BuildDynamic(newContext).AsContext<IVisitPropertySegmentContext>();
+            var newContext = VisitPropertyGenericSegmentContext.Custom(definition.DynamicNode.Context, knownType);
+            var newNode = _nodeBuilder.BuildDynamic(newContext).AsContext<IVisitPropertySegmentContext>();
             return BuildValue(newNode).Value;
         }
 
         public BlockDefinition BuildBlock(Type blockType)
         {
-            BlockNode node = _nodeBuilder.BuildNode(blockType);
+            var node = _nodeBuilder.BuildNode(blockType);
             return BuildBlock(node);
         }
 

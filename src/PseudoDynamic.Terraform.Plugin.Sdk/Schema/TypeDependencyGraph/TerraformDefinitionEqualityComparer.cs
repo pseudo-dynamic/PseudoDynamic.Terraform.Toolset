@@ -2,7 +2,7 @@
 {
     internal class TerraformDefinitionEqualityComparer : EqualityComparer<TerraformDefinition>
     {
-        public new static readonly TerraformDefinitionEqualityComparer Default = new(static (x, y) => object.Equals(x, y));
+        public static new readonly TerraformDefinitionEqualityComparer Default = new(static (x, y) => object.Equals(x, y));
 
         private readonly Func<TerraformDefinition?, TerraformDefinition?, bool> _checkEquality;
 
@@ -19,8 +19,8 @@
                 return false;
             }
 
-            Queue<TerraformDefinition> queueOfX = TerraformDefinitionCollector.Default.Queue(x);
-            EqualityComparingVisitor definitionVisitor = new(queueOfX, _checkEquality);
+            var queueOfX = TerraformDefinitionCollector.Default.Queue(x);
+            var definitionVisitor = new EqualityComparingVisitor(queueOfX, _checkEquality);
             definitionVisitor.Visit(y);
             return definitionVisitor.AreEqual;
         }
@@ -52,7 +52,7 @@
                     throw new InvalidOperationException("This instance is stateful and cannot be used to re-compare another definition");
                 }
 
-                bool dequeueSucceeded = _queueOfX.TryDequeue(out TerraformDefinition? x);
+                var dequeueSucceeded = _queueOfX.TryDequeue(out var x);
 
                 if (dequeueSucceeded) {
                     _visitCounter++;

@@ -27,7 +27,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType
             }
 
             internal init {
-                Type? visitType = _visitType;
+                var visitType = _visitType;
                 _visitType = value;
 
                 if (visitType != value) {
@@ -58,7 +58,7 @@ Visit type = {VisitType.FullName}");
 
         public IReadOnlySet<TerraformTypeConstraint> ImplicitTypeConstraints {
             get {
-                IReadOnlySet<TerraformTypeConstraint>? implicitTypeConstraints = _implicitTypeConstraints;
+                var implicitTypeConstraints = _implicitTypeConstraints;
 
                 if (implicitTypeConstraints is not null) {
                     return implicitTypeConstraints;

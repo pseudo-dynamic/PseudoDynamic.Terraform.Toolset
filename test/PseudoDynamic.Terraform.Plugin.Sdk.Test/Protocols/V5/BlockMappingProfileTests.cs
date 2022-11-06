@@ -20,7 +20,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
         [ClassData(typeof(SchemaBlockData))]
         internal void Block_definition_maps_to_schema_block(Schema.Types.Block expectedSchemaBlock, BlockDefinition blockDefinition)
         {
-            Schema.Types.Block actualSchemaBlock = Mapper.Map<BlockDefinition, Schema.Types.Block>(blockDefinition);
+            var actualSchemaBlock = Mapper.Map<BlockDefinition, Schema.Types.Block>(blockDefinition);
             Assert.Equal(expectedSchemaBlock, actualSchemaBlock);
         }
 
@@ -40,7 +40,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                     Version = 2
                 });
 
-                MonoRangeDefinition stringList = MonoRangeDefinition.List<IList<string>>(PrimitiveDefinition.String);
+                var stringList = MonoRangeDefinition.List<IList<string>>(PrimitiveDefinition.String);
 
                 Add(new Schema.Types.Block() {
                     Version = 1,

@@ -139,7 +139,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         [MemberData(nameof(GetBlockSchemas))]
         internal void Block_schema_matches_expected_block_schema(Type schemaType, TerraformDefinition expectedDefinition)
         {
-            BlockDefinition actualDefinition = BlockBuilder.Default.BuildBlock(schemaType);
+            var actualDefinition = BlockBuilder.Default.BuildBlock(schemaType);
             Assert.Equal(expectedDefinition, actualDefinition, AssertingTerraformDefinitionEqualityComparer.Default);
         }
 

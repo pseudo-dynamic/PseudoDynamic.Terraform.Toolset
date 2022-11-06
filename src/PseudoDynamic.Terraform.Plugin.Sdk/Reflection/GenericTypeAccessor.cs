@@ -11,7 +11,7 @@
 
         public TypeAccessor MakeGenericTypeAccessor(Type missingTypeArgument)
         {
-            if (_typeAccessorByTypeArgument.TryGetValue(missingTypeArgument, out TypeAccessor? typeAccessor)) {
+            if (_typeAccessorByTypeArgument.TryGetValue(missingTypeArgument, out var typeAccessor)) {
                 return typeAccessor;
             }
 
@@ -22,7 +22,7 @@
 
         public TypeAccessor MakeGenericTypeAccessor(params Type[] missingTypeArguments)
         {
-            if (_typeAccessorByTwoTypeArgument.TryGetValue(missingTypeArguments, out TypeAccessor? typeAccessor)) {
+            if (_typeAccessorByTwoTypeArgument.TryGetValue(missingTypeArguments, out var typeAccessor)) {
                 return typeAccessor;
             }
 

@@ -8,7 +8,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
     {
         private static TerraformCommandOptions ProvideOptions(Action<TerraformCommandOptions>? configureOptions)
         {
-            TerraformCommandOptions options = new();
+            var options = new TerraformCommandOptions();
             configureOptions?.Invoke(options);
             return options;
         }
@@ -34,13 +34,13 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
         private TerraformProcessStartInfo PrepareStartInfo()
         {
-            TerraformProcessStartInfo? processStartInfo = _preparedProcessStartInfo;
+            var processStartInfo = _preparedProcessStartInfo;
 
             if (processStartInfo != null) {
                 return processStartInfo;
             }
 
-            Dictionary<string, string> environmentVariables = new(EnvironmentVariables);
+            var environmentVariables = new Dictionary<string, string>(EnvironmentVariables);
 
             if (TerraformReattachProviders != null && TerraformReattachProviders.Count > 0) {
                 environmentVariables.Add(TfReattachProvidersVariableName, SerializeTerraformReattachProviders(TerraformReattachProviders));
@@ -172,7 +172,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             private bool _isDisposed;
 
             public WorkingDirectoryCloning(Action<WorkingDirectoryCloningOptions>? configureOptions)
-                : base(ProvideOptions(configureOptions, out WorkingDirectoryCloningOptions? options))
+                : base(ProvideOptions(configureOptions, out var options))
             {
                 if (options.DeleteOnDispose
                     && options.DeleteOnlyTempDirectory
@@ -182,23 +182,23 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
                 _options = options;
 
-                string workingDirectory = options.WorkingDirectory != null
+                var workingDirectory = options.WorkingDirectory != null
                     ? (Path.IsPathRooted(options.WorkingDirectory)
                         ? options.WorkingDirectory
                         : (Path.Combine(Environment.CurrentDirectory, options.WorkingDirectory)))
                     : Environment.CurrentDirectory;
 
-                DirectoryInfo workingDirectoryInfo = new(workingDirectory);
+                var workingDirectoryInfo = new DirectoryInfo(workingDirectory);
                 workingDirectory = workingDirectoryInfo.FullName;
                 OriginalWorkingDirectory = workingDirectory;
                 Directory.CreateDirectory(workingDirectory);
-                string[] copyableFilePatterns = options.CopyableFilePatterns;
+                var copyableFilePatterns = options.CopyableFilePatterns;
 
-                foreach (FileInfo? file in copyableFilePatterns.AsParallel().SelectMany(filePattern => workingDirectoryInfo.EnumerateFiles(filePattern, SearchOption.AllDirectories))) {
-                    string relativeDirectory = file.DirectoryName!.Remove(0, workingDirectory.Length);
-                    string mirroringDirectory = options.TemporaryWorkingDirectory + relativeDirectory;
+                foreach (var file in copyableFilePatterns.AsParallel().SelectMany(filePattern => workingDirectoryInfo.EnumerateFiles(filePattern, SearchOption.AllDirectories))) {
+                    var relativeDirectory = file.DirectoryName!.Remove(0, workingDirectory.Length);
+                    var mirroringDirectory = options.TemporaryWorkingDirectory + relativeDirectory;
                     Directory.CreateDirectory(mirroringDirectory); // May be redudant but we don't care
-                    string mirroringFile = Path.Combine(mirroringDirectory, file.Name);
+                    var mirroringFile = Path.Combine(mirroringDirectory, file.Name);
                     file.CopyTo(mirroringFile);
                 }
 
@@ -222,11 +222,11 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
                 }
 
                 if (disposing && _options.DeleteOnDispose) {
-                    string gitDirectory = _options.TemporaryWorkingDirectory;
+                    var gitDirectory = _options.TemporaryWorkingDirectory;
 
                     if (Directory.Exists(gitDirectory)
                         && (!_options.DeleteOnlyTempDirectory || ContainsBasePath(gitDirectory, Path.GetTempPath()))) {
-                        foreach (string filePath in Directory.EnumerateFiles(gitDirectory, "*", SearchOption.AllDirectories)) {
+                        foreach (var filePath in Directory.EnumerateFiles(gitDirectory, "*", SearchOption.AllDirectories)) {
                             File.SetAttributes(filePath, FileAttributes.Normal);
                         }
 
@@ -235,7 +235,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
 
                     static bool ContainsBasePath(string subPath, string basePath)
                     {
-                        string relativePath = Path.GetRelativePath(basePath, subPath);
+                        var relativePath = Path.GetRelativePath(basePath, subPath);
                         return !relativePath.StartsWith('.') && !Path.IsPathRooted(relativePath);
                     }
                 }

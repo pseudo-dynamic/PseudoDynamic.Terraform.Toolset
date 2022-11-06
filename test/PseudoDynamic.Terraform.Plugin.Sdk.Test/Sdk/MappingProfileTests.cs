@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         [Fact]
         internal void Mapper_configuration_is_valid()
         {
-            IMapper mapper = new MapperConfiguration(config => config.AddMaps(typeof(MappingProfile))).CreateMapper();
+            var mapper = new MapperConfiguration(config => config.AddMaps(typeof(MappingProfile))).CreateMapper();
             mapper.ConfigurationProvider.AssertConfigurationIsValid();
         }
     }

@@ -9,11 +9,11 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
     {
         public BlockMappingProfile()
         {
-            IMappingExpression<BlockDefinition, Schema> schema = CreateMap<BlockDefinition, Schema>()
+            var schema = CreateMap<BlockDefinition, Schema>()
                 .ForMember(x => x.Version, o => o.MapFrom(x => x.Version))
                 .ForMember(x => x.Block, o => o.MapFrom(x => x));
 
-            IMappingExpression<BlockDefinition, Schema.Types.Block> blockFromBlock = CreateMap<BlockDefinition, Schema.Types.Block>()
+            var blockFromBlock = CreateMap<BlockDefinition, Schema.Types.Block>()
                 .ForMember(x => x.Attributes, o => o.MapFrom(x => x.Attributes))
                 .ForMember(x => x.BlockTypes, o => o.MapFrom(x => x.Blocks))
                 .ForMember(x => x.Deprecated, o => o.MapFrom(x => x.IsDeprecated))
@@ -21,7 +21,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
                 .ForMember(x => x.DescriptionKind, o => o.MapFrom(x => x.DescriptionKind))
                 .ForMember(x => x.Version, o => o.MapFrom(x => x.Version));
 
-            IMappingExpression<BlockAttributeDefinition, Schema.Types.Attribute> blockAttribute = CreateMap<BlockAttributeDefinition, Schema.Types.Attribute>()
+            var blockAttribute = CreateMap<BlockAttributeDefinition, Schema.Types.Attribute>()
                 .ForMember(x => x.Computed, o => o.MapFrom(x => x.IsComputed))
                 .ForMember(x => x.Deprecated, o => o.MapFrom(x => x.IsDeprecated))
                 .ForMember(x => x.Description, o => o.MapFrom(x => x.Description))
@@ -34,7 +34,7 @@ namespace PseudoDynamic.Terraform.Plugin.Protocols.V5
             blockAttribute.ForMember(x => x.Type, o => o.MapFrom((destination, _) =>
                 ByteString.CopyFromUtf8(BlockAttributeTypeBuilder.Default.BuildJsonType(destination.Value))));
 
-            IMappingExpression<NestedBlockAttributeDefinition, Schema.Types.NestedBlock> nestedBlockAttribute = CreateMap<NestedBlockAttributeDefinition, Schema.Types.NestedBlock>()
+            var nestedBlockAttribute = CreateMap<NestedBlockAttributeDefinition, Schema.Types.NestedBlock>()
                 .ForMember(x => x.Block, o => o.MapFrom(x => x.Block))
                 .ForMember(x => x.MaxItems, o => o.MapFrom(x => x.MaximumItems))
                 .ForMember(x => x.MinItems, o => o.MapFrom(x => x.MinimumItems))

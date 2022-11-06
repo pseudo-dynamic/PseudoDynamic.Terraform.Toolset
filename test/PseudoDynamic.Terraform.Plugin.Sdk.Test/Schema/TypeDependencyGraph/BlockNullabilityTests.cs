@@ -7,9 +7,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         [Fact]
         public void String_block_has_optional_string()
         {
-            BlockDefinition actualBlock = BlockBuilder.Default.BuildBlock(typeof(StringBlocks.Optional));
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(StringBlocks.Optional));
 
-            BlockDefinition expectedBlock = new(typeof(StringBlocks.Optional)) {
+            var expectedBlock = new BlockDefinition(typeof(StringBlocks.Optional)) {
                 Attributes = new[] {
                     new BlockAttributeDefinition(typeof(string),"nullable_string", PrimitiveDefinition.String) {
                         IsOptional = true
@@ -23,9 +23,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         [Fact]
         public void String_block_has_required_string()
         {
-            BlockDefinition actualBlock = BlockBuilder.Default.BuildBlock(typeof(StringBlocks.Required));
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(StringBlocks.Required));
 
-            BlockDefinition expectedBlock = new(typeof(StringBlocks.Required)) {
+            var expectedBlock = new BlockDefinition(typeof(StringBlocks.Required)) {
                 Attributes = new[] {
                     new BlockAttributeDefinition(typeof(string), "string", PrimitiveDefinition.String) {
                         IsRequired = true
@@ -39,9 +39,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         [Fact]
         public void Terraform_value_block_has_optional_string()
         {
-            BlockDefinition actualBlock = BlockBuilder.Default.BuildBlock(typeof(TeraformValueBlocks.Optional));
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(TeraformValueBlocks.Optional));
 
-            BlockDefinition expectedBlock = new(typeof(TeraformValueBlocks.Optional)) {
+            var expectedBlock = new BlockDefinition(typeof(TeraformValueBlocks.Optional)) {
                 Attributes = new[] {
                     new BlockAttributeDefinition(typeof(string),"nullable_string", PrimitiveDefinition.String with {
                         OuterType = typeof(TerraformValue<string>),
@@ -58,9 +58,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
         [Fact]
         public void Terraform_value_block_has_required_string()
         {
-            BlockDefinition actualBlock = BlockBuilder.Default.BuildBlock(typeof(TeraformValueBlocks.Required));
+            var actualBlock = BlockBuilder.Default.BuildBlock(typeof(TeraformValueBlocks.Required));
 
-            BlockDefinition expectedBlock = new(typeof(TeraformValueBlocks.Required)) {
+            var expectedBlock = new BlockDefinition(typeof(TeraformValueBlocks.Required)) {
                 Attributes = new[] {
                     new BlockAttributeDefinition(typeof(string), "string", PrimitiveDefinition.String with {
                         OuterType = typeof(TerraformValue<string>),

@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
     /// </summary>
     public record class SimpleProcessStartInfo
     {
-        internal readonly static IReadOnlyDictionary<string, string> EmptyEnvironmentVariables = new Dictionary<string, string>();
+        internal static readonly IReadOnlyDictionary<string, string> EmptyEnvironmentVariables = new Dictionary<string, string>();
 
         /// <summary>
         /// The executable to start.
@@ -40,9 +40,9 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
 
         internal ProcessStartInfo CreateProcessStartInfo()
         {
-            string executable = Executable;
-            string? arguments = Arguments;
-            string workingDirectory = WorkingDirectory ?? string.Empty;
+            var executable = Executable;
+            var arguments = Arguments;
+            var workingDirectory = WorkingDirectory ?? string.Empty;
             ProcessStartInfo processStartInfo;
 
             if (arguments == null) {
@@ -56,7 +56,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics
             }
 
             if (EnvironmentVariables is not null) {
-                foreach (KeyValuePair<string, string> environmentVariable in EnvironmentVariables) {
+                foreach (var environmentVariable in EnvironmentVariables) {
                     processStartInfo.EnvironmentVariables.Add(environmentVariable.Key, environmentVariable.Value);
                 }
             }

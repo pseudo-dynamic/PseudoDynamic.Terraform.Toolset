@@ -75,7 +75,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         [MemberData(nameof(GetBlockTypeNodes))]
         internal void Node_producer_produces_correct_blocks(Type schemaType, BlockNode expectedNode)
         {
-            BlockNode actualNode = new BlockNodeBuilder().BuildNode(schemaType);
+            var actualNode = new BlockNodeBuilder().BuildNode(schemaType);
             Assert.Equal(expectedNode, actualNode, BlockNodeContextEqualityComparer.Default);
         }
 

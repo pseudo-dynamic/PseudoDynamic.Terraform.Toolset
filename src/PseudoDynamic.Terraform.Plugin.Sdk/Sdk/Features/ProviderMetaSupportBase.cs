@@ -27,8 +27,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Features
         public void AddResource<Resource>(Resource? resource)
             where Resource : DesignTimeTerraformService, IDesignTimeTerraformService<object>.IResource<ProviderMetaSchema>
         {
-            Type resourceType = typeof(Resource);
-            Type schematype = DesignTimeTerraformService.GetSchemaType(resourceType);
+            var resourceType = typeof(Resource);
+            var schematype = DesignTimeTerraformService.GetSchemaType(resourceType);
             ProviderFeature.AddResource(resourceType, schematype, ProviderMetaSchemaType, resource);
         }
 
@@ -53,8 +53,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Features
         public void AddDataSource<DataSource>(DataSource? dataSource)
             where DataSource : DesignTimeTerraformService, IDesignTimeTerraformService<object>.IDataSource<ProviderMetaSchema>
         {
-            Type dataSourceType = typeof(DataSource);
-            Type schematype = DesignTimeTerraformService.GetSchemaType(dataSourceType);
+            var dataSourceType = typeof(DataSource);
+            var schematype = DesignTimeTerraformService.GetSchemaType(dataSourceType);
             ProviderFeature.AddDataSource(dataSourceType, schematype, ProviderMetaSchemaType, dataSource);
         }
 

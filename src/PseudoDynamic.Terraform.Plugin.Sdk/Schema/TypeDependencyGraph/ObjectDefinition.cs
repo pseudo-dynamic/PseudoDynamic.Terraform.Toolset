@@ -35,7 +35,7 @@
         {
             _indexedAttributes ??= ToDictionary(_attributes);
 
-            if (_indexedAttributes.TryGetValue(attributeName, out int attributeIndex)) {
+            if (_indexedAttributes.TryGetValue(attributeName, out var attributeIndex)) {
                 return _attributes[attributeIndex];
             }
 

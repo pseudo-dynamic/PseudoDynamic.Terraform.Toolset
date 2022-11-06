@@ -15,7 +15,7 @@ public static class TerraformServiceExtensions
     /// </returns>
     public static bool HasConfig<Schema>(this IConfigContext<Schema> context, [MaybeNullWhen(false)] out IConfigContext<Schema> configContext)
     {
-        bool result = context.Config != null;
+        var result = context.Config != null;
         configContext = result ? context : null;
         return result;
     }
@@ -31,7 +31,7 @@ public static class TerraformServiceExtensions
     /// </returns>
     public static bool HasState<Schema>(this IStateContext<Schema> context, [MaybeNullWhen(false)] out IStateContext<Schema> stateContext)
     {
-        bool result = context.State != null;
+        var result = context.State != null;
         stateContext = result ? context : null;
         return result;
     }

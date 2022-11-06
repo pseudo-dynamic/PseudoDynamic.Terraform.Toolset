@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         [Fact]
         public void Resource_implementation_contains_inferred_schema()
         {
-            Type actualSchemaType = DesignTimeTerraformService.GetSchemaType(typeof(ResourceImpl));
+            var actualSchemaType = DesignTimeTerraformService.GetSchemaType(typeof(ResourceImpl));
             Assert.Equal(typeof(SchemaImpl), actualSchemaType);
         }
 

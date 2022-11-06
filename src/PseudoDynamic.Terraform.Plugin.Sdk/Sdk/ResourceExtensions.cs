@@ -18,7 +18,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </returns>
         public static bool HasPlan<Schema>(this IPlanContext<Schema> context, [MaybeNullWhen(false)] out IPlanContext<Schema> planContext)
         {
-            bool result = context.Plan != null;
+            var result = context.Plan != null;
             planContext = result ? context : null;
             return result;
         }
@@ -35,7 +35,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </returns>
         public static bool IsChanging<Schema, ProviderMetaSchema>(this IPlanContext<Schema, ProviderMetaSchema> context, [MaybeNullWhen(false)] out IChangeContext<Schema, ProviderMetaSchema> changeContext)
         {
-            bool result = context.State == null;
+            var result = context.State == null;
             changeContext = result ? context : null;
             return result;
         }
@@ -52,7 +52,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </returns>
         public static bool IsCreating<Schema, ProviderMetaSchema>(this IPlanContext<Schema, ProviderMetaSchema> context, [MaybeNullWhen(false)] out ICreateContext<Schema, ProviderMetaSchema> createContext)
         {
-            bool result = context.State == null;
+            var result = context.State == null;
             createContext = result ? context : null;
             return result;
         }
@@ -69,7 +69,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </returns>
         public static bool IsUpdating<Schema, ProviderMetaSchema>(this IPlanContext<Schema, ProviderMetaSchema> context, [MaybeNullWhen(false)] out IUpdateContext<Schema, ProviderMetaSchema> updateContext)
         {
-            bool result = context.State != null && context.Plan != null;
+            var result = context.State != null && context.Plan != null;
             updateContext = result ? context : null;
             return result;
         }
@@ -86,7 +86,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         /// </returns>
         public static bool IsDeleting<Schema, ProviderMetaSchema>(this IPlanContext<Schema, ProviderMetaSchema> context, [MaybeNullWhen(false)] out IDeleteContext<Schema, ProviderMetaSchema> deleteContext)
         {
-            bool result = context.Plan == null;
+            var result = context.Plan == null;
             deleteContext = result ? context : null;
             return result;
         }

@@ -6,14 +6,14 @@
 
         public Queue<TerraformDefinition> Queue(TerraformDefinition definition)
         {
-            QueuingVisitor visitor = new();
+            var visitor = new QueuingVisitor();
             visitor.Visit(definition);
             return visitor.Queue;
         }
 
         public Stack<TerraformDefinition> Stack(TerraformDefinition definition)
         {
-            StackingVisitor visitor = new();
+            var visitor = new StackingVisitor();
             visitor.Visit(definition);
             return visitor.Stack;
         }

@@ -2,7 +2,7 @@
 {
     public interface IProvider<Schema> : IProvider where Schema : class
     {
-        internal new static readonly ProviderAdapter.ProviderGenericAdapter<Schema> ProviderAdapter;
+        internal static new readonly ProviderAdapter.ProviderGenericAdapter<Schema> ProviderAdapter;
 
         ProviderAdapter.IProviderAdapter IProvider.ProviderAdapter => ProviderAdapter;
 

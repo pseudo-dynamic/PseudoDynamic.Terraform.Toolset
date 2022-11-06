@@ -29,7 +29,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             IHostApplicationLifetime applicationLifetime,
             ILogger<PluginServer> logger)
         {
-            PluginServerOptions unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            var unwrappedOptions = options?.Value ?? throw new ArgumentNullException(nameof(options));
             PluginProtocol = unwrappedOptions.Protocol ?? throw new InvalidOperationException($"The plugin protocol has not been configured inside an instance of {typeof(PluginServerOptions).FullName}");
             IsDebuggable = unwrappedOptions.IsDebuggable;
 
@@ -40,7 +40,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
             // Server port is only initialized after the server has been started, therefore we delay it because the
             // access to the lazy server address of this instance is expected to happen after the server started.
             _serverAddress = new Lazy<Uri>(() => {
-                IServerAddressesFeature? serverAddressesProvider = server.Features.Get<IServerAddressesFeature>();
+                var serverAddressesProvider = server.Features.Get<IServerAddressesFeature>();
 
                 if (serverAddressesProvider is null || serverAddressesProvider.Addresses.Count == 0) {
                     throw new InvalidOperationException("The plugin server needs at least one available server address");
@@ -49,7 +49,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                 string? serverAddressString;
 
                 if (unwrappedOptions.ServerAddressFilter != null) {
-                    IEnumerator<string> enumerator = serverAddressesProvider.Addresses.GetEnumerator();
+                    var enumerator = serverAddressesProvider.Addresses.GetEnumerator();
 
                     do {
                         if (!enumerator.MoveNext()) {
@@ -65,14 +65,14 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
                     serverAddressString = serverAddressesProvider.Addresses.First();
                 }
 
-                Uri serverAddressUri = new(serverAddressString);
+                var serverAddressUri = new Uri(serverAddressString);
 
                 if (serverAddressUri.Port == 0) {
                     throw new InvalidOperationException($"Because the server port of the address {serverAddressString} is still zero, you cannot access the server address. Has the server been started?");
                 }
 
                 if (string.Equals(serverAddressUri.Host, "localhost", StringComparison.InvariantCultureIgnoreCase)) {
-                    UriBuilder serverAddressBuilder = new(serverAddressUri) {
+                    var serverAddressBuilder = new UriBuilder(serverAddressUri) {
                         Host = "127.0.0.1"
                     };
 
@@ -96,10 +96,10 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
 
         private void WriteTerraformHandshake()
         {
-            Uri serverAddress = ServerAddress;
+            var serverAddress = ServerAddress;
             // Terraform seems not to like Base64 padding, so we trim
-            string base64EncodedCertificate = Convert.ToBase64String(_clientCertificate!.RawData).TrimEnd('=');
-            string terraformHandshake = $"1|{PluginProtocol.ToVersionNumber()}|tcp|{serverAddress.Host}:{serverAddress.Port}|grpc|{base64EncodedCertificate}";
+            var base64EncodedCertificate = Convert.ToBase64String(_clientCertificate!.RawData).TrimEnd('=');
+            var terraformHandshake = $"1|{PluginProtocol.ToVersionNumber()}|tcp|{serverAddress.Host}:{serverAddress.Port}|grpc|{base64EncodedCertificate}";
             _logger.LogInformation($"Writing Terraform handshake{Environment.NewLine}" + terraformHandshake);
             // Terraform reads until newline and stucks if non is present
             Console.WriteLine(terraformHandshake);

@@ -10,7 +10,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 
         public virtual BlockNode BuildDynamic(VisitContext context)
         {
-            SameDepthCapturingVisitor visitor = new();
+            var visitor = new SameDepthCapturingVisitor();
             visitor.RewriteThenVisitDynamic(context);
             return visitor.RootNode;
         }
@@ -23,7 +23,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
         /// <exception cref="ArgumentException"></exception>
         public virtual BlockNode BuildNode(Type blockType, Context? context = null)
         {
-            SameDepthCapturingVisitor visitor = new();
+            var visitor = new SameDepthCapturingVisitor();
             visitor.RewriteThenVisitComplex(blockType);
             return visitor.RootNode;
         }
@@ -40,7 +40,7 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 
             private bool TryVisitPropertySegment(IVisitPropertySegmentContext context)
             {
-                Type visitType = context.VisitType;
+                var visitType = context.VisitType;
                 return TryVisitTerraformValue() || TryVisitNullable();
 
                 bool TryVisitTerraformValue()
@@ -55,10 +55,10 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
                         return true;
                     }
 
-                    if (visitType.IsImplementingGenericTypeDefinition(TerraformValue.InterfaceGenericTypeDefinition, out _, out Type[]? genericTypeArguments)) {
-                        Type genericTypeArgument = genericTypeArguments.Single();
+                    if (visitType.IsImplementingGenericTypeDefinition(TerraformValue.InterfaceGenericTypeDefinition, out _, out var genericTypeArguments)) {
+                        var genericTypeArgument = genericTypeArguments.Single();
 
-                        (int Index, Type GenericTypeParameter)[] annotatedTerraformValueGenericTypeParameters = visitType.GetGenericTypeDefinition().GetGenericArguments()
+                        var annotatedTerraformValueGenericTypeParameters = visitType.GetGenericTypeDefinition().GetGenericArguments()
                             .Select((GenericTypeParameter, Index) => (Index, GenericTypeParameter))
                             .Where(tuple => tuple.GenericTypeParameter.GetCustomAttribute<TerraformValueTypeAttribute>() is not null)
                             .ToArray();
@@ -71,9 +71,9 @@ namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
                             throw new TerraformValueException($"The generic type argument for {TerraformValue.InterfaceGenericTypeDefinition.FullName} generic type definition can only originate from one generic type argument");
                         }
 
-                        (int Index, Type GenericTypeParameter) terraformValueGenericTypeParameterTuple = annotatedTerraformValueGenericTypeParameters.Single();
-                        int terraformValueGenericTypeArgumentIndex = terraformValueGenericTypeParameterTuple.Index;
-                        Type terraformValueGenericTypeArgument = visitType.GetGenericArguments()[terraformValueGenericTypeArgumentIndex];
+                        var terraformValueGenericTypeParameterTuple = annotatedTerraformValueGenericTypeParameters.Single();
+                        var terraformValueGenericTypeArgumentIndex = terraformValueGenericTypeParameterTuple.Index;
+                        var terraformValueGenericTypeArgument = visitType.GetGenericArguments()[terraformValueGenericTypeArgumentIndex];
 
                         if (terraformValueGenericTypeArgument != genericTypeArgument) {
                             throw new TerraformValueException($@"The actual generic type argument of {TerraformValue.InterfaceGenericTypeDefinition.FullName} generic type definition is incompatible with the indicated generic type argument of {visitType.FullName}
@@ -102,7 +102,7 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
                         return false;
                     }
 
-                    Type genericTypeArgument = visitType.GenericTypeArguments.Single();
+                    var genericTypeArgument = visitType.GenericTypeArguments.Single();
                     RewriteThenVisit(VisitPropertyGenericSegmentContext.Custom(context, genericTypeArgument, BlockVisitContextType.Nullable));
                     return true;
                 }
@@ -145,14 +145,14 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
                     return;
                 }
 
-                List<VisitContext> capturedContexts = _sameDepthCapturing.CaptureSameDepth(base.Visit, context);
-                BlockNode[] capturedContextNodes = capturedContexts.Select(context => new BlockNode(context)).ToArray();
+                var capturedContexts = _sameDepthCapturing.CaptureSameDepth(base.Visit, context);
+                var capturedContextNodes = capturedContexts.Select(context => new BlockNode(context)).ToArray();
                 _rootNode = new BlockNode(context, capturedContextNodes);
 
-                Queue<BlockNode> postponedNodes = new(capturedContextNodes);
-                while (postponedNodes.TryDequeue(out BlockNode? node)) {
-                    foreach (VisitContext capturedContext in _sameDepthCapturing.CaptureSameDepth(base.Visit, node.Context)) {
-                        BlockNode capturedContextNode = new(capturedContext);
+                var postponedNodes = new Queue<BlockNode>(capturedContextNodes);
+                while (postponedNodes.TryDequeue(out var node)) {
+                    foreach (var capturedContext in _sameDepthCapturing.CaptureSameDepth(base.Visit, node.Context)) {
+                        var capturedContextNode = new BlockNode(capturedContext);
                         postponedNodes.Enqueue(capturedContextNode);
                         node.Add(capturedContextNode);
                     }
@@ -162,7 +162,7 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
             private bool TryRewritePropertySegment<T>(T context, [NotNullWhen(true)] out T? rewrittenContext)
                 where T : VisitContext, IVisitPropertySegmentContext
             {
-                Type visitedType = context.VisitType;
+                var visitedType = context.VisitType;
 
                 if ((context.ImplicitTypeConstraints.Count == 1 && context.ImplicitTypeConstraints.Single().IsComplex())
                     || visitedType.IsComplexAnnotated(out _)) {
@@ -176,7 +176,7 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
 
             protected override VisitPropertyContext RewriteProperty(VisitPropertyContext context)
             {
-                if (TryRewritePropertySegment(context, out VisitPropertyContext? rewrittenContext)) {
+                if (TryRewritePropertySegment(context, out var rewrittenContext)) {
                     return rewrittenContext;
                 }
 
@@ -185,7 +185,7 @@ indicated generic type argument: {terraformValueGenericTypeArgument.FullName} (i
 
             protected override VisitPropertyGenericSegmentContext RewritePropertyGenericArgument(VisitPropertyGenericSegmentContext context)
             {
-                if (TryRewritePropertySegment(context, out VisitPropertyGenericSegmentContext? rewrittenContext)) {
+                if (TryRewritePropertySegment(context, out var rewrittenContext)) {
                     return rewrittenContext;
                 }
 

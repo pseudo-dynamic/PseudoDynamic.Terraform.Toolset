@@ -26,8 +26,8 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
         public static void SetProvider<Provider>(this IProviderFeature providerFeature, Provider? provider = null)
             where Provider : DesignTimeTerraformService, IDesignTimeTerraformService<object>.IProvider
         {
-            Type providerType = typeof(Provider);
-            Type schematype = DesignTimeTerraformService.GetSchemaType(providerType);
+            var providerType = typeof(Provider);
+            var schematype = DesignTimeTerraformService.GetSchemaType(providerType);
             providerFeature.SetProvider(providerType, schematype, provider);
         }
 

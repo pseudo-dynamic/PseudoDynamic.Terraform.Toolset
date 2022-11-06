@@ -24,7 +24,7 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
 
         public MethodInfo GetMethod(string methodName, BindingFlags bindingFlags)
         {
-            if (_methodByName.TryGetValue(methodName, out MethodInfo? method)) {
+            if (_methodByName.TryGetValue(methodName, out var method)) {
                 return method;
             }
 
@@ -38,11 +38,11 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
 
         public MethodAccessor GetMethodAccessor(Func<TypeAccessor, Func<string, MethodInfo>> getMethod, string methodName)
         {
-            if (_methodAccessorByName.TryGetValue(methodName, out MethodAccessor? methodAccessor)) {
+            if (_methodAccessorByName.TryGetValue(methodName, out var methodAccessor)) {
                 return methodAccessor;
             }
 
-            MethodInfo method = getMethod(this)(methodName);
+            var method = getMethod(this)(methodName);
             methodAccessor = new MethodAccessor(method);
             _methodAccessorByName[methodName] = methodAccessor;
             return methodAccessor;
@@ -50,11 +50,11 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
 
         public MethodCaller<object, object> GetMethodCaller(string methodName)
         {
-            if (_methodCallerByName.TryGetValue(methodName, out MethodCaller<object, object>? methodDelegate)) {
+            if (_methodCallerByName.TryGetValue(methodName, out var methodDelegate)) {
                 return methodDelegate;
             }
 
-            MethodInfo method = Type.GetMethod(methodName) ?? throw new InvalidOperationException($"Method {methodName} not found");
+            var method = Type.GetMethod(methodName) ?? throw new InvalidOperationException($"Method {methodName} not found");
             methodDelegate = method.DelegateForCall();
             _methodCallerByName[methodName] = methodDelegate;
             return methodDelegate;
@@ -65,11 +65,11 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
 
         public ConstructorInfo GetConstructor(int parametersCount, BindingFlags bindingFlags)
         {
-            if (_constructorByParametersCount.TryGetValue(parametersCount, out ConstructorInfo? cachedConstructor)) {
+            if (_constructorByParametersCount.TryGetValue(parametersCount, out var cachedConstructor)) {
                 return cachedConstructor;
             }
 
-            ConstructorInfo constructor = Type.GetConstructors(bindingFlags).Single(x => x.GetParameters().Length == parametersCount);
+            var constructor = Type.GetConstructors(bindingFlags).Single(x => x.GetParameters().Length == parametersCount);
             _constructorByParametersCount[parametersCount] = constructor;
             return constructor;
         }
@@ -82,11 +82,11 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
 
         public CreateInstance GetConstructorActivator(int parametersCount, BindingFlags bindingFlags)
         {
-            if (_instanceActivatorByParametersCount.TryGetValue(parametersCount, out CreateInstance? instanceActivator)) {
+            if (_instanceActivatorByParametersCount.TryGetValue(parametersCount, out var instanceActivator)) {
                 return instanceActivator;
             }
 
-            ConstructorInfo constructorInfo = GetConstructor(parametersCount, bindingFlags);
+            var constructorInfo = GetConstructor(parametersCount, bindingFlags);
             instanceActivator = Activation.ExpressionWeakTyped(constructorInfo);
             _instanceActivatorByParametersCount[parametersCount] = instanceActivator;
             return instanceActivator;

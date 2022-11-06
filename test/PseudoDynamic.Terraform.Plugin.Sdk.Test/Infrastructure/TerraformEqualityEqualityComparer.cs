@@ -6,7 +6,7 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
     {
         private static readonly TerraformEqualityEqualityComparer<T>? _default;
 
-        public new static TerraformEqualityEqualityComparer<T> Default = _default ??= new TerraformEqualityEqualityComparer<T>(EqualityComparer<T>.Default);
+        public static new TerraformEqualityEqualityComparer<T> Default = _default ??= new TerraformEqualityEqualityComparer<T>(EqualityComparer<T>.Default);
         private readonly IEqualityComparer<T> _equalityComparer;
 
         public TerraformEqualityEqualityComparer(IEqualityComparer<T>? equalityComparer) =>

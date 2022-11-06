@@ -7,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk
     {
         public static void EnsureProviderNameConvention(string providerName)
         {
-            string lastNamePart = providerName.Split("/").Last();
+            var lastNamePart = providerName.Split("/").Last();
 
             // ISSUE: Normally you can decide at design-time the provider name, so should we enforce convention?
             if (!string.Equals(lastNamePart, SnakeCaseConvention.Default.Format(lastNamePart), StringComparison.InvariantCulture)
