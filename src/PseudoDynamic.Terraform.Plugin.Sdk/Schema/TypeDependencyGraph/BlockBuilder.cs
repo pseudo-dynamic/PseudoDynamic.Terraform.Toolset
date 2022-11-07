@@ -4,6 +4,7 @@ using PseudoDynamic.Terraform.Plugin.Conventions;
 using PseudoDynamic.Terraform.Plugin.Schema.Conventions;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
+using PseudoDynamic.Terraform.Plugin.Sdk;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph
 {

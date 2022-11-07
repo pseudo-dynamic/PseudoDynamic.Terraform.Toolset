@@ -2,6 +2,7 @@
 using Moq;
 using PseudoDynamic.Terraform.Plugin.Infrastructure;
 using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
+using PseudoDynamic.Terraform.Plugin.Schema;
 using PseudoDynamic.Terraform.Plugin.Sdk.Services;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.CollectionFactories;
 

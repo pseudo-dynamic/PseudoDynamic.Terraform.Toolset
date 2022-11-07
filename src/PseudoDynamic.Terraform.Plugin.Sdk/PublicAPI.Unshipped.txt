@@ -2,6 +2,8 @@
 abstract PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema, ProviderMetaSchema>.TypeName.get -> string!
 abstract PseudoDynamic.Terraform.Plugin.Sdk.PluginServerSpecificationBase<TDerived>.Protocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
 abstract PseudoDynamic.Terraform.Plugin.Sdk.Resource<Schema, ProviderMetaSchema>.TypeName.get -> string!
+override PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.Equals(object? other) -> bool
+override PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.GetHashCode() -> int
 override PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException.Message.get -> string!
 override PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5.Protocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
 override PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6.Protocol.get -> PseudoDynamic.Terraform.Plugin.Protocols.PluginProtocol
@@ -38,6 +40,18 @@ PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind.Plain = 0 -> PseudoDynamic
 PseudoDynamic.Terraform.Plugin.Schema.DescriptionKindAttribute
 PseudoDynamic.Terraform.Plugin.Schema.DescriptionKindAttribute.DescriptionKind.get -> PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind
 PseudoDynamic.Terraform.Plugin.Schema.DescriptionKindAttribute.DescriptionKindAttribute(PseudoDynamic.Terraform.Plugin.Schema.DescriptionKind descriptionKind) -> void
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue.AsNull.get -> PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<object!>!
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue.AsUnknown.get -> PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<object!>!
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue.IsNull.get -> bool
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue.IsUnknown.get -> bool
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue.Value.get -> object?
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>.AsNull.get -> PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>!
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>.AsUnknown.get -> PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>!
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>.IsNull.get -> bool
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>.IsUnknown.get -> bool
+PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>.Value.get -> T
 PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute
 PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.MaximumItems.get -> int
 PseudoDynamic.Terraform.Plugin.Schema.NestedBlockAttribute.MaximumItems.init -> void
@@ -64,6 +78,15 @@ PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Object = 7 -> Pseu
 PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Set = 5 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
 PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.String = 2 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
 PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint.Tuple = 8 -> PseudoDynamic.Terraform.Plugin.Schema.TerraformTypeConstraint
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.AsNull.get -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.AsUnknown.get -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.Equals(PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>? other) -> bool
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.IsNull.get -> bool
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.IsUnknown.get -> bool
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.TerraformValue() -> void
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.TerraformValue(T value) -> void
+PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.Value.get -> T
 PseudoDynamic.Terraform.Plugin.Schema.TupleAttribute
 PseudoDynamic.Terraform.Plugin.Schema.TupleAttribute.TupleAttribute() -> void
 PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType.MissingAttributeAnnotationException
@@ -246,6 +269,8 @@ PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IShapingContext.Dyn
 PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IStateContext<Schema>
 PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IStateContext<Schema>.State.get -> Schema
 PseudoDynamic.Terraform.Plugin.Sdk.TerraformServiceExtensions
+PseudoDynamic.Terraform.Plugin.Sdk.TerraformValue
+PseudoDynamic.Terraform.Plugin.Sdk.TerraformValueExtensions
 PseudoDynamic.Terraform.Plugin.Sdk.Transcoding.ITerraformDynamicDecoder
 PseudoDynamic.Terraform.Plugin.Sdk.Transcoding.ITerraformDynamicDecoder.TryDecode<Schema>(object? unknown, out Schema? content) -> bool
 PseudoDynamic.Terraform.Plugin.TerraformValue
@@ -259,6 +284,7 @@ PseudoDynamic.Terraform.Plugin.TerraformValue<T>.TerraformValue() -> void
 PseudoDynamic.Terraform.Plugin.TerraformValue<T>.TerraformValue(T value) -> void
 PseudoDynamic.Terraform.Plugin.TerraformValue<T>.Value.get -> T
 PseudoDynamic.Terraform.Plugin.TerraformValueExtensions
+static PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.implicit operator PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!(T value) -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
 static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerDependencyInjectionExtensions.AddTerraformPluginServer(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5! serverSpecification) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerDependencyInjectionExtensions.AddTerraformPluginServer(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV6! serverSpecification) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
 static PseudoDynamic.Terraform.Plugin.Sdk.PluginServerWebHostBuilderExtensions.UseTerraformPluginServer<THostBuilder>(this THostBuilder builder, PseudoDynamic.Terraform.Plugin.Sdk.IPluginServerSpecification.ProtocolV5! serverSpecification) -> THostBuilder
@@ -272,6 +298,15 @@ static PseudoDynamic.Terraform.Plugin.Sdk.ResourceExtensions.IsDeleting<Schema, 
 static PseudoDynamic.Terraform.Plugin.Sdk.ResourceExtensions.IsUpdating<Schema, ProviderMetaSchema>(this PseudoDynamic.Terraform.Plugin.Sdk.Resource.IPlanContext<Schema, ProviderMetaSchema>! context, out PseudoDynamic.Terraform.Plugin.Sdk.Resource.IUpdateContext<Schema, ProviderMetaSchema>! updateContext) -> bool
 static PseudoDynamic.Terraform.Plugin.Sdk.TerraformServiceExtensions.HasConfig<Schema>(this PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IConfigContext<Schema>! context, out PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IConfigContext<Schema>! configContext) -> bool
 static PseudoDynamic.Terraform.Plugin.Sdk.TerraformServiceExtensions.HasState<Schema>(this PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IStateContext<Schema>! context, out PseudoDynamic.Terraform.Plugin.Sdk.Services.TerraformService.IStateContext<Schema>! stateContext) -> bool
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValue.OfNull<T>() -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValue.OfNull<T>(bool isUnknown) -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValue.OfUnknown<T>() -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValue.OfValue<T>(T value) -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValue.OfValue<T>(T value, bool isUnknown) -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValueExtensions.IsNull<T>(this PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>? terraformValue, out T value) -> bool
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValueExtensions.IsNullOrUnknown<T>(this PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>? terraformValue, out T value) -> bool
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValueExtensions.IsUnknown<T>(this PseudoDynamic.Terraform.Plugin.Schema.ITerraformValue<T>? terraformValue) -> bool
+static PseudoDynamic.Terraform.Plugin.Sdk.TerraformValueExtensions.TryGetValue<T>(this PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>? terraformValue, out T value) -> bool
 static PseudoDynamic.Terraform.Plugin.TerraformValue.OfNull<T>() -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
 static PseudoDynamic.Terraform.Plugin.TerraformValue.OfNull<T>(bool isUnknown) -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
 static PseudoDynamic.Terraform.Plugin.TerraformValue.OfUnknown<T>() -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
@@ -282,6 +317,8 @@ static PseudoDynamic.Terraform.Plugin.TerraformValueExtensions.IsNull<T>(this Ps
 static PseudoDynamic.Terraform.Plugin.TerraformValueExtensions.IsNullOrUnknown<T>(this PseudoDynamic.Terraform.Plugin.ITerraformValue<T>? terraformValue, out T value) -> bool
 static PseudoDynamic.Terraform.Plugin.TerraformValueExtensions.IsUnknown<T>(this PseudoDynamic.Terraform.Plugin.ITerraformValue<T>? terraformValue) -> bool
 static PseudoDynamic.Terraform.Plugin.TerraformValueExtensions.TryGetValue<T>(this PseudoDynamic.Terraform.Plugin.TerraformValue<T>? terraformValue, out T value) -> bool
+static readonly PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.Null -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
+static readonly PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>.Unknown -> PseudoDynamic.Terraform.Plugin.Schema.TerraformValue<T>!
 static readonly PseudoDynamic.Terraform.Plugin.TerraformValue<T>.Null -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
 static readonly PseudoDynamic.Terraform.Plugin.TerraformValue<T>.Unknown -> PseudoDynamic.Terraform.Plugin.TerraformValue<T>!
 virtual PseudoDynamic.Terraform.Plugin.Sdk.DataSource<Schema, ProviderMetaSchema>.Read(PseudoDynamic.Terraform.Plugin.Sdk.DataSource.IReadContext<Schema!, ProviderMetaSchema!>! context) -> System.Threading.Tasks.Task!

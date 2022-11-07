@@ -1,7 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
 using PseudoDynamic.Terraform.Plugin.Reflection;
+using PseudoDynamic.Terraform.Plugin.Schema;
 
-namespace PseudoDynamic.Terraform.Plugin
+namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     /// <summary>
     /// Provides helper functions for <see cref="TerraformValue{T}"/>.
@@ -12,13 +13,13 @@ namespace PseudoDynamic.Terraform.Plugin
         internal static readonly Type InterfaceGenericTypeDefinition = typeof(ITerraformValue<>);
         internal static readonly Type BaseInterfaceType = typeof(ITerraformValue);
 
-        private static readonly GenericTypeAccessor TerraformValueAccessor = new(ClassGenericTypeDefinition);
+        private static readonly GenericTypeAccessor _terraformValueAccessor = new(ClassGenericTypeDefinition);
 
         internal static object CreateInstance(Type typeArgument, bool isNullable, object? value, bool isNull, bool isUnknown)
         {
             var constructorArguments = new[] { isNullable, value, isNull, isUnknown };
 
-            return TerraformValueAccessor
+            return _terraformValueAccessor
                 .MakeGenericTypeAccessor(typeArgument)
                 .GetPrivateInstanceConstructor(constructorArguments.Length)
                 .Invoke(constructorArguments);

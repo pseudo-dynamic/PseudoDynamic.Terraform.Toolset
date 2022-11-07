@@ -1,4 +1,6 @@
-﻿namespace PseudoDynamic.Terraform.Plugin
+﻿using PseudoDynamic.Terraform.Plugin.Schema;
+
+namespace PseudoDynamic.Terraform.Plugin.Sdk
 {
     /// <summary>
     /// Contains extension methods for <see cref="ITerraformValue{T}"/>.

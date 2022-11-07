@@ -1,6 +1,4 @@
-﻿using PseudoDynamic.Terraform.Plugin.Schema;
-
-namespace PseudoDynamic.Terraform.Plugin
+﻿namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     /// <summary>
     /// Represents a value that follows the conventions of a value of Terraform, that can be null or unknown.

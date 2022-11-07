@@ -2,7 +2,7 @@
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
-namespace PseudoDynamic.Terraform.Plugin
+namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     /// <summary>
     /// Represents the low-level representation of <see cref="ITerraformValue{T}"/>.

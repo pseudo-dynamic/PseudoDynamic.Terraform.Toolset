@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using PseudoDynamic.Terraform.Plugin.Reflection;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.ComplexType;
+using PseudoDynamic.Terraform.Plugin.Sdk;
 
 namespace PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph.BlockType
 {

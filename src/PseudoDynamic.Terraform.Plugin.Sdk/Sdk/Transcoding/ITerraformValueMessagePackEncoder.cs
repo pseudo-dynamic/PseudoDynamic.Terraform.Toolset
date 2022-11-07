@@ -1,4 +1,5 @@
 ﻿using MessagePack;
+using PseudoDynamic.Terraform.Plugin.Schema;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding

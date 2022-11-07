@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using PseudoDynamic.Terraform.Plugin.Infrastructure.Fakes;
+using PseudoDynamic.Terraform.Plugin.Schema;
 using PseudoDynamic.Terraform.Plugin.Schema.TypeDependencyGraph;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.CollectionFactories;
 

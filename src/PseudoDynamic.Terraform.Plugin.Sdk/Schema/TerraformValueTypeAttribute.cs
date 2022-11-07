@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace PseudoDynamic.Terraform.Plugin
+namespace PseudoDynamic.Terraform.Plugin.Schema
 {
     /// <summary>
     /// This attribute should be applied on classes or structs that implement <see cref="ITerraformValue{T}"/>.

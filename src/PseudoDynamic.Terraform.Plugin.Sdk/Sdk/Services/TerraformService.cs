@@ -1,4 +1,5 @@
-﻿using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
+﻿using PseudoDynamic.Terraform.Plugin.Schema;
+using PseudoDynamic.Terraform.Plugin.Sdk.Transcoding;
 
 namespace PseudoDynamic.Terraform.Plugin.Sdk.Services
 {
