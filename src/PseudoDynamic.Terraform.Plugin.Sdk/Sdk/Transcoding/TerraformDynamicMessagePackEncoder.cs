@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -302,7 +303,7 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
                 return Expression.Lambda<EncodeValueDelegate>(body, param1, param2, param3, param4).Compile();
             }
 
-            private static readonly Dictionary<Type, EncodeValueDelegate> _encodeValueCompiledDelegates = new();
+            private static readonly ConcurrentDictionary<Type, EncodeValueDelegate> _encodeValueCompiledDelegates = new();
 
             internal static EncodeValueDelegate RequestCompiledEncodeValueDelegate(Type sourceType)
             {

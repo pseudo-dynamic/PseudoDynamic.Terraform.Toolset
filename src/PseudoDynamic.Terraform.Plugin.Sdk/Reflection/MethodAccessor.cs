@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace PseudoDynamic.Terraform.Plugin.Reflection
 {
@@ -6,7 +7,7 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
     {
         public MethodInfo Method { get; }
 
-        private readonly Dictionary<Type, MethodInfo> _methodByOneTypeArgument = new();
+        private readonly ConcurrentDictionary<Type, MethodInfo> _methodByOneTypeArgument = new();
 
         public MethodAccessor(MethodInfo method) => Method = method;
 

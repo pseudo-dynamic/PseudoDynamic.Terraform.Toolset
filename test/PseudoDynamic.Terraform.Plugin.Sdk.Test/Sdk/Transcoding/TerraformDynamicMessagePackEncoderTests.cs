@@ -8,20 +8,20 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
 {
     public class TerraformDynamicMessagePackEncoderTests
     {
-        private static readonly BlockBuilder BlockBuilder = BlockBuilder.Default;
-        private static readonly SchemaBuilder SchemaBuilder = new();
-        private static readonly TerraformDynamicMessagePackDecoder Decoder = new(new NonRequestableServiceProvider(), SchemaBuilder);
-        private static readonly TerraformDynamicMessagePackEncoder Encoder = new(new());
+        private static readonly BlockBuilder _blockBuilder = BlockBuilder.Default;
+        private static readonly SchemaBuilder _schemaBuilder = new();
+        private static readonly TerraformDynamicMessagePackDecoder _decoder = new(new NonRequestableServiceProvider(), _schemaBuilder);
+        private static readonly TerraformDynamicMessagePackEncoder _encoder = new(new());
 
         [Theory]
         [ClassData(typeof(DynamicSchemasGenerator))]
         internal void Encoder_should_encode_non_wrapped_dynamic(object content, Type contentType, Type dynamicType)
         {
-            var dynamicBlock = BlockBuilder.BuildBlock(dynamicType);
-            var encoded = Encoder.EncodeBlock(dynamicBlock, content);
+            var dynamicBlock = _blockBuilder.BuildBlock(dynamicType);
+            var encoded = _encoder.EncodeBlock(dynamicBlock, content);
 
-            var block = BlockBuilder.BuildBlock(contentType);
-            var decoded = Decoder.DecodeBlock(encoded, block, new());
+            var block = _blockBuilder.BuildBlock(contentType);
+            var decoded = _decoder.DecodeBlock(encoded, block, new());
 
             Assert.Equal(content, decoded);
         }
@@ -30,11 +30,11 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         [ClassData(typeof(DynamicSchemasGenerator.Wrapped))]
         internal void Encoder_should_encode_wrapped_dynamic(object content, Type contentType, Type dynamicType)
         {
-            var dynamicBlock = BlockBuilder.BuildBlock(dynamicType);
-            var encoded = Encoder.EncodeBlock(dynamicBlock, content);
+            var dynamicBlock = _blockBuilder.BuildBlock(dynamicType);
+            var encoded = _encoder.EncodeBlock(dynamicBlock, content);
 
-            var block = BlockBuilder.BuildBlock(contentType);
-            var decoded = Decoder.DecodeBlock(encoded, block, new());
+            var block = _blockBuilder.BuildBlock(contentType);
+            var decoded = _decoder.DecodeBlock(encoded, block, new());
 
             Assert.Equal(content, decoded);
         }
@@ -43,9 +43,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         [ClassData(typeof(SchemasGenerator))]
         internal void Encoder_should_encode_non_wrapped(object content, Type contentType)
         {
-            var block = BlockBuilder.BuildBlock(contentType);
-            var bytes = Encoder.EncodeBlock(block, content);
-            var result = Decoder.DecodeBlock(bytes, block, new());
+            var block = _blockBuilder.BuildBlock(contentType);
+            var bytes = _encoder.EncodeBlock(block, content);
+            var result = _decoder.DecodeBlock(bytes, block, new());
             Assert.Equal(content, result);
         }
 
@@ -53,9 +53,9 @@ namespace PseudoDynamic.Terraform.Plugin.Sdk.Transcoding
         [ClassData(typeof(SchemasGenerator.Wrapped))]
         internal void Encoder_should_encode_wrapped(object content, Type contentType)
         {
-            var block = BlockBuilder.BuildBlock(contentType);
-            var bytes = Encoder.EncodeBlock(block, content);
-            var result = Decoder.DecodeBlock(bytes, block, new());
+            var block = _blockBuilder.BuildBlock(contentType);
+            var bytes = _encoder.EncodeBlock(block, content);
+            var result = _decoder.DecodeBlock(bytes, block, new());
             Assert.Equal(content, result);
         }
 

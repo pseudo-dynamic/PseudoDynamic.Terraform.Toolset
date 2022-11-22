@@ -1,5 +1,6 @@
 ﻿using System.Text;
-using PseudoDynamic.Terraform.Plugin.Infrastructure.Diagnostics;
+using Kenet.SimpleProcess;
+using Kenet.SimpleProcess.Buffers;
 using static PseudoDynamic.Terraform.Plugin.Infrastructure.Terraform;
 
 namespace PseudoDynamic.Terraform.Plugin.Infrastructure
@@ -63,15 +64,35 @@ namespace PseudoDynamic.Terraform.Plugin.Infrastructure
             Arguments = args
         };
 
-        private string RunCommandThenReadOutput(string? args, CancellationToken cancellationToken) => SimpleProcess.StartThenWaitForExitThenReadOutput(
-            UpgradeStartInfo(args),
-            encoding: Encoding.UTF8,
-            cancellationToken: cancellationToken);
+        private string RunCommandThenReadOutput(string? args, CancellationToken cancellationToken)
+        {
+            BufferOwner<byte> bufferOwner = default;
 
-        private Task<string> RunCommandThenReadOutputAsync(string? args, CancellationToken cancellationToken) => SimpleProcess.StartThenWaitForExitThenReadOutputAsync(
-            UpgradeStartInfo(args),
-            encoding: Encoding.UTF8,
-            cancellationToken: cancellationToken);
+            try {
+                _ = ProcessExecutorBuilder.CreateDefault(UpgradeStartInfo(args), validExitCode: 0)
+                    .WriteTo(builder => builder.AddOutputWriter, out bufferOwner)
+                    .RunToCompletion(cancellationToken);
+
+                return Encoding.UTF8.GetString(bufferOwner.WrittenSpan);
+            } finally {
+                bufferOwner.Dispose();
+            }
+        }
+
+        private async Task<string> RunCommandThenReadOutputAsync(string? args, CancellationToken cancellationToken)
+        {
+            BufferOwner<byte> bufferOwner = default;
+
+            try {
+                _ = await ProcessExecutorBuilder.CreateDefault(UpgradeStartInfo(args), validExitCode: 0)
+                    .WriteTo(builder => builder.AddOutputWriter, out bufferOwner)
+                    .RunToCompletionAsync(cancellationToken);
+
+                return Encoding.UTF8.GetString(bufferOwner.WrittenSpan);
+            } finally {
+                bufferOwner.Dispose();
+            }
+        }
 
         public string Init(CancellationToken cancellationToken = default) => RunCommandThenReadOutput("init -no-color", cancellationToken);
 

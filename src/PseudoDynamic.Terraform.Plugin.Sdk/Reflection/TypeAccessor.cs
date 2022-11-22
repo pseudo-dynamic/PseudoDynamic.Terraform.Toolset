@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using Concurrent.FastReflection.NetStandard;
 using TypeKitchen.Creation;
 
@@ -6,18 +7,18 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
 {
     internal class TypeAccessor
     {
-        private const BindingFlags PrivateStaticBindings = BindingFlags.Static | BindingFlags.NonPublic;
+        private const BindingFlags _privateStaticBindings = BindingFlags.Static | BindingFlags.NonPublic;
 
-        private const BindingFlags PublicInstanceBindings = BindingFlags.Instance | BindingFlags.Public;
-        private const BindingFlags PrivateInstanceBindings = BindingFlags.Instance | BindingFlags.NonPublic;
+        private const BindingFlags _publicInstanceBindings = BindingFlags.Instance | BindingFlags.Public;
+        private const BindingFlags _privateInstanceBindings = BindingFlags.Instance | BindingFlags.NonPublic;
 
         public Type Type { get; }
 
-        private readonly Dictionary<string, MethodInfo> _methodByName = new();
-        private readonly Dictionary<string, MethodAccessor> _methodAccessorByName = new();
-        private readonly Dictionary<string, MethodCaller<object, object>> _methodCallerByName = new();
-        private readonly Dictionary<int, ConstructorInfo> _constructorByParametersCount = new();
-        private readonly Dictionary<int, CreateInstance> _instanceActivatorByParametersCount = new();
+        private readonly ConcurrentDictionary<string, MethodInfo> _methodByName = new();
+        private readonly ConcurrentDictionary<string, MethodAccessor> _methodAccessorByName = new();
+        private readonly ConcurrentDictionary<string, MethodCaller<object, object>> _methodCallerByName = new();
+        private readonly ConcurrentDictionary<int, ConstructorInfo> _constructorByParametersCount = new();
+        private readonly ConcurrentDictionary<int, CreateInstance> _instanceActivatorByParametersCount = new();
 
         public TypeAccessor(Type type) =>
             Type = type ?? throw new ArgumentNullException(nameof(type));
@@ -34,7 +35,7 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
         }
 
         public MethodInfo GetPrivateStaticMethod(string methodName) =>
-            GetMethod(methodName, PrivateStaticBindings);
+            GetMethod(methodName, _privateStaticBindings);
 
         public MethodAccessor GetMethodAccessor(Func<TypeAccessor, Func<string, MethodInfo>> getMethod, string methodName)
         {
@@ -75,10 +76,10 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
         }
 
         public ConstructorInfo GetPublicInstanceConstructor(int parametersCount) =>
-            GetConstructor(parametersCount, PublicInstanceBindings);
+            GetConstructor(parametersCount, _publicInstanceBindings);
 
         public ConstructorInfo GetPrivateInstanceConstructor(int parametersCount) =>
-            GetConstructor(parametersCount, PrivateInstanceBindings);
+            GetConstructor(parametersCount, _privateInstanceBindings);
 
         public CreateInstance GetConstructorActivator(int parametersCount, BindingFlags bindingFlags)
         {
@@ -93,10 +94,10 @@ namespace PseudoDynamic.Terraform.Plugin.Reflection
         }
 
         public CreateInstance GetPublicInstanceActivator(int parametersCount) =>
-            GetConstructorActivator(parametersCount, PublicInstanceBindings);
+            GetConstructorActivator(parametersCount, _publicInstanceBindings);
 
         public CreateInstance GetPrivateInstanceActivator(int parametersCount) =>
-            GetConstructorActivator(parametersCount, PrivateInstanceBindings);
+            GetConstructorActivator(parametersCount, _privateInstanceBindings);
 
         /// <summary>
         /// Creates an instance by invoking directly the cached <see cref="ConstructorInfo"/>.
