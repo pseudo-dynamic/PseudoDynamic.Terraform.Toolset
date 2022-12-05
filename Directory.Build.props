@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <LangVersion>preview</LangVersion>
-        <Authors>The pseudo-dynamic Authors</Authors>
-        <Copyright>Copyright (c) 2022 The pseudo-dynamic Authors</Copyright>
+        <Authors>Pseudo Dynamic authors and contributors</Authors>
+        <Copyright>Copyright (c) 2022 Pseudo Dynamic authors and contributors</Copyright>
         <PackageLicenseFile Condition="'$(PackageLicenseFile)' == ''">LICENSE</PackageLicenseFile>
         <PackageIcon Condition="'$(PackageIcon)' == ''">icon.png</PackageIcon>
     </PropertyGroup>
