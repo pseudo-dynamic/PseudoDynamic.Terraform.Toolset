@@ -1,5 +1,7 @@
 # PseudoDynamic.Terraform.Plugin.Sdk
 
+> :warning: Due to the fact that this side-project has literally no interest I retire this project. Even the smallest feature request for a tiny CLI called (terraform-plugin-docs)[https://github.com/hashicorp/terraform-plugin-docs/issues/195] seems to be ignored. ^^
+
 This library wants to take charge and allows you to write a provider in C# with ease. Before I begin, yes, this library has a lot of similarities with [terraform-plugin-framework](https://github.com/hashicorp/terraform-plugin-framework)!
 
 This is the main goal that this library should fullfill:
